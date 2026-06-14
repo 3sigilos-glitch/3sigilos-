@@ -1,0 +1,27 @@
+{
+  "name": "3sigilos-gestao",
+  "version": "1.0.0",
+  "description": "Plataforma de gestao de encomendas, stocks e producao para a marca 3 Sigilos",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node src/db/seed.js",
+    "backup": "node src/scripts/backup-cli.js"
+  },
+  "keywords": [
+    "3sigilos",
+    "encomendas",
+    "stocks",
+    "producao"
+  ],
+  "author": "3 Sigilos",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "express": "^4.21.2",
+    "pdfkit": "^0.16.0"
+  }
+}
