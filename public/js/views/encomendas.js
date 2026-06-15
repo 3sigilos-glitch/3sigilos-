@@ -95,9 +95,31 @@ App.views.encomendas = {
 
   descricao(e) {
     if (Array.isArray(e.itens) && e.itens.length) {
-      return e.itens.map((i) => `${i.quantidade}x ${i.modelo} ${i.tamanho}`).join(', ');
+      return e.itens
+        .map((i) => `${i.quantidade}x ${i.modelo}${i.cor ? ' ' + i.cor : ''} ${i.tamanho}`)
+        .join(', ');
     }
     return e.pedido_texto || '';
+  },
+
+  // Opcoes de modelo agrupadas por marca
+  opcoesModelos(cat, selecionado) {
+    const ui = App.ui;
+    const porMarca = {};
+    (cat.modelos_detalhe || []).forEach((m) => {
+      (porMarca[m.marca] = porMarca[m.marca] || []).push(m.nome);
+    });
+    if (!Object.keys(porMarca).length) {
+      return ui.opcoes(cat.modelos || [], selecionado);
+    }
+    return Object.entries(porMarca)
+      .map(
+        ([marca, nomes]) =>
+          `<optgroup label="${ui.esc(marca)}">${nomes
+            .map((n) => `<option value="${ui.esc(n)}"${n === selecionado ? ' selected' : ''}>${ui.esc(n)}</option>`)
+            .join('')}</optgroup>`
+      )
+      .join('');
   },
 
   // Ficha de detalhe de uma encomenda
@@ -153,7 +175,11 @@ App.views.encomendas = {
     const cat = await App.estado.catalogo();
     const clientes = await App.api.get('/api/clientes');
     const e = existente || {};
-    const itens = (e.itens && e.itens.length ? e.itens : [{ modelo: cat.modelos[0], tamanho: 'M', quantidade: 1 }]);
+    const corDefeito = (cat.cores && cat.cores[0]) || 'Branca';
+    const itens =
+      e.itens && e.itens.length
+        ? e.itens
+        : [{ modelo: cat.modelos[0], cor: corDefeito, tamanho: 'M', quantidade: 1 }];
 
     const corpo = ui.abrirModal(e.id ? 'Editar encomenda ' + e.id : 'Nova encomenda', `
       <form id="formEnc">
@@ -187,7 +213,7 @@ App.views.encomendas = {
         <div class="linha-form tres">
           <div class="campo">
             <label>Tipo de preco</label>
-            <select id="tipoPreco">${ui.opcoes(cat.tipos_preco, e.tipo_preco || 'normal', { valor: 'id', etiqueta: 'etiqueta' })}</select>
+            <select id="tipoPreco">${ui.opcoes(cat.tipos_preco, e.tipo_preco || 'normal', { valor: 'slug', etiqueta: 'etiqueta' })}</select>
           </div>
           <div class="campo" id="campoManual" style="display:none">
             <label>Preco unitario personalizado</label>
@@ -268,17 +294,26 @@ App.views.encomendas = {
     `, '820px');
 
     const ctx = { cat, itens: JSON.parse(JSON.stringify(itens)) };
+    // Garante que cada linha tem cor, tamanho e quantidade validos
+    ctx.itens.forEach((it) => {
+      if (!it.cor) it.cor = corDefeito;
+      if (!it.tamanho) it.tamanho = 'M';
+      if (!it.quantidade) it.quantidade = 1;
+    });
     this._desenharItens(corpo, ctx);
 
     const tipoSel = corpo.querySelector('#tipoPreco');
+    const mapaTipos = {};
+    (cat.tipos_preco || []).forEach((t) => (mapaTipos[t.slug] = t));
     const atualizarManual = () => {
-      corpo.querySelector('#campoManual').style.display = tipoSel.value === 'personalizado' ? '' : 'none';
+      const t = mapaTipos[tipoSel.value];
+      corpo.querySelector('#campoManual').style.display = t && t.manual ? '' : 'none';
     };
     atualizarManual();
 
     const recalc = () => this._recalcular(corpo, ctx);
     corpo.querySelector('#addItem').onclick = () => {
-      ctx.itens.push({ modelo: cat.modelos[0], tamanho: 'M', quantidade: 1 });
+      ctx.itens.push({ modelo: cat.modelos[0], cor: corDefeito, tamanho: 'M', quantidade: 1 });
       this._desenharItens(corpo, ctx);
       recalc();
     };
@@ -331,7 +366,8 @@ App.views.encomendas = {
       .map(
         (it, idx) => `
         <div class="item-linha" data-idx="${idx}">
-          <select data-campo="modelo">${ui.opcoes(ctx.cat.modelos, it.modelo)}</select>
+          <select data-campo="modelo">${this.opcoesModelos(ctx.cat, it.modelo)}</select>
+          <select data-campo="cor">${ui.opcoes(ctx.cat.cores, it.cor)}</select>
           <select data-campo="tamanho">${ui.opcoes(ctx.cat.tamanhos, it.tamanho)}</select>
           <input type="number" min="1" data-campo="quantidade" value="${ui.esc(it.quantidade)}" />
           <button type="button" class="btn perigo pequeno" data-remover="${idx}">&times;</button>
@@ -353,7 +389,14 @@ App.views.encomendas = {
       const btn = linha.querySelector('[data-remover]');
       btn.onclick = () => {
         ctx.itens.splice(idx, 1);
-        if (!ctx.itens.length) ctx.itens.push({ modelo: ctx.cat.modelos[0], tamanho: 'M', quantidade: 1 });
+        if (!ctx.itens.length) {
+          ctx.itens.push({
+            modelo: ctx.cat.modelos[0],
+            cor: (ctx.cat.cores && ctx.cat.cores[0]) || 'Branca',
+            tamanho: 'M',
+            quantidade: 1,
+          });
+        }
         this._desenharItens(corpo, ctx);
         this._recalcular(corpo, ctx);
       };

@@ -225,7 +225,7 @@ function aplicarEfeitosSecundarios(anterior, atual) {
     const baixar = db.transaction(() => {
       for (const item of atual.itens) {
         if (item.modelo && item.tamanho) {
-          stock.ajustarEstampado(item.modelo, item.tamanho, -(Number(item.quantidade) || 0));
+          stock.ajustarEstampado(item.modelo, item.cor, item.tamanho, -(Number(item.quantidade) || 0));
         }
       }
       db.prepare('UPDATE encomendas SET stock_baixado = 1 WHERE id = ?').run(atual.id);

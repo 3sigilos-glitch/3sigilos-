@@ -98,12 +98,12 @@ function reporStock(pedido) {
       const qtd = Number(item.quantidade) || 0;
       if (qtd <= 0) continue;
       if (pedido.tipo === 'tshirts_branco') {
-        if (item.tamanho) stock.ajustarBranco(item.tamanho, qtd);
+        if (item.tamanho) stock.ajustarBranco(item.cor, item.tamanho, qtd);
       } else {
         // Estampagem DTF gera t-shirts estampadas e consome t-shirts em branco
         if (item.modelo && item.tamanho) {
-          stock.ajustarEstampado(item.modelo, item.tamanho, qtd);
-          stock.ajustarBranco(item.tamanho, -qtd);
+          stock.ajustarEstampado(item.modelo, item.cor, item.tamanho, qtd);
+          stock.ajustarBranco(item.cor, item.tamanho, -qtd);
         }
       }
     }

@@ -8,6 +8,31 @@ const db = require('./index');
  */
 function criarEsquema() {
   db.exec(`
+    CREATE TABLE IF NOT EXISTS modelos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome TEXT NOT NULL,
+      marca TEXT NOT NULL DEFAULT '3 Sigilos',
+      ativo INTEGER NOT NULL DEFAULT 1,
+      criado_em TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (nome, marca)
+    );
+
+    CREATE TABLE IF NOT EXISTS cores (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome TEXT NOT NULL UNIQUE,
+      ativo INTEGER NOT NULL DEFAULT 1,
+      criado_em TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS tipos_preco (
+      slug TEXT PRIMARY KEY,
+      etiqueta TEXT NOT NULL,
+      preco REAL,
+      manual INTEGER NOT NULL DEFAULT 0,
+      ativo INTEGER NOT NULL DEFAULT 1,
+      ordem INTEGER NOT NULL DEFAULT 50
+    );
+
     CREATE TABLE IF NOT EXISTS clientes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       nome TEXT NOT NULL,
@@ -54,20 +79,23 @@ function criarEsquema() {
 
     CREATE TABLE IF NOT EXISTS stock_branco (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      tamanho TEXT NOT NULL UNIQUE,
+      cor TEXT NOT NULL DEFAULT 'Branca',
+      tamanho TEXT NOT NULL,
       quantidade INTEGER NOT NULL DEFAULT 0,
       minimo INTEGER NOT NULL DEFAULT 0,
-      atualizado_em TEXT NOT NULL DEFAULT (datetime('now'))
+      atualizado_em TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (cor, tamanho)
     );
 
     CREATE TABLE IF NOT EXISTS stock_estampado (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       modelo TEXT NOT NULL,
+      cor TEXT NOT NULL DEFAULT 'Cores',
       tamanho TEXT NOT NULL,
       quantidade INTEGER NOT NULL DEFAULT 0,
       minimo INTEGER NOT NULL DEFAULT 0,
       atualizado_em TEXT NOT NULL DEFAULT (datetime('now')),
-      UNIQUE (modelo, tamanho)
+      UNIQUE (modelo, cor, tamanho)
     );
 
     CREATE TABLE IF NOT EXISTS producao (

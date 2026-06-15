@@ -1,13 +1,19 @@
 'use strict';
 
 /**
- * Catalogo fixo da marca 3 Sigilos.
- * Centraliza modelos, tamanhos, tipos de preco, canais e metodos de pagamento.
- * Manter aqui torna simples adicionar ou alterar dados sem mexer no resto do codigo.
+ * Catalogo base da marca 3 Sigilos e da marca do Colegio Rompe Mato.
+ *
+ * Os modelos de desenho, as cores de t-shirt e os tipos de preco passaram a ser
+ * geridos na base de dados, para que seja possivel adicionar, editar e remover
+ * pela interface. Os valores aqui definidos servem apenas para preencher a base
+ * de dados no primeiro arranque.
  */
 
-// Modelos de t-shirt disponiveis no catalogo
-const MODELOS = [
+// Marcas conhecidas. Servem de sugestao, e possivel usar outras.
+const MARCAS = ['3 Sigilos', 'Colegio Rompe Mato'];
+
+// Modelos de desenho iniciais da 3 Sigilos
+const MODELOS_DEFEITO = [
   'Exu Guardiao',
   'Pombagira Guardia',
   'Celestial Balance',
@@ -30,17 +36,21 @@ const PACK_TAROT_MODELOS = ['Roda da Fortuna', 'A Estrela', 'O Mundo'];
 // Tamanhos aplicaveis a todos os modelos
 const TAMANHOS = ['S', 'M', 'L', 'XL', 'XXL'];
 
+// Cores de t-shirt iniciais
+const CORES_DEFEITO = ['Branca', 'Cores'];
+
 /**
- * Tipos de preco pre-definidos.
- * O valor pode ser nulo quando depende de configuracao (VIP) ou e manual (Personalizado).
- * Os valores por defeito vivem nas definicoes da aplicacao e podem ser alterados.
+ * Tipos de preco iniciais.
+ * preco a null significa que o valor e introduzido manualmente (personalizado).
  */
-const TIPOS_PRECO = [
-  { id: 'normal', etiqueta: 'Normal', precoDefeito: 19 },
-  { id: 'vip', etiqueta: 'VIP', precoDefeito: 15 },
-  { id: 'terreiro', etiqueta: 'Terreiro', precoDefeito: 6 },
-  { id: 'europa', etiqueta: 'Europa (portes incluidos)', precoDefeito: 33 },
-  { id: 'personalizado', etiqueta: 'Personalizado', precoDefeito: null },
+const TIPOS_PRECO_DEFEITO = [
+  { slug: 'normal', etiqueta: 'Normal', preco: 19, manual: 0, ordem: 1 },
+  { slug: 'vip', etiqueta: 'VIP', preco: 12, manual: 0, ordem: 2 },
+  { slug: 'terreiro', etiqueta: 'Terreiro', preco: 6, manual: 0, ordem: 3 },
+  { slug: 'europa', etiqueta: 'Europa (portes incluidos)', preco: 33, manual: 0, ordem: 4 },
+  { slug: 'rm_cores', etiqueta: 'Rompe Mato cores', preco: 6, manual: 0, ordem: 5 },
+  { slug: 'rm_branca', etiqueta: 'Rompe Mato branca', preco: 5, manual: 0, ordem: 6 },
+  { slug: 'personalizado', etiqueta: 'Personalizado', preco: null, manual: 1, ordem: 99 },
 ];
 
 // Canais de origem das encomendas
@@ -58,7 +68,6 @@ const ESTADOS_PAGAMENTO = ['Nao pago', 'Pago'];
 // Valores por defeito das definicoes configuraveis
 const DEFINICOES_DEFEITO = {
   custo_producao: 4, // custo base por t-shirt em euros
-  preco_vip: 15, // preco unitario para clientes VIP
   preco_pack_tarot: 50, // preco do conjunto das 3 t-shirts do tarot
   iva_taxa: 23, // taxa de IVA aplicavel em percentagem
   meta_mensal: 1000, // meta de vendas mensal em euros
@@ -68,10 +77,12 @@ const DEFINICOES_DEFEITO = {
 };
 
 module.exports = {
-  MODELOS,
+  MARCAS,
+  MODELOS_DEFEITO,
   PACK_TAROT_MODELOS,
   TAMANHOS,
-  TIPOS_PRECO,
+  CORES_DEFEITO,
+  TIPOS_PRECO_DEFEITO,
   CANAIS,
   METODOS_PAGAMENTO,
   ESTADOS_ENTREGA,

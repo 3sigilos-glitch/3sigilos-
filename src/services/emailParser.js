@@ -1,6 +1,7 @@
 'use strict';
 
-const { MODELOS, TAMANHOS } = require('../config/catalog');
+const { TAMANHOS } = require('../config/catalog');
+const catalogo = require('./catalogo');
 
 /**
  * Extrai dados de uma encomenda a partir do texto colado de um email.
@@ -58,8 +59,10 @@ function extrairNif(texto) {
 function extrairItens(texto) {
   const semAc = semAcentos(texto);
   const itens = [];
+  // Usa os modelos atuais do catalogo, incluindo os adicionados pelo utilizador
+  const modelos = catalogo.nomesModelos();
 
-  for (const modelo of MODELOS) {
+  for (const modelo of modelos) {
     const modeloSemAc = semAcentos(modelo);
     let pos = semAc.indexOf(modeloSemAc);
     while (pos !== -1) {

@@ -15,7 +15,7 @@ App.views.producao = {
     ]);
 
     const linhaTrabalho = (e) =>
-      `<li><span>${ui.esc(e.cliente_nome)}: ${ui.esc((e.itens || []).map((i) => `${i.quantidade}x ${i.modelo} ${i.tamanho}`).join(', ') || e.pedido_texto || '')}</span><span class="etiqueta neutra">Enc ${e.id}</span></li>`;
+      `<li><span>${ui.esc(e.cliente_nome)}: ${ui.esc((e.itens || []).map((i) => `${i.quantidade}x ${i.modelo}${i.cor ? ' ' + i.cor : ''} ${i.tamanho}`).join(', ') || e.pedido_texto || '')}</span><span class="etiqueta neutra">Enc ${e.id}</span></li>`;
 
     const pedidosHtml = pedidos.length
       ? `<div class="tabela-wrap"><table>
@@ -25,7 +25,7 @@ App.views.producao = {
               (p) => `<tr>
                 <td>${p.tipo === 'tshirts_branco' ? 'T-shirts em branco' : 'Estampagem DTF'}</td>
                 <td>${ui.esc(p.fornecedor || '')}</td>
-                <td>${ui.esc((p.itens || []).map((i) => `${i.quantidade}x ${i.modelo ? i.modelo + ' ' : ''}${i.tamanho}`).join(', '))}</td>
+                <td>${ui.esc((p.itens || []).map((i) => `${i.quantidade}x ${i.modelo ? i.modelo + ' ' : ''}${i.cor ? i.cor + ' ' : ''}${i.tamanho}`).join(', '))}</td>
                 <td>${ui.data(p.data_pedido)}</td>
                 <td>${ui.data(p.data_prevista)}</td>
                 <td>${ui.etiquetaEstado(p.estado)}</td>
@@ -113,7 +113,8 @@ App.views.producao = {
       </form>
     `, '700px');
 
-    const ctx = { itens: [{ modelo: cat.modelos[0], tamanho: 'M', quantidade: 10 }], cat };
+    const corDefeito = (cat.cores && cat.cores[0]) || 'Branca';
+    const ctx = { itens: [{ modelo: cat.modelos[0], cor: corDefeito, tamanho: 'M', quantidade: 10 }], cat };
     const tipoSel = corpo.querySelector('#tipo');
 
     const desenhar = () => {
@@ -122,6 +123,7 @@ App.views.producao = {
         .map(
           (it, idx) => `<div class="item-linha" data-idx="${idx}">
             ${branco ? '' : `<select data-campo="modelo">${ui.opcoes(cat.modelos, it.modelo)}</select>`}
+            <select data-campo="cor">${ui.opcoes(cat.cores, it.cor)}</select>
             <select data-campo="tamanho">${ui.opcoes(cat.tamanhos, it.tamanho)}</select>
             <input type="number" min="1" data-campo="quantidade" value="${ui.esc(it.quantidade)}" />
             <button type="button" class="btn perigo pequeno" data-remover="${idx}">&times;</button>
@@ -138,7 +140,7 @@ App.views.producao = {
         });
         linha.querySelector('[data-remover]').onclick = () => {
           ctx.itens.splice(idx, 1);
-          if (!ctx.itens.length) ctx.itens.push({ modelo: cat.modelos[0], tamanho: 'M', quantidade: 1 });
+          if (!ctx.itens.length) ctx.itens.push({ modelo: cat.modelos[0], cor: corDefeito, tamanho: 'M', quantidade: 1 });
           desenhar();
         };
       });
@@ -150,7 +152,7 @@ App.views.producao = {
       desenhar();
     };
     corpo.querySelector('#addItemProd').onclick = () => {
-      ctx.itens.push({ modelo: cat.modelos[0], tamanho: 'M', quantidade: 10 });
+      ctx.itens.push({ modelo: cat.modelos[0], cor: corDefeito, tamanho: 'M', quantidade: 10 });
       desenhar();
     };
     corpo.querySelector('#cancelar').onclick = () => ui.fecharModal();

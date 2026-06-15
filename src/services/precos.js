@@ -1,33 +1,33 @@
 'use strict';
 
+const db = require('../db');
 const definicoes = require('./definicoes');
 
 /**
  * Motor de calculo de precos e margens.
  * Centraliza a logica para que o servidor seja sempre a fonte de verdade,
  * mesmo quando o navegador mostra uma pre-visualizacao.
+ *
+ * Os tipos de preco sao geridos na base de dados, o que permite alterar valores
+ * e adicionar novos tipos (por exemplo, precos da marca do Colegio Rompe Mato)
+ * sem mexer no codigo.
  */
 
 /**
  * Devolve o preco unitario para um tipo de preco.
- * Para 'personalizado' usa o valor passado pelo utilizador.
+ * Tipos marcados como manuais usam o valor introduzido pelo utilizador.
  */
 function precoUnitario(tipoPreco, precoManual) {
-  const cfg = definicoes.obterTodas();
-  switch (tipoPreco) {
-    case 'normal':
-      return 19;
-    case 'vip':
-      return Number(cfg.preco_vip) || 15;
-    case 'terreiro':
-      return 6;
-    case 'europa':
-      return 33;
-    case 'personalizado':
-      return Number(precoManual) || 0;
-    default:
-      return 19;
+  const tipo = db.prepare('SELECT * FROM tipos_preco WHERE slug = ?').get(tipoPreco);
+  if (!tipo) {
+    // Tipo desconhecido, assume preco normal se existir, senao zero
+    const normal = db.prepare("SELECT preco FROM tipos_preco WHERE slug = 'normal'").get();
+    return normal ? Number(normal.preco) || 0 : 0;
   }
+  if (tipo.manual) {
+    return Number(precoManual) || 0;
+  }
+  return Number(tipo.preco) || 0;
 }
 
 /**

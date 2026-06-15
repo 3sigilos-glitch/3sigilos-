@@ -57,6 +57,9 @@ function listarBackups() {
  */
 function exportarJson() {
   const tabelas = [
+    'modelos',
+    'cores',
+    'tipos_preco',
     'clientes',
     'encomendas',
     'stock_branco',
