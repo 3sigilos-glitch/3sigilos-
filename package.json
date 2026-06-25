@@ -1,27 +1,25 @@
 {
-  "name": "3sigilos-gestao",
-  "version": "1.0.0",
-  "description": "Plataforma de gestao de encomendas, stocks e producao para a marca 3 Sigilos",
-  "main": "server.js",
-  "type": "commonjs",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
-    "seed": "node src/db/seed.js",
-    "backup": "node src/scripts/backup-cli.js"
-  },
-  "keywords": [
-    "3sigilos",
-    "encomendas",
-    "stocks",
-    "producao"
-  ],
-  "author": "3 Sigilos",
-  "license": "UNLICENSED",
+  "name": "nasa-gestao",
+  "version": "0.1.0",
   "private": true,
+  "description": "Aplicacao de gestao interna dos N'ASA, banda de covers de rock portugues",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
   "dependencies": {
-    "better-sqlite3": "^11.8.1",
-    "express": "^4.21.2",
-    "pdfkit": "^0.16.0"
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.45.4",
+    "next": "14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.11",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.6.3"
   }
 }

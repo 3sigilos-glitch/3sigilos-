@@ -1,8 +1,30 @@
-node_modules/
-data/*.db
-data/*.db-shm
-data/*.db-wal
-data/backups/
-*.log
-.DS_Store
+# Dependencias
+/node_modules
+/.pnp
+.pnp.js
+
+# Compilacao e producao
+/.next/
+/out/
+/build
+
+# Variaveis de ambiente (chaves do Supabase, nunca no repositorio)
 .env
+.env.local
+.env*.local
+
+# Registos
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema operativo
+.DS_Store
+*.pem
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
