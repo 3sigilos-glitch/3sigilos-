@@ -21,9 +21,15 @@ A app esta a ser construida por fases. Concluido ate agora:
   tema escuro base, navegacao inferior e app instalavel como PWA.
 - **Fase 2**: esquema da base de dados (tabelas, relacoes e valor total calculado), permissoes
   finas com RLS (admin e membro) e dados de exemplo (equipa, escaloes e repertorio).
+- **Fase 3**: gestao de eventos (lista em agenda, ficha, criar e editar, valor total ao vivo,
+  deslocacao editavel, conflito de data e datas automaticas).
+- **Fase 4**: painel com indicadores, pipeline por estado e proximos concertos.
+- **Fase 5**: contactos (com historico), equipa (banda e tecnicos) e repertorio.
+- **Fase 6**: recibos e resumo fiscal por membro, com lista de recibos por emitir.
+- **Fase 7**: propostas (texto pronto a copiar, PDF com a referencia NASA, arquivo no Storage e
+  email ao contratante).
 
-As fases seguintes (eventos, painel, contactos, equipa, repertorio, recibos, propostas e
-automacoes) chegam a seguir.
+As fases seguintes (automacoes e definicoes) chegam a seguir.
 
 ## Configurar as variaveis de ambiente
 
@@ -74,6 +80,9 @@ A forma mais simples, sem instalar nada:
    - `supabase/migrations/0002_rls.sql` (permissoes RLS e criacao automatica de perfis)
    - `supabase/seed.sql` (equipa, escaloes e repertorio de exemplo, opcional)
 
+Corre tambem a migracao `0003_referencia.sql` (geracao da referencia das propostas) e, se quiseres
+arquivar os PDF, a `0004_storage.sql` (cria o balde de Storage "propostas" e as suas permissoes).
+
 Em alternativa, com a [CLI do Supabase](https://supabase.com/docs/guides/cli): `supabase db push`.
 
 As permissoes ficam assim: todos os elementos leem tudo e podem criar e editar eventos, contactos,
@@ -114,10 +123,17 @@ O logotipo branco da banda ja esta em `public/logo-branco.jpg` e aparece no ecra
 mix-blend-mode para o fundo preto desaparecer sobre o tema escuro). A marca no cabecalho usa um
 nome desenhado em tipografia (ver `components/Marca.tsx`).
 
-Ainda falta:
+Para o PDF da proposta (fundo claro), coloca o logotipo preto em `public/logo-preto.png` (ou .jpg).
+Se nao existir, o PDF usa o nome da banda em tipografia. Ainda falta tambem os icones definitivos
+da PWA em `public/icons` (por agora ha uma versao provisoria).
 
-- `public/logo-preto`: versao para o PDF da proposta (fundo claro), usada na Fase 7.
-- Icones definitivos da PWA em `public/icons` (por agora ha uma versao provisoria).
+## Propostas
+
+Na ficha de cada evento, em **Proposta**, geras a proposta: e atribuida uma referencia unica no
+formato `NASA-{ano}-{numero}` (a comecar em 50, contador em Definicoes), fica marcada a data da
+proposta, e podes copiar o texto pronto, ver e arquivar o PDF, e enviar por email. O envio
+automatico usa o Resend (ver variaveis de ambiente); sem ele, o botao de rascunho de email abre o
+teu cliente de email ja preenchido.
 
 ## Estrutura
 

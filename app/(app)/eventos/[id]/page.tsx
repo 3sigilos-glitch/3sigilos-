@@ -21,7 +21,10 @@ export default async function PaginaFichaEvento({ params }: { params: Promise<{ 
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Link href="/eventos" style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Voltar</Link>
-        <Link href={`/eventos/${id}/editar`} className="botao" style={{ width: 'auto' }}>Editar</Link>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Link href={`/eventos/${id}/proposta`} className="botao botao-secundario" style={{ width: 'auto' }}>Proposta</Link>
+          <Link href={`/eventos/${id}/editar`} className="botao" style={{ width: 'auto' }}>Editar</Link>
+        </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

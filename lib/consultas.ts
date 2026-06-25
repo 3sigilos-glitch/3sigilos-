@@ -1,5 +1,12 @@
 import { criarClienteServidor } from '@/lib/supabase/server';
-import type { Evento, Contacto, Equipa, Escalao, Repertorio, Recibo } from '@/lib/tipos';
+import type { Evento, Contacto, Equipa, Escalao, Repertorio, Recibo, Definicoes } from '@/lib/tipos';
+
+// Definicoes da app (linha unica). Devolve null se ainda nao houver ligacao.
+export async function obterDefinicoes(): Promise<Definicoes | null> {
+  const supabase = await criarClienteServidor();
+  const { data } = await supabase.from('definicoes').select('*').eq('id', 1).single();
+  return (data as Definicoes) ?? null;
+}
 
 // Consultas do lado do servidor. Todas toleram falhas de ligacao,
 // devolvendo listas vazias, para a interface renderizar sem rebentar.
