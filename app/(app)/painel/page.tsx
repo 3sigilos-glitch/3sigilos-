@@ -16,9 +16,14 @@ export default async function PaginaPainel() {
         <p style={{ color: 'var(--texto-suave)', fontSize: 13, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
           {mesAno(agora)}
         </p>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, gap: 8 }}>
           <h1 style={{ fontSize: 34 }}>Painel</h1>
-          <Link href="/automacoes" className="botao botao-secundario" style={{ width: 'auto' }}>Automacoes</Link>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Link href="/automacoes" className="botao botao-secundario" style={{ width: 'auto' }}>Automacoes</Link>
+            {sessao.ehAdmin && (
+              <Link href="/definicoes" className="botao botao-secundario" style={{ width: 'auto' }} aria-label="Definicoes">Definicoes</Link>
+            )}
+          </div>
         </div>
       </div>
 

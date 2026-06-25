@@ -30,8 +30,10 @@ A app esta a ser construida por fases. Concluido ate agora:
   email ao contratante).
 - **Fase 8**: automacoes (follow-up de propostas paradas, lembretes pre-concerto e briefings de
   semana e mes, com texto pronto a copiar e envio por email a banda).
+- **Fase 9**: definicoes de admin (parametros, textos da proposta e escaloes), afinacao visual e
+  preparacao do deploy no Vercel.
 
-A fase seguinte (definicoes de admin e afinacao visual) chega a seguir.
+A aplicacao esta completa. As fases seguintes sao so afinacoes e o uso no dia a dia.
 
 ## Configurar as variaveis de ambiente
 
@@ -113,6 +115,14 @@ Como o login e por link magico, basta o email estar registado para a pessoa cons
 3. No Supabase, acrescenta o dominio de producao ao **Site URL** e as **Redirect URLs**
    (`https://o-teu-dominio/auth/confirmar`).
 4. Faz deploy. O Vercel constroi e publica automaticamente a cada push.
+
+### Lista rapida de verificacao do deploy
+
+- [ ] Variaveis NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY e NEXT_PUBLIC_SITE_URL
+- [ ] Migracoes 0001 a 0004 corridas no Supabase
+- [ ] Site URL e Redirect URLs do Supabase a apontar para o dominio de producao
+- [ ] Os 5 elementos convidados e o teu perfil definido como admin
+- [ ] Opcional: RESEND_API_KEY, SUPABASE_SERVICE_ROLE_KEY e CRON_SECRET para email e lembretes
 
 ## Instalar no telemovel
 

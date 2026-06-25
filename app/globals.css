@@ -157,6 +157,37 @@ textarea {
   padding: 16px;
 }
 
+/* Cartao tocavel (quando e um link ou botao): leve resposta ao toque. */
+a.cartao,
+button.cartao {
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.05s ease;
+}
+
+a.cartao:active,
+button.cartao:active {
+  transform: scale(0.995);
+  border-color: var(--linha);
+}
+
+/* Remove o realce azul do toque em telemovel e usa a cor de acento no foco. */
+a,
+button,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+/* Permite barras de deslocamento horizontais (chips) sem barra visivel. */
+.sem-barra::-webkit-scrollbar {
+  display: none;
+}
+
 /* Etiqueta de estado, base comum */
 .estado {
   display: inline-flex;

@@ -87,6 +87,23 @@ export async function listarEventos(filtros: FiltrosEventos = {}): Promise<Event
 }
 
 // -----------------------------------------------------------------------------
+// Escaloes.
+// -----------------------------------------------------------------------------
+
+export async function listarEscaloes(): Promise<Escalao[]> {
+  const supabase = await criarClienteServidor();
+  const { data } = await supabase.from('escaloes').select('*').order('nome');
+  return (data as Escalao[]) ?? [];
+}
+
+export async function obterEscalao(id: string): Promise<Escalao | null> {
+  const supabase = await criarClienteServidor();
+  const { data, error } = await supabase.from('escaloes').select('*').eq('id', id).single();
+  if (error || !data) return null;
+  return data as Escalao;
+}
+
+// -----------------------------------------------------------------------------
 // Contactos.
 // -----------------------------------------------------------------------------
 
