@@ -1,5 +1,5 @@
 import { criarClienteServidor } from '@/lib/supabase/server';
-import type { Evento, Contacto, Equipa, Escalao, Repertorio } from '@/lib/tipos';
+import type { Evento, Contacto, Equipa, Escalao, Repertorio, Recibo } from '@/lib/tipos';
 
 // Consultas do lado do servidor. Todas toleram falhas de ligacao,
 // devolvendo listas vazias, para a interface renderizar sem rebentar.
@@ -143,6 +143,86 @@ export async function obterMusica(id: string): Promise<Repertorio | null> {
   const { data, error } = await supabase.from('repertorio').select('*').eq('id', id).single();
   if (error || !data) return null;
   return data as Repertorio;
+}
+
+// -----------------------------------------------------------------------------
+// Recibos e resumo fiscal.
+// -----------------------------------------------------------------------------
+
+export interface ReciboDetalhado extends Recibo {
+  evento: { evento: string; data: string | null } | null;
+  membro: { nome: string } | null;
+}
+
+export async function listarRecibos(ano: number): Promise<ReciboDetalhado[]> {
+  const supabase = await criarClienteServidor();
+  const inicio = `${ano}-01-01`;
+  const fim = `${ano + 1}-01-01`;
+  const { data } = await supabase
+    .from('recibos')
+    .select(
+      `*,
+       evento:eventos!recibos_evento_id_fkey (evento, data),
+       membro:equipa!recibos_membro_id_fkey (nome)`
+    )
+    .gte('data', inicio)
+    .lt('data', fim)
+    .order('data', { ascending: false });
+  return (data as unknown as ReciboDetalhado[]) ?? [];
+}
+
+export interface ResumoMembro {
+  membroId: string | null;
+  nome: string;
+  total: number;
+  passado: number;
+  porPassar: number;
+  numeroPorPassar: number;
+}
+
+// Junta os recibos de um ano por membro, para o resumo fiscal.
+export function resumirPorMembro(recibos: ReciboDetalhado[]): ResumoMembro[] {
+  const mapa = new Map<string, ResumoMembro>();
+  for (const r of recibos) {
+    const chave = r.membro_id ?? 'sem';
+    if (!mapa.has(chave)) {
+      mapa.set(chave, {
+        membroId: r.membro_id,
+        nome: r.membro?.nome ?? 'Sem membro',
+        total: 0,
+        passado: 0,
+        porPassar: 0,
+        numeroPorPassar: 0,
+      });
+    }
+    const linha = mapa.get(chave)!;
+    const valor = Number(r.valor ?? 0);
+    linha.total += valor;
+    if (r.passado) {
+      linha.passado += valor;
+    } else {
+      linha.porPassar += valor;
+      linha.numeroPorPassar += 1;
+    }
+  }
+  return Array.from(mapa.values()).sort((a, b) => b.total - a.total);
+}
+
+export async function obterRecibo(id: string): Promise<Recibo | null> {
+  const supabase = await criarClienteServidor();
+  const { data, error } = await supabase.from('recibos').select('*').eq('id', id).single();
+  if (error || !data) return null;
+  return data as Recibo;
+}
+
+// Opcoes para o formulario de recibo: eventos e membros.
+export async function carregarOpcoesRecibo() {
+  const supabase = await criarClienteServidor();
+  const [eventos, equipa] = await Promise.all([
+    supabase.from('eventos').select('id, evento, data, valor_total').order('data', { ascending: false }),
+    supabase.from('equipa').select('id, nome').eq('papel', 'membro').eq('ativo', true).order('nome'),
+  ]);
+  return { eventos: eventos.data ?? [], membros: equipa.data ?? [] };
 }
 
 // -----------------------------------------------------------------------------
