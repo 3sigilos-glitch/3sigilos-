@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Marca from '@/components/Marca';
+import Brasao from '@/components/Brasao';
 import { criarClienteBrowser } from '@/lib/supabase/client';
 
 // Ecra de entrada: logotipo branco sobre fundo escuro e login rapido
@@ -44,8 +44,8 @@ export default function PaginaLogin() {
         gap: '40px',
       }}
     >
-      <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <Marca tamanho="grande" />
+      <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        <Brasao largura={230} />
         <p style={{ color: 'var(--texto-suave)', letterSpacing: '0.1em', fontSize: 13, textTransform: 'uppercase' }}>
           Gestao da banda
         </p>

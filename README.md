@@ -19,9 +19,11 @@ A app esta a ser construida por fases. Concluido ate agora:
 
 - **Fase 1**: projeto Next.js, ligacao ao Supabase, autenticacao dos elementos por link magico,
   tema escuro base, navegacao inferior e app instalavel como PWA.
+- **Fase 2**: esquema da base de dados (tabelas, relacoes e valor total calculado), permissoes
+  finas com RLS (admin e membro) e dados de exemplo (equipa, escaloes e repertorio).
 
-As fases seguintes (base de dados e permissoes, eventos, painel, contactos, equipa, repertorio,
-recibos, propostas e automacoes) chegam a seguir.
+As fases seguintes (eventos, painel, contactos, equipa, repertorio, recibos, propostas e
+automacoes) chegam a seguir.
 
 ## Configurar as variaveis de ambiente
 
@@ -60,6 +62,33 @@ O login e feito por link magico (email, sem palavra-passe). No painel do Supabas
 2. Em **Redirect URLs**, acrescenta `http://localhost:3000/auth/confirmar` (e o equivalente em
    producao).
 
+### Base de dados (esquema, permissoes e dados de exemplo)
+
+O esquema e as permissoes estao em `supabase/migrations` e os dados de exemplo em `supabase/seed.sql`.
+
+A forma mais simples, sem instalar nada:
+
+1. No painel do Supabase, abre **SQL Editor**.
+2. Cola e corre, por esta ordem, o conteudo de:
+   - `supabase/migrations/0001_esquema.sql` (tabelas e relacoes)
+   - `supabase/migrations/0002_rls.sql` (permissoes RLS e criacao automatica de perfis)
+   - `supabase/seed.sql` (equipa, escaloes e repertorio de exemplo, opcional)
+
+Em alternativa, com a [CLI do Supabase](https://supabase.com/docs/guides/cli): `supabase db push`.
+
+As permissoes ficam assim: todos os elementos leem tudo e podem criar e editar eventos, contactos,
+recibos e repertorio; so o admin pode apagar registos e mexer em equipa, escaloes e definicoes.
+
+### Definir quem e admin
+
+Quando um elemento entra pela primeira vez, e criado automaticamente um perfil com papel `membro`.
+Para te tornares admin, corre no **SQL Editor** (troca pelo teu email):
+
+```sql
+update public.perfis set papel = 'admin'
+where id = (select id from auth.users where email = '3sigilos@gmail.com');
+```
+
 ### Convidar os 5 elementos
 
 Em **Authentication, Users**, usa **Invite user** (ou **Add user**) para cada um dos 5 emails.
@@ -81,13 +110,14 @@ e abre em ecra inteiro, com cara de app.
 
 ## Logotipos
 
-Coloca os logotipos da banda em:
+O logotipo branco da banda ja esta em `public/logo-branco.jpg` e aparece no ecra de entrada (com
+mix-blend-mode para o fundo preto desaparecer sobre o tema escuro). A marca no cabecalho usa um
+nome desenhado em tipografia (ver `components/Marca.tsx`).
 
-- `public/logo-branco.svg` (ou .png): usado na interface escura
-- `public/logo-preto.svg` (ou .png): usado mais tarde no PDF da proposta (fundo claro)
+Ainda falta:
 
-Enquanto nao existirem, a app mostra um nome desenhado em tipografia (ver `components/Marca.tsx`),
-e os icones da PWA usam uma versao provisoria em `public/icons`.
+- `public/logo-preto`: versao para o PDF da proposta (fundo claro), usada na Fase 7.
+- Icones definitivos da PWA em `public/icons` (por agora ha uma versao provisoria).
 
 ## Estrutura
 
