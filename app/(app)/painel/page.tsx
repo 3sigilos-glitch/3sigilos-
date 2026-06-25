@@ -16,7 +16,10 @@ export default async function PaginaPainel() {
         <p style={{ color: 'var(--texto-suave)', fontSize: 13, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
           {mesAno(agora)}
         </p>
-        <h1 style={{ fontSize: 34, marginTop: 4 }}>Painel</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+          <h1 style={{ fontSize: 34 }}>Painel</h1>
+          <Link href="/automacoes" className="botao botao-secundario" style={{ width: 'auto' }}>Automacoes</Link>
+        </div>
       </div>
 
       {/* Indicadores */}

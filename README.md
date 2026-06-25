@@ -28,8 +28,10 @@ A app esta a ser construida por fases. Concluido ate agora:
 - **Fase 6**: recibos e resumo fiscal por membro, com lista de recibos por emitir.
 - **Fase 7**: propostas (texto pronto a copiar, PDF com a referencia NASA, arquivo no Storage e
   email ao contratante).
+- **Fase 8**: automacoes (follow-up de propostas paradas, lembretes pre-concerto e briefings de
+  semana e mes, com texto pronto a copiar e envio por email a banda).
 
-As fases seguintes (automacoes e definicoes) chegam a seguir.
+A fase seguinte (definicoes de admin e afinacao visual) chega a seguir.
 
 ## Configurar as variaveis de ambiente
 
@@ -126,6 +128,19 @@ nome desenhado em tipografia (ver `components/Marca.tsx`).
 Para o PDF da proposta (fundo claro), coloca o logotipo preto em `public/logo-preto.png` (ou .jpg).
 Se nao existir, o PDF usa o nome da banda em tipografia. Ainda falta tambem os icones definitivos
 da PWA em `public/icons` (por agora ha uma versao provisoria).
+
+## Automacoes
+
+Em **Automacoes** (atalho no painel) tens, sempre prontos a copiar para o WhatsApp:
+
+- **Follow-up**: propostas em orcamentado paradas ha mais dias do que o definido, com um texto de
+  reforco para o contratante.
+- **Lembretes pre-concerto**: concertos confirmados a chegar dentro da janela definida.
+- **Briefings**: agenda da semana e do mes, com opcao de envio por email a toda a banda.
+
+Para envio automatico agendado (sem ser a mao), o ficheiro `vercel.json` ja agenda o Vercel Cron
+para chamar `/api/cron/lembretes` todos os dias as 9h. Para funcionar, define no Vercel as variaveis
+`SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY` e, por seguranca, `CRON_SECRET`.
 
 ## Propostas
 
