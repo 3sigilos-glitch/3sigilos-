@@ -78,3 +78,68 @@ export async function listarEventos(filtros: FiltrosEventos = {}): Promise<Event
   const { data } = await consulta;
   return (data as Evento[]) ?? [];
 }
+
+// -----------------------------------------------------------------------------
+// Dados do painel: proximos concertos, pipeline, recibos e indicadores.
+// -----------------------------------------------------------------------------
+
+export interface DadosPainel {
+  proximos: Evento[];
+  pipeline: Record<string, number>;
+  recibosPorPassar: number;
+  indicadores: {
+    concertosDoMes: number;
+    faturacaoPrevista: number;
+    propostasEmAberto: number;
+  };
+}
+
+export async function carregarPainel(): Promise<DadosPainel> {
+  const supabase = await criarClienteServidor();
+  const agora = new Date();
+  const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString();
+  const inicioMesSeguinte = new Date(agora.getFullYear(), agora.getMonth() + 1, 1).toISOString();
+
+  const [todos, proximos, recibos, doMes] = await Promise.all([
+    // Todos os eventos, so o estado, para contar o pipeline.
+    supabase.from('eventos').select('estado'),
+    // Proximos concertos a partir de hoje (exclui recusados), os mais proximos primeiro.
+    supabase
+      .from('eventos')
+      .select('*')
+      .gte('data', agora.toISOString())
+      .neq('estado', 'recusado')
+      .order('data', { ascending: true })
+      .limit(6),
+    // Recibos ainda por passar.
+    supabase.from('recibos').select('id', { count: 'exact', head: true }).eq('passado', false),
+    // Eventos confirmados ou realizados no mes corrente, para indicadores.
+    supabase
+      .from('eventos')
+      .select('valor_total, estado')
+      .gte('data', inicioMes)
+      .lt('data', inicioMesSeguinte)
+      .in('estado', ['confirmado', 'realizado']),
+  ]);
+
+  const pipeline: Record<string, number> = {
+    orcamentado: 0, pre_reserva: 0, confirmado: 0, realizado: 0, recusado: 0,
+  };
+  for (const e of todos.data ?? []) {
+    if (e.estado in pipeline) pipeline[e.estado] += 1;
+  }
+
+  const eventosMes = doMes.data ?? [];
+  const faturacaoPrevista = eventosMes.reduce((soma: number, e: any) => soma + Number(e.valor_total ?? 0), 0);
+
+  return {
+    proximos: (proximos.data as Evento[]) ?? [],
+    pipeline,
+    recibosPorPassar: recibos.count ?? 0,
+    indicadores: {
+      concertosDoMes: eventosMes.length,
+      faturacaoPrevista,
+      propostasEmAberto: pipeline.orcamentado,
+    },
+  };
+}
