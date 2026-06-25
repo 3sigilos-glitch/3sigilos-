@@ -1,5 +1,5 @@
 import { criarClienteServidor } from '@/lib/supabase/server';
-import type { Evento, Contacto, Equipa, Escalao } from '@/lib/tipos';
+import type { Evento, Contacto, Equipa, Escalao, Repertorio } from '@/lib/tipos';
 
 // Consultas do lado do servidor. Todas toleram falhas de ligacao,
 // devolvendo listas vazias, para a interface renderizar sem rebentar.
@@ -77,6 +77,72 @@ export async function listarEventos(filtros: FiltrosEventos = {}): Promise<Event
 
   const { data } = await consulta;
   return (data as Evento[]) ?? [];
+}
+
+// -----------------------------------------------------------------------------
+// Contactos.
+// -----------------------------------------------------------------------------
+
+export async function listarContactos(): Promise<Contacto[]> {
+  const supabase = await criarClienteServidor();
+  const { data } = await supabase.from('contactos').select('*').order('nome');
+  return (data as Contacto[]) ?? [];
+}
+
+export interface ContactoComHistorico extends Contacto {
+  eventos: Pick<Evento, 'id' | 'evento' | 'estado' | 'data' | 'local' | 'valor_total'>[];
+}
+
+export async function obterContacto(id: string): Promise<ContactoComHistorico | null> {
+  const supabase = await criarClienteServidor();
+  const [contacto, eventos] = await Promise.all([
+    supabase.from('contactos').select('*').eq('id', id).single(),
+    supabase
+      .from('eventos')
+      .select('id, evento, estado, data, local, valor_total')
+      .eq('contratante_id', id)
+      .order('data', { ascending: false }),
+  ]);
+  if (contacto.error || !contacto.data) return null;
+  return { ...(contacto.data as Contacto), eventos: (eventos.data as any) ?? [] };
+}
+
+// -----------------------------------------------------------------------------
+// Equipa.
+// -----------------------------------------------------------------------------
+
+export async function listarEquipa(): Promise<Equipa[]> {
+  const supabase = await criarClienteServidor();
+  const { data } = await supabase.from('equipa').select('*').order('papel').order('nome');
+  return (data as Equipa[]) ?? [];
+}
+
+export async function obterMembro(id: string): Promise<Equipa | null> {
+  const supabase = await criarClienteServidor();
+  const { data, error } = await supabase.from('equipa').select('*').eq('id', id).single();
+  if (error || !data) return null;
+  return data as Equipa;
+}
+
+// -----------------------------------------------------------------------------
+// Repertorio.
+// -----------------------------------------------------------------------------
+
+export async function listarRepertorio(filtros: { decada?: string; ativo?: string } = {}): Promise<Repertorio[]> {
+  const supabase = await criarClienteServidor();
+  let consulta = supabase.from('repertorio').select('*').order('artista_original').order('musica');
+  if (filtros.decada) consulta = consulta.eq('decada', filtros.decada);
+  if (filtros.ativo === 'sim') consulta = consulta.eq('ativo', true);
+  if (filtros.ativo === 'nao') consulta = consulta.eq('ativo', false);
+  const { data } = await consulta;
+  return (data as Repertorio[]) ?? [];
+}
+
+export async function obterMusica(id: string): Promise<Repertorio | null> {
+  const supabase = await criarClienteServidor();
+  const { data, error } = await supabase.from('repertorio').select('*').eq('id', id).single();
+  if (error || !data) return null;
+  return data as Repertorio;
 }
 
 // -----------------------------------------------------------------------------
