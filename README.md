@@ -131,13 +131,16 @@ e abre em ecra inteiro, com cara de app.
 
 ## Logotipos
 
-O logotipo branco da banda ja esta em `public/logo-branco.jpg` e aparece no ecra de entrada (com
+O logotipo branco da banda esta em `public/logo-branco.jpg` e aparece no ecra de entrada (com
 mix-blend-mode para o fundo preto desaparecer sobre o tema escuro). A marca no cabecalho usa um
 nome desenhado em tipografia (ver `components/Marca.tsx`).
 
-Para o PDF da proposta (fundo claro), coloca o logotipo preto em `public/logo-preto.png` (ou .jpg).
-Se nao existir, o PDF usa o nome da banda em tipografia. Ainda falta tambem os icones definitivos
-da PWA em `public/icons` (por agora ha uma versao provisoria).
+O logotipo preto (`public/logo-preto.png`, gerado a partir do branco) e usado no PDF da proposta.
+Os icones da PWA em `public/icons` (192, 512 e maskable, mais o apple-touch-icon) ja estao feitos
+a partir do emblema da banda.
+
+O logotipo preto do PDF e os icones da PWA ja estao no repositorio. Se quiseres trocar por versoes
+oficiais, substitui `public/logo-preto.png` e os ficheiros em `public/icons`.
 
 ## Automacoes
 

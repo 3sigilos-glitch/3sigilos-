@@ -22,6 +22,10 @@ export const metadata: Metadata = {
   title: "N'ASA | Gestao",
   description: 'Gestao interna dos N\'ASA, concertos, propostas, equipa e repertorio.',
   manifest: '/manifest.webmanifest',
+  icons: {
+    icon: '/icons/icon-192.png',
+    apple: '/icons/apple-touch-icon.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
