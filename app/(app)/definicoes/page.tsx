@@ -70,7 +70,7 @@ export default async function PaginaDefinicoes() {
                 <strong style={{ fontSize: 16 }}>{e.nome}</strong>
                 {e.condicoes && <span style={{ fontSize: 12, color: 'var(--texto-suave)' }}>{e.condicoes}</span>}
               </span>
-              <strong className="titulo" style={{ fontSize: 16 }}>{euros(e.valor_base)}</strong>
+              <strong className="titulo numero" style={{ fontSize: 16 }}>{euros(e.valor_base)}</strong>
             </Link>
           ))
         )}

@@ -42,8 +42,8 @@ export default async function PaginaProposta({ params }: { params: Promise<{ id:
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href={`/eventos/${id}`} style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Voltar</Link>
-        <span style={{ fontSize: 13, color: 'var(--acento)', letterSpacing: '0.04em' }}>{evento.referencia}</span>
+        <Link href={`/eventos/${id}`} style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--texto-suave)', fontSize: 14 }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M15 18l-6-6 6-6" /></svg>Voltar</Link>
+        <span className="carimbo carimbo--caixa">{evento.referencia}</span>
       </div>
       <h1 style={{ fontSize: 30 }}>Proposta</h1>
 

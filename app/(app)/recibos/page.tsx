@@ -29,9 +29,10 @@ export default async function PaginaRecibos({
         <Link href={`/recibos?ano=${ano + 1}`} className="botao botao-secundario" style={{ width: 'auto' }}>{ano + 1}</Link>
       </div>
 
-      <div className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+      <div className="cartao" style={{ position: 'relative', overflow: 'hidden', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', background: 'linear-gradient(135deg, #1a1213, var(--superficie) 70%)', borderColor: '#3a2422' }}>
+        <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'var(--acento)', boxShadow: '0 0 18px rgba(226, 59, 46, 0.6)' }} />
         <span style={{ fontSize: 12, color: 'var(--texto-suave)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Total do ano</span>
-        <strong className="titulo" style={{ fontSize: 28, color: 'var(--acento)' }}>{euros(totalAno)}</strong>
+        <strong className="titulo numero" style={{ fontSize: 28, color: 'var(--acento-forte)' }}>{euros(totalAno)}</strong>
       </div>
 
       {/* Recibos por emitir */}
@@ -49,7 +50,7 @@ export default async function PaginaRecibos({
                 </span>
               </Link>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-                <strong className="titulo" style={{ fontSize: 16 }}>{euros(r.valor)}</strong>
+                <strong className="titulo numero" style={{ fontSize: 16 }}>{euros(r.valor)}</strong>
                 <BotaoPassado id={r.id} passado={r.passado} />
               </div>
             </div>
@@ -67,7 +68,7 @@ export default async function PaginaRecibos({
             <div key={m.membroId ?? 'sem'} className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                 <strong style={{ fontSize: 16 }}>{m.nome}</strong>
-                <strong className="titulo" style={{ fontSize: 18 }}>{euros(m.total)}</strong>
+                <strong className="titulo numero" style={{ fontSize: 18 }}>{euros(m.total)}</strong>
               </div>
               <div style={{ display: 'flex', gap: 16, fontSize: 13, color: 'var(--texto-suave)' }}>
                 <span><span style={{ color: 'var(--estado-confirmado)' }}>Passados:</span> {euros(m.passado)}</span>

@@ -28,7 +28,7 @@ export default async function PaginaAutomacoes() {
             <div key={evento.id} className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
                 <Link href={`/eventos/${evento.id}`} style={{ fontSize: 16, fontWeight: 700 }}>{evento.evento}</Link>
-                <span style={{ fontSize: 12, color: 'var(--estado-orcamentado)', whiteSpace: 'nowrap' }}>parada ha {diasParado} dias</span>
+                <span style={{ fontSize: 12, color: 'var(--estado-orcamentado)', background: 'var(--superficie-2)', border: '1px solid var(--linha)', borderRadius: 999, padding: '3px 10px', whiteSpace: 'nowrap' }}>parada ha {diasParado} dias</span>
               </div>
               <CopiarBloco texto={texto} etiqueta="Copiar reforco" />
             </div>
@@ -48,7 +48,7 @@ export default async function PaginaAutomacoes() {
             <div key={evento.id} className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
                 <Link href={`/eventos/${evento.id}`} style={{ fontSize: 16, fontWeight: 700 }}>{evento.evento}</Link>
-                <span style={{ fontSize: 12, color: 'var(--estado-confirmado)', whiteSpace: 'nowrap' }}>faltam {diasAte} dias</span>
+                <span style={{ fontSize: 12, color: 'var(--estado-confirmado)', background: 'var(--superficie-2)', border: '1px solid var(--linha)', borderRadius: 999, padding: '3px 10px', whiteSpace: 'nowrap' }}>faltam {diasAte} dias</span>
               </div>
               <span style={{ fontSize: 12, color: 'var(--texto-suave)' }}>{dataExtenso(evento.data)}</span>
               <CopiarBloco texto={texto} etiqueta="Copiar lembrete" />

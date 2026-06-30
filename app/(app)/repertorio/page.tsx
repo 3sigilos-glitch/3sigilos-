@@ -39,7 +39,7 @@ export default async function PaginaRepertorio({
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--texto-fraco)', fontSize: 12 }}>
                 {m.decada && <span>anos {m.decada}</span>}
-                {m.duracao && <span>{m.duracao}</span>}
+                {m.duracao && <span className="carimbo">{m.duracao}</span>}
                 {!m.ativo && <span style={{ color: 'var(--estado-recusado)' }}>inativa</span>}
               </span>
             </Link>

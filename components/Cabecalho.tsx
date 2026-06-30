@@ -1,6 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 import Marca from '@/components/Marca';
 
-// Barra de topo com o logotipo branco e a accao de sair.
+// Barra de topo com o emblema da banda, o logotipo em tipografia e a accao de
+// sair. Um fino traco de luz vermelha por baixo da barra (o "palco a acender").
 // O email do utilizador com sessao iniciada e mostrado de forma discreta.
 export default function Cabecalho({ email }: { email?: string }) {
   return (
@@ -16,9 +18,19 @@ export default function Cabecalho({ email }: { email?: string }) {
         paddingTop: 'calc(14px + env(safe-area-inset-top))',
         background: 'var(--fundo)',
         borderBottom: '1px solid var(--linha)',
+        boxShadow: '0 1px 0 rgba(226, 59, 46, 0.5)',
       }}
     >
-      <Marca tamanho="medio" />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+        <img
+          src="/logo-emblema.jpg"
+          alt=""
+          width={30}
+          height={30}
+          style={{ width: 30, height: 30, objectFit: 'cover', borderRadius: 6, mixBlendMode: 'screen' }}
+        />
+        <Marca tamanho="medio" />
+      </div>
 
       <form action="/auth/sair" method="post">
         <button

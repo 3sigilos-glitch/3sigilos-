@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Oswald, Inter } from 'next/font/google';
+import { Oswald, Inter, Space_Mono } from 'next/font/google';
 import './globals.css';
 import RegistoServiceWorker from '@/components/RegistoServiceWorker';
 
@@ -15,6 +15,14 @@ const fonteTitulo = Oswald({
 const fonteCorpo = Inter({
   subsets: ['latin'],
   variable: '--fonte-corpo',
+  display: 'swap',
+});
+
+// Mono para carimbos e referencias (NASA-2026-051), ar de estampado.
+const fonteMono = Space_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--fonte-mono',
   display: 'swap',
 });
 
@@ -48,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-PT" className={`${fonteTitulo.variable} ${fonteCorpo.variable}`}>
+    <html lang="pt-PT" className={`${fonteTitulo.variable} ${fonteCorpo.variable} ${fonteMono.variable}`}>
       <body>
         {children}
         <RegistoServiceWorker />

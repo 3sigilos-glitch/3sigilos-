@@ -20,7 +20,7 @@ export default async function PaginaFichaEvento({ params }: { params: Promise<{ 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href="/eventos" style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Voltar</Link>
+        <Link href="/eventos" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--texto-suave)', fontSize: 14 }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M15 18l-6-6 6-6" /></svg>Voltar</Link>
         <div style={{ display: 'flex', gap: 8 }}>
           <Link href={`/eventos/${id}/proposta`} className="botao botao-secundario" style={{ width: 'auto' }}>Proposta</Link>
           <Link href={`/eventos/${id}/editar`} className="botao" style={{ width: 'auto' }}>Editar</Link>
@@ -33,12 +33,13 @@ export default async function PaginaFichaEvento({ params }: { params: Promise<{ 
           <EtiquetaEstado estado={evento.estado} />
         </div>
         {evento.referencia && (
-          <span style={{ fontSize: 13, color: 'var(--texto-fraco)', letterSpacing: '0.04em' }}>{evento.referencia}</span>
+          <span className="carimbo carimbo--caixa" style={{ alignSelf: 'flex-start' }}>{evento.referencia}</span>
         )}
       </div>
 
       {/* Valor em destaque */}
-      <div className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+      <div className="cartao" style={{ position: 'relative', overflow: 'hidden', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', background: 'linear-gradient(135deg, #1a1213, var(--superficie) 70%)', borderColor: '#3a2422' }}>
+        <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'var(--acento)', boxShadow: '0 0 18px rgba(226, 59, 46, 0.6)' }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <span style={{ fontSize: 12, color: 'var(--texto-suave)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Valor total</span>
           {(evento.deslocacao_valor ?? 0) > 0 && (
@@ -47,7 +48,7 @@ export default async function PaginaFichaEvento({ params }: { params: Promise<{ 
             </span>
           )}
         </div>
-        <strong className="titulo" style={{ fontSize: 34, color: 'var(--acento)' }}>{euros(evento.valor_total)}</strong>
+        <strong className="titulo numero" style={{ fontSize: 34, color: 'var(--acento-forte)' }}>{euros(evento.valor_total)}</strong>
       </div>
 
       <Bloco titulo="Quando e onde">

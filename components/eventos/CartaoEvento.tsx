@@ -23,9 +23,9 @@ export default function CartaoEvento({ evento }: { evento: Evento }) {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderTop: '1px solid var(--linha)', paddingTop: 8 }}>
         {evento.referencia
-          ? <span style={{ fontSize: 12, color: 'var(--texto-fraco)', letterSpacing: '0.04em' }}>{evento.referencia}</span>
+          ? <span className="carimbo">{evento.referencia}</span>
           : <span />}
-        <strong className="titulo" style={{ fontSize: 18 }}>{euros(evento.valor_total)}</strong>
+        <strong className="titulo numero" style={{ fontSize: 18 }}>{euros(evento.valor_total)}</strong>
       </div>
     </Link>
   );

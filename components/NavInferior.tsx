@@ -39,6 +39,7 @@ export default function NavInferior() {
             key={href}
             href={href}
             style={{
+              position: 'relative',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -51,6 +52,19 @@ export default function NavInferior() {
               fontWeight: ativo ? 700 : 500,
             }}
           >
+            {ativo && (
+              <span
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  width: 26,
+                  height: 2,
+                  background: 'var(--acento)',
+                  boxShadow: '0 0 8px var(--acento)',
+                }}
+              />
+            )}
             <Icone />
             {etiqueta}
           </Link>
