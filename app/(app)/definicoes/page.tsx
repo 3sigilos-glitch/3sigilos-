@@ -4,6 +4,7 @@ import { obterDefinicoes, listarEscaloes } from '@/lib/consultas';
 import { obterSessao } from '@/lib/sessao';
 import { euros } from '@/lib/formatar';
 import { guardarDefinicoes } from './acoes';
+import CopiaSeguranca from '@/components/definicoes/CopiaSeguranca';
 
 export default async function PaginaDefinicoes() {
   const sessao = await obterSessao();
@@ -74,6 +75,14 @@ export default async function PaginaDefinicoes() {
             </Link>
           ))
         )}
+      </div>
+
+      {/* Copias de seguranca */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>Copias de seguranca</h2>
+        <div className="cartao">
+          <CopiaSeguranca />
+        </div>
       </div>
     </section>
   );

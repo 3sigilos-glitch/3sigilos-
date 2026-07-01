@@ -3,9 +3,47 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { criarClienteServidor } from '@/lib/supabase/server';
+import { obterSessao } from '@/lib/sessao';
+import { importarTudo, type Backup } from '@/lib/backup';
 
 // Todas estas accoes mexem em configuracao e estrutura, por isso so funcionam
 // para o admin (garantido pelo RLS no servidor).
+
+// Restaura a informacao a partir de um ficheiro de copia de seguranca (JSON).
+// Reservado ao admin. Devolve um resumo do que foi restaurado.
+export async function restaurarBackup(formData: FormData): Promise<string> {
+  const sessao = await obterSessao();
+  if (!sessao.ehAdmin) {
+    throw new Error('Reservado ao admin.');
+  }
+
+  const ficheiro = formData.get('ficheiro');
+  if (!(ficheiro instanceof File) || ficheiro.size === 0) {
+    throw new Error('Escolhe um ficheiro de copia de seguranca (.json).');
+  }
+
+  let backup: Backup;
+  try {
+    backup = JSON.parse(await ficheiro.text());
+  } catch {
+    throw new Error('O ficheiro nao e um JSON valido.');
+  }
+  if (!backup?.dados || typeof backup.dados !== 'object') {
+    throw new Error('O ficheiro nao parece uma copia de seguranca desta aplicacao.');
+  }
+
+  const resultados = await importarTudo(backup);
+  const comErro = resultados.filter((r) => r.erro);
+  if (comErro.length > 0) {
+    const detalhe = comErro.map((r) => `${r.tabela}: ${r.erro}`).join('; ');
+    throw new Error(`Restauro incompleto. ${detalhe}`);
+  }
+
+  revalidatePath('/definicoes');
+  const total = resultados.reduce((s, r) => s + r.registos, 0);
+  const porTabela = resultados.filter((r) => r.registos > 0).map((r) => `${r.tabela} (${r.registos})`).join(', ');
+  return `Restauro concluido: ${total} registos. ${porTabela}`;
+}
 
 export async function guardarDefinicoes(formData: FormData) {
   const supabase = await criarClienteServidor();

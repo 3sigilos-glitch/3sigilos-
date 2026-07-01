@@ -164,6 +164,16 @@ a partir do emblema da banda.
 O logotipo preto do PDF e os icones da PWA ja estao no repositorio. Se quiseres trocar por versoes
 oficiais, substitui `public/logo-preto.png` e os ficheiros em `public/icons`.
 
+## Copias de seguranca
+
+Em **Definicoes** (so admin), na seccao Copias de seguranca:
+
+- **Descarregar**: guarda num ficheiro JSON toda a informacao (eventos, contactos, equipa,
+  escaloes, repertorio, recibos e definicoes). Guarda esse ficheiro num sitio seguro, de vez em
+  quando.
+- **Restaurar**: carrega um ficheiro descarregado antes. Os registos com o mesmo identificador sao
+  atualizados e os que faltam sao criados, sem apagar o que ja existe.
+
 ## Automacoes
 
 Em **Automacoes** (atalho no painel) tens, sempre prontos a copiar para o WhatsApp:
