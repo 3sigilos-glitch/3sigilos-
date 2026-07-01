@@ -15,27 +15,22 @@ export interface Backup {
   dados: Record<string, any[]>;
 }
 
-// Le todas as tabelas com um dado cliente Supabase (de sessao ou de servico).
-export async function exportarComCliente(supabase: {
-  from: (t: string) => { select: (c: string) => Promise<{ data: any[] | null }> };
-}): Promise<Backup> {
+// Le todas as tabelas e devolve um objeto pronto a guardar em ficheiro.
+export async function exportarTudo(): Promise<Backup> {
+  const supabase = await criarClienteServidor();
   const dados: Record<string, any[]> = {};
+
   for (const tabela of TABELAS) {
     const { data } = await supabase.from(tabela).select('*');
     dados[tabela] = data ?? [];
   }
+
   return {
     aplicacao: "N'ASA Gestao",
     versao: 1,
     exportado_em: new Date().toISOString(),
     dados,
   };
-}
-
-// Le todas as tabelas e devolve um objeto pronto a guardar em ficheiro.
-export async function exportarTudo(): Promise<Backup> {
-  const supabase = await criarClienteServidor();
-  return exportarComCliente(supabase as any);
 }
 
 export interface ResultadoRestauro {

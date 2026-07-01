@@ -174,14 +174,6 @@ Em **Definicoes** (so admin), na seccao Copias de seguranca:
 - **Restaurar**: carrega um ficheiro descarregado antes. Os registos com o mesmo identificador sao
   atualizados e os que faltam sao criados, sem apagar o que ja existe.
 
-### Backup semanal automatico por email
-
-O ficheiro `vercel.json` agenda o Vercel Cron para, todas as segundas as 8h, chamar
-`/api/cron/backup`, que exporta toda a informacao e a envia por email com o JSON em anexo.
-Para funcionar, define no Vercel: `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `RESEND_FROM`,
-`CRON_SECRET` e, se quiseres mudar o destinatario, `BACKUP_EMAIL` (por omissao,
-casakmsm.ai@gmail.com). O assunto do email e "Backup N'ASA Backoffice app".
-
 ## Automacoes
 
 Em **Automacoes** (atalho no painel) tens, sempre prontos a copiar para o WhatsApp:
