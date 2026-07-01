@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Conselho do Dia · Trânsitos Astrológicos</title>
+<style>
+  :root{
+    --tinta:#1A1614;
+    --papel:#F4EDE2;
+    --tangerina:#E8633A;
+    --verde:#2B6F6A;
+    --dourado:#C9A24B;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--tinta);
+    color:var(--papel);
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+    padding-bottom:48px;
+  }
+  h1,h2,h3,.titulo{
+    font-family:Georgia,"Times New Roman",serif;
+    font-weight:normal;
+    margin:0 0 8px 0;
+  }
+  main{
+    max-width:520px;
+    margin:0 auto;
+    padding:20px 16px 8px;
+  }
+  header.topo{
+    text-align:center;
+    padding:22px 16px 18px;
+    border-bottom:1px solid rgba(244,237,226,0.15);
+  }
+  header.topo .data{
+    font-family:Georgia,serif;
+    font-size:0.95rem;
+    color:var(--dourado);
+    letter-spacing:0.02em;
+  }
+  header.topo .lua-agora{
+    font-size:1.6rem;
+    margin:10px 0 4px;
+    font-family:Georgia,serif;
+  }
+  header.topo .fase{
+    font-size:0.9rem;
+    opacity:0.85;
+  }
+  .cartao{
+    background:var(--papel);
+    color:var(--tinta);
+    border-radius:14px;
+    padding:18px 18px 20px;
+    margin:18px 0;
+    box-shadow:0 2px 10px rgba(0,0,0,0.25);
+  }
+  .cartao h2{
+    font-size:1.15rem;
+    color:var(--verde);
+    border-bottom:2px solid var(--dourado);
+    padding-bottom:6px;
+    display:inline-block;
+  }
+  .cartao p{ margin:10px 0; }
+  .aviso-lento{
+    background:var(--tangerina);
+    color:var(--papel);
+    border-radius:14px;
+    padding:18px;
+    margin:18px 0;
+    box-shadow:0 2px 10px rgba(0,0,0,0.3);
+  }
+  .aviso-lento h2{ color:var(--papel); border-bottom:2px solid var(--papel); display:inline-block; padding-bottom:6px;}
+  .aviso-lento p{ margin:10px 0; }
+  .outros-toques ul{ list-style:none; margin:0; padding:0; }
+  .outros-toques li{
+    padding:8px 0;
+    border-top:1px solid rgba(26,22,20,0.12);
+    font-size:0.95rem;
+  }
+  .outros-toques li:first-child{ border-top:none; }
+  .seletor-tom{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    margin:16px 0;
+  }
+  .seletor-tom button{
+    flex:1;
+    background:transparent;
+    border:1px solid var(--dourado);
+    color:var(--papel);
+    padding:9px 6px;
+    border-radius:10px;
+    font-size:0.9rem;
+    cursor:pointer;
+  }
+  .seletor-tom button.ativo{
+    background:var(--dourado);
+    color:var(--tinta);
+    font-weight:bold;
+  }
+  .botao-secundario{
+    display:block;
+    margin:6px auto 0;
+    background:transparent;
+    border:1px solid var(--verde);
+    color:var(--papel);
+    padding:8px 14px;
+    border-radius:10px;
+    font-size:0.85rem;
+    cursor:pointer;
+  }
+  details.calculo-exato{
+    background:transparent;
+    border:1px solid var(--dourado);
+    border-radius:14px;
+    padding:12px 16px;
+    margin:22px 0 12px;
+  }
+  details.calculo-exato summary{
+    font-family:Georgia,serif;
+    color:var(--dourado);
+    font-size:1.05rem;
+    cursor:pointer;
+  }
+  table.tabela-exata{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    font-size:0.88rem;
+  }
+  table.tabela-exata th, table.tabela-exata td{
+    text-align:left;
+    padding:5px 4px;
+    border-bottom:1px solid rgba(244,237,226,0.15);
+  }
+  table.tabela-exata th{ color:var(--dourado); font-weight:normal; }
+  .nota-validacao{
+    font-size:0.82rem;
+    opacity:0.85;
+    margin-top:10px;
+    line-height:1.45;
+  }
+  .cruzamento{
+    font-size:0.82rem;
+    margin-top:8px;
+    color:var(--verde);
+    background:rgba(43,111,106,0.15);
+    padding:8px 10px;
+    border-radius:8px;
+  }
+  .rodape-carregamento{
+    text-align:center;
+    padding:40px 16px;
+    opacity:0.8;
+    font-size:0.9rem;
+  }
+  .erro-fatal{
+    background:var(--tangerina);
+    color:var(--papel);
+    padding:16px;
+    border-radius:10px;
+    margin:20px 16px;
+  }
+</style>
+</head>
+<body>
+
+<div id="raiz">
+  <div class="rodape-carregamento">A calcular as posições do céu de hoje...</div>
+</div>
+
+<script>
+/* =====================================================================
+   CARREGADOR DA BIBLIOTECA DE EFEMÉRIDE
+   Usa a Astronomy Engine (cosinekitty), versão de browser, via CDN.
+   Não há cálculo de efeméride escrito à mão neste ficheiro: todas as
+   posições dos corpos celestes vêm desta biblioteca.
+   Se a versão fixa (2.1.19) falhar a carregar, tenta a mais recente
+   disponível no mesmo caminho do jsDelivr.
+===================================================================== */
+function carregarScript(src){
+  return new Promise(function(resolve, reject){
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function arrancar(){
+  var principal = 'https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js';
+  var reserva   = 'https://cdn.jsdelivr.net/npm/astronomy-engine/astronomy.browser.min.js';
+  try{
+    await carregarScript(principal);
+  }catch(e){
+    console.warn('Falha a carregar astronomy-engine@2.1.19, a tentar a versão mais recente do jsDelivr.');
+    try{
+      await carregarScript(reserva);
+    }catch(e2){
+      mostrarErroFatal('Não foi possível carregar a biblioteca de efeméride (Astronomy Engine) a partir do jsDelivr. Verifica a ligação à internet e tenta novamente.');
+      return;
+    }
+  }
+  if (typeof Astronomy === 'undefined'){
+    mostrarErroFatal('A biblioteca de efeméride carregou mas não expôs o objeto Astronomy. Não é seguro continuar sem ela.');
+    return;
+  }
+  iniciarApp();
+}
+
+function mostrarErroFatal(msg){
+  document.getElementById('raiz').innerHTML = '<div class="erro-fatal">' + msg + '</div>';
+}
+
+arrancar();
+
+/* =====================================================================
+   CAMADA DE CÁLCULO
+   Astronomia pura. Nada aqui é interpretação, é geometria do céu.
+===================================================================== */
+
+// ---- Mapa natal (tropical, Placidus), validado pelo utilizador no Astro-Seek ----
+// Nascimento: 24 de abril de 1989, 01:57, Genebra (Suíça), 46°12'N 6°09'E.
+// Guardado aqui em graus e minutos, convertido para decimal por dms().
+// Base dos signos em graus absolutos (0 a 360):
+//   Carneiro 0, Touro 30, Gémeos 60, Caranguejo 90, Leão 120, Virgem 150,
+//   Balança 180, Escorpião 210, Sagitário 240, Capricórnio 270, Aquário 300, Peixes 330.
+// Se precisares de corrigir à mão, é só mudar os graus/minutos abaixo.
+function dms(graus, minutos){ return graus + minutos / 60; }
+
+const NATAL = {
+  Sol:        30  + dms(3, 47),   // 3°47' Touro
+  Lua:        240 + dms(5, 48),   // 5°48' Sagitário
+  Mercurio:   30  + dms(22, 24),  // 22°24' Touro
+  Venus:      30  + dms(8, 42),   // 8°42' Touro
+  Marte:      60  + dms(26, 47),  // 26°47' Gémeos
+  Jupiter:    60  + dms(8, 2),    // 8°02' Gémeos
+  Saturno:    270 + dms(13, 55),  // 13°55' Capricórnio
+  Ascendente: 270 + dms(10, 9),   // 10°09' Capricórnio
+  MeioCeu:    210 + dms(9, 48),   // 9°48' Escorpião (Plutão natal perto)
+};
+
+const SIGN_NAMES = ['Carneiro','Touro','Gémeos','Caranguejo','Leão','Virgem',
+                     'Balança','Escorpião','Sagitário','Capricórnio','Aquário','Peixes'];
+
+// Corpos em trânsito calculados para o painel de validação.
+// Ordem: Sol, Lua, Mercúrio, Vénus, Marte, Júpiter, Saturno.
+const CORPOS_TRANSITO = [
+  { chave:'Sol',      corpo:'Sun' },
+  { chave:'Lua',       corpo:'Moon' },
+  { chave:'Mercurio',  corpo:'Mercury' },
+  { chave:'Venus',     corpo:'Venus' },
+  { chave:'Marte',     corpo:'Mars' },
+  { chave:'Jupiter',   corpo:'Jupiter' },
+  { chave:'Saturno',   corpo:'Saturn' },
+];
+
+function norm360(x){ x = x % 360; if (x < 0) x += 360; return x; }
+
+/*
+ * CONVERSÃO DE REFERENCIAL: J2000 versus "de data" (of-date).
+ *
+ * O plano original era: obter a longitude eclíptica J2000 via
+ * Astronomy.Ecliptic(vec).elon e depois somar à mão a precessão desde
+ * J2000 (cerca de 50.2879"/ano) para chegar à longitude "de data".
+ *
+ * Verificação feita (fora desta app, com o mesmo GeoVector+Ecliptic e
+ * comparando com Astronomy.SunPosition() e Astronomy.EclipticGeoMoon(),
+ * que a própria biblioteca documenta como "true ecliptic of date"):
+ * Astronomy.Ecliptic() já devolve a longitude eclíptica DE DATA
+ * (equinócio verdadeiro da data, com precessão e nutação incluídas),
+ * e não a longitude J2000. Isto está escrito no código-fonte da própria
+ * função ("Converts a J2000 mean equator (EQJ) vector to a TRUE ECLIPTIC
+ * OF DATE (ECT) vector and angles").
+ *
+ * Confirmação numérica (data de teste 2026-07-01 12:00 UTC):
+ *  - GeoVector+Ecliptic para o Sol: 99.6790°
+ *  - Astronomy.SunPosition (função de-data da própria biblioteca): 99.6791°
+ *    (diferença de 0.0001°, dentro do ruído numérico)
+ *  - Se se somar a precessão à mão por cima disto, o Sol passa a 100.0492°,
+ *    um erro de 0.37°, exatamente o tipo de erro de referencial que trocaria
+ *    um aspeto perto da órbita.
+ * Por isso esta app NÃO soma precessão manual: usa GeoVector+Ecliptic
+ * diretamente como longitude de data, e mostra no painel de validação a
+ * comparação com SunPosition/EclipticGeoMoon para prova.
+ */
+function longitudeEclipticaDeData(nomeCorpo, data){
+  const vec = Astronomy.GeoVector(nomeCorpo, data, true); // equatorial J2000, com aberração
+  const ecl = Astronomy.Ecliptic(vec);                    // já devolve ecliptic of-date (ver nota acima)
+  return norm360(ecl.elon);
+}
+
+function signoGrauMinuto(lonAbs){
+  const l = norm360(lonAbs);
+  let signIdx = Math.floor(l / 30);
+  let dentroDoSigno = l - signIdx * 30;
+  let grau = Math.floor(dentroDoSigno);
+  let minuto = Math.round((dentroDoSigno - grau) * 60);
+  if (minuto === 60){
+    minuto = 0;
+    grau += 1;
+    if (grau === 30){ grau = 0; signIdx = (signIdx + 1) % 12; }
+  }
+  return { signo: SIGN_NAMES[signIdx], grau: grau, minuto: minuto, abs: l };
+}
+
+function formatoSGM(lonAbs){
+  const p = signoGrauMinuto(lonAbs);
+  return p.signo + ' ' + p.grau + '°' + String(p.minuto).padStart(2,'0') + "'";
+}
+
+// ---- Aspetos dos trânsitos ao mapa natal ----
+// Só aspetos duros: conjunção (0°), oposição (180°), quadratura (90°).
+// d = diferença angular mínima entre as duas longitudes (0 a 180).
+function aspectoEntre(lonTransito, lonNatal, orbe){
+  let d = Math.abs(lonTransito - lonNatal) % 360;
+  if (d > 180) d = 360 - d;
+  if (d <= orbe)                    return { tipo:'conjuncao', exatidao: d };
+  if (Math.abs(d - 180) <= orbe)    return { tipo:'oposicao',  exatidao: Math.abs(d - 180) };
+  if (Math.abs(d - 90) <= orbe)     return { tipo:'quadratura', exatidao: Math.abs(d - 90) };
+  return null;
+}
+
+const PONTOS_NATAIS = ['Sol','Lua','Mercurio','Venus','Marte','Jupiter','Saturno','Ascendente','MeioCeu'];
+
+// Órbitas: Lua em trânsito 5°; planetas lentos (Marte, Júpiter, Saturno) 1°.
+const ORBE_LUA = 5;
+const ORBE_LENTO = 1;
+
+function calcularAspetosDaLua(lonLuaHoje){
+  const encontrados = [];
+  for (const ponto of PONTOS_NATAIS){
+    const a = aspectoEntre(lonLuaHoje, NATAL[ponto], ORBE_LUA);
+    if (a) encontrados.push({ ponto: ponto, tipo: a.tipo, exatidao: a.exatidao });
+  }
+  encontrados.sort(function(a,b){ return a.exatidao - b.exatidao; });
+  return encontrados;
+}
+
+function calcularAlertasLentos(longitudesHoje){
+  const alertas = [];
+  for (const planeta of ['Marte','Jupiter','Saturno']){
+    for (const ponto of PONTOS_NATAIS){
+      const a = aspectoEntre(longitudesHoje[planeta], NATAL[ponto], ORBE_LENTO);
+      if (a) alertas.push({ planeta: planeta, ponto: ponto, tipo: a.tipo, exatidao: a.exatidao });
+    }
+  }
+  alertas.sort(function(a,b){ return a.exatidao - b.exatidao; });
+  return alertas;
+}
+
+function faseDaLua(data){
+  const anguloFase = norm360(Astronomy.MoonPhase(data)); // elongação Lua-Sol, 0 a 360
+  const iluminacao = Astronomy.Illumination('Moon', data).phase_fraction * 100;
+  const perto = function(a, alvo, tol){ return Math.abs(a - alvo) <= tol || Math.abs(a - alvo - 360) <= tol; };
+  let nome;
+  if (perto(anguloFase, 0, 3))        nome = 'Lua Nova';
+  else if (perto(anguloFase, 90, 3))  nome = 'Quarto Crescente';
+  else if (perto(anguloFase, 180, 3)) nome = 'Lua Cheia';
+  else if (perto(anguloFase, 270, 3)) nome = 'Quarto Minguante';
+  else if (anguloFase > 0 && anguloFase < 90)    nome = 'Lua Crescente';
+  else if (anguloFase > 90 && anguloFase < 180)  nome = 'Lua Gibosa Crescente';
+  else if (anguloFase > 180 && anguloFase < 270) nome = 'Lua Gibosa Minguante';
+  else nome = 'Lua Minguante';
+  return { nome: nome, anguloFase: anguloFase, iluminacaoPct: iluminacao };
+}
+
+function calcularTudo(data){
+  const longitudes = {};
+  for (const c of CORPOS_TRANSITO){
+    longitudes[c.chave] = longitudeEclipticaDeData(c.corpo, data);
+  }
+  const lunarAspetos = calcularAspetosDaLua(longitudes.Lua);
+  const alertasLentos = calcularAlertasLentos(longitudes);
+  const fase = faseDaLua(data);
+
+  // Cruzamento de validação: comparar Sol e Lua com as funções de-data
+  // que a própria Astronomy Engine já disponibiliza para estes dois corpos.
+  const solCruzado = norm360(Astronomy.SunPosition(data).elon);
+  const luaCruzada = norm360(Astronomy.EclipticGeoMoon(data).lon);
+  const diffSol = Math.abs(norm360(solCruzado - longitudes.Sol + 180) - 180);
+  const diffLua = Math.abs(norm360(luaCruzada - longitudes.Lua + 180) - 180);
+
+  return {
+    data: data,
+    longitudes: longitudes,
+    lunarAspetos: lunarAspetos,
+    alertasLentos: alertasLentos,
+    fase: fase,
+    cruzamento: { solCruzado: solCruzado, luaCruzada: luaCruzada, diffSol: diffSol, diffLua: diffLua },
+  };
+}
+
+
+/* =====================================================================
+   CAMADA DE OFÍCIO
+   Leitura simbólica e interpretativa. Nada aqui é cálculo astronómico,
+   é o texto que traduz a geometria do céu em conselho.
+   Português europeu, sem travessão, tom não fatalista ("hoje há terreno
+   para", nunca "vais").
+===================================================================== */
+
+const TONS = ['amigo', 'mistico', 'direto'];
+
+// Temas dos pontos natais: frase completa (usada no conselho longo),
+// versão curta (usada nos toques rápidos) e artigo para concordância.
+const NATAL_INFO = {
+  Sol: {
+    nome: 'Sol', comArtigo: 'o teu Sol',
+    tema: 'O teu Sol fala da tua voz e do ofício das mãos, aquilo que constróis devagar e com solidez.',
+    temaCurto: 'a voz e o ofício das mãos',
+    convite: {
+      amigo:   'Hoje há espaço para dares um passo simples nisso que constróis com as mãos, sem teres de resolver tudo de uma vez.',
+      mistico: 'Hoje o fogo lento de Touro pede um ritual simples, um gesto feito com presença vale mais do que muitas palavras.',
+      direto:  'Hoje é dia de avançar um pouco no que já vinhas a construir, sem drama, só continuar.',
+    },
+  },
+  Lua: {
+    nome: 'Lua', comArtigo: 'a tua Lua',
+    tema: 'A tua Lua fala da tua sede de liberdade, da visão de futuro e dos amigos que te alimentam a alma.',
+    temaCurto: 'a liberdade e os amigos que te alimentam',
+    convite: {
+      amigo:   'Hoje dá-te um instante para sonhar mais alto e para ligares aos amigos que te fazem bem.',
+      mistico: 'Hoje o horizonte chama, deixa a alma respirar longe da rotina, ainda que seja só por um momento.',
+      direto:  'Hoje vale falar com quem te inspira ou pensar num plano maior, não fiques fechado.',
+    },
+  },
+  Mercurio: {
+    nome: 'Mercúrio', comArtigo: 'o teu Mercúrio',
+    tema: 'O teu Mercúrio fala do pensamento com raízes, da casa e das palavras que dizes aos teus.',
+    temaCurto: 'as palavras que dizes em casa',
+    convite: {
+      amigo:   'Hoje é bom dia para dizeres o que pensas às pessoas de casa, com calma e sem rodeios.',
+      mistico: 'As palavras ganham raiz hoje, o que falares em casa planta semente para mais tarde.',
+      direto:  'Fala claro com os teus hoje, diz o que precisa de ser dito, sem enrolar.',
+    },
+  },
+  Venus: {
+    nome: 'Vénus', comArtigo: 'a tua Vénus',
+    tema: 'A tua Vénus fala do prazer no concreto, do valor que dás às coisas e de como mostras o que amas.',
+    temaCurto: 'o prazer no concreto',
+    convite: {
+      amigo:   'Hoje dá-te um gosto simples e concreto, uma coisa boa que se veja e se sinta.',
+      mistico: 'Hoje o prazer pede corpo, toca, sente, aprecia o que é palpável e belo à tua volta.',
+      direto:  'Hoje trata-te bem numa coisa concreta, não precisa de ser grande, só real.',
+    },
+  },
+  Marte: {
+    nome: 'Marte', comArtigo: 'o teu Marte',
+    tema: 'O teu Marte fala da energia no trabalho do dia a dia, das mãos ocupadas na rotina que sustenta tudo.',
+    temaCurto: 'a energia do trabalho do dia a dia',
+    convite: {
+      amigo:   'Hoje há boa energia para despachares tarefas do dia a dia, aproveita a força nas mãos.',
+      mistico: 'A rotina de hoje é o teu templo, cada tarefa feita com atenção é oferenda.',
+      direto:  'Hoje despacha o trabalho, a energia está aí, usa-a nas tarefas concretas.',
+    },
+  },
+  Jupiter: {
+    nome: 'Júpiter', comArtigo: 'o teu Júpiter',
+    tema: 'O teu Júpiter fala da expansão pela criatividade e pela expressão, do crescimento que vem de te mostrares.',
+    temaCurto: 'a expansão pela criatividade',
+    convite: {
+      amigo:   'Hoje há terreno para te mostrares mais, uma ideia criativa merece sair da cabeça.',
+      mistico: 'A expressão hoje expande o que és, deixa a criatividade falar mais alto do que a dúvida.',
+      direto:  'Hoje é dia de mostrar o que fazes, não guardes a ideia só para ti.',
+    },
+  },
+  Saturno: {
+    nome: 'Saturno', comArtigo: 'o teu Saturno',
+    tema: 'O teu Saturno fala da estrutura, da disciplina e da muralha de autoproteção que ergueste ao longo do tempo.',
+    temaCurto: 'a estrutura e a muralha de autoproteção',
+    convite: {
+      amigo:   'Hoje a muralha pode abrir só uma fresta, não precisas de decidir tudo de uma vez, um passo pequeno já conta.',
+      mistico: 'A pedra de Saturno pede respeito hoje, sem pressa, mas também convida a soltar um pouco o que seguras com tanta força.',
+      direto:  'Hoje não precisas de te fechar tanto, um passo de cada vez, sem pressão, mas dá o passo.',
+    },
+  },
+  Ascendente: {
+    nome: 'Ascendente', comArtigo: 'o teu Ascendente',
+    tema: 'O teu Ascendente fala de como te apresentas ao mundo, da máscara séria e do peso que carregas à entrada.',
+    temaCurto: 'a máscara séria que mostras ao mundo',
+    convite: {
+      amigo:   'Hoje podes mostrar-te tal como és, sem a máscara mais pesada, as pessoas certas reconhecem o que é real.',
+      mistico: 'O rosto que mostras hoje pode ser mais leve do que o de costume, a seriedade não precisa de armadura sempre.',
+      direto:  'Hoje não precisas de parecer mais forte do que és, mostra-te como és, já chega.',
+    },
+  },
+  MeioCeu: {
+    nome: 'Meio Céu', comArtigo: 'o teu Meio Céu',
+    tema: 'O teu Meio Céu fala da vocação de transformar, de entrar pelo poder e pela profundidade, como quem entra com respeito.',
+    temaCurto: 'a vocação de entrar pelo poder e pela profundidade',
+    convite: {
+      amigo:   'Hoje há espaço para entrares mais fundo numa coisa que te chama de verdade, sem medo do que vais encontrar.',
+      mistico: 'O chamamento de Escorpião pede profundidade hoje, entra como quem entra num templo, com respeito e sem pressa.',
+      direto:  'Hoje é dia de ires ao fundo de algo que importa, não fiques à superfície.',
+    },
+  },
+};
+
+// Enquadramento dos tipos de aspeto: conjunção funde e ativa, oposição
+// traz tensão e consciência através do outro, quadratura gera fricção
+// e empurra à ação. Um enquadramento por tom.
+const ASPECTO_INFO = {
+  conjuncao: {
+    nome: 'conjunção', artigo: 'uma conjunção',
+    abertura: {
+      amigo:   'Isto é fusão, direta e simples, a energia de hoje ativa isto sem grandes voltas.',
+      mistico: 'É um encontro que une numa só corrente, o que hoje se ativa pede menos análise e mais entrega.',
+      direto:  'Ativação direta, o que está em jogo liga-se hoje sem meio termo.',
+    },
+    verbo: {
+      amigo:   'funde-se, fácil e direto, com',
+      mistico: 'une-se em corrente única com',
+      direto:  'ativa, sem rodeios, junto com',
+    },
+  },
+  oposicao: {
+    nome: 'oposição', artigo: 'uma oposição',
+    abertura: {
+      amigo:   'Isto traz tensão, mas do tipo que te faz ver as coisas de fora, através de outra pessoa ou situação.',
+      mistico: 'É espelho que se coloca à frente, o que vês no outro hoje é também um pedaço de ti.',
+      direto:  'Tensão à vista, algo ou alguém do lado de fora vai puxar-te a atenção para isto.',
+    },
+    verbo: {
+      // Nota: as frases dos "verbo" terminam sempre em "com" ou "contra"
+      // porque estas preposições não fazem contração com artigos ("o"/"a").
+      // "a" e "em" fariam ("ao"/"à", "no"/"na") e o ponto natal muda de género,
+      // por isso evitam-se aqui para não sair português errado.
+      amigo:   'entra em tensão, de frente, com',
+      mistico: 'entra em espelho, cara a cara, com',
+      direto:  'tensiona contra',
+    },
+  },
+  quadratura: {
+    nome: 'quadratura', artigo: 'uma quadratura',
+    abertura: {
+      amigo:   'Isto traz fricção, do tipo que incomoda o suficiente para te pôr a fazer alguma coisa.',
+      mistico: 'É atrito que não deixa adormecer, a fricção de hoje é convite a agir, não a fugir.',
+      direto:  'Fricção hoje, vai custar um pouco, mas é o empurrão que falta para agires.',
+    },
+    verbo: {
+      amigo:   'esbarra, com alguma fricção, contra',
+      mistico: 'risca fricção contra',
+      direto:  'atrita com',
+    },
+  },
+};
+
+// Humor genérico por signo, para quando a Lua não faz nenhum aspeto
+// dentro da órbita: conselho neutro, honesto, baseado só no signo.
+const HUMOR_SIGNO = {
+  'Carneiro':    'impulso e vontade de começar algo já',
+  'Touro':       'necessidade de estabilidade, conforto e ritmo mais lento',
+  'Gémeos':      'mente inquieta, conversas e várias coisas ao mesmo tempo',
+  'Caranguejo':  'sensibilidade em alta, casa e memória a pesarem mais',
+  'Leão':        'vontade de brilhar, de ser visto e de criar',
+  'Virgem':      'atenção ao detalhe, ordem e sentido prático',
+  'Balança':     'procura de equilíbrio, de acordo e de companhia',
+  'Escorpião':   'intensidade e profundidade, o que está por baixo a pedir espaço',
+  'Sagitário':   'vontade de expandir horizontes, aprender e sair da rotina',
+  'Capricórnio': 'foco, disciplina e sentido de responsabilidade mais forte',
+  'Aquário':     'independência, ideias novas e distância emocional saudável',
+  'Peixes':      'sensibilidade e imaginação em alta, limites mais ténues',
+};
+
+const FALLBACK_SEM_ASPETO = {
+  amigo:   function(signo, humor){ return 'A Lua não faz hoje nenhum aspeto forte ao teu mapa, mas isso não quer dizer que o dia seja neutro. Está em ' + signo + ', e isso traz ' + humor + '. Aproveita o clima geral do dia, sem forçares nada.'; },
+  mistico: function(signo, humor){ return 'Hoje não há aspeto que se destaque no silêncio entre a Lua e o teu mapa, mas o signo onde ela pisa fala por si. Em ' + signo + ', o ambiente pede ' + humor + '. Deixa-te guiar por essa energia, com atenção e sem pressa.'; },
+  direto:  function(signo, humor){ return 'Sem aspeto forte da Lua ao teu mapa hoje. Está em ' + signo + ', clima geral de ' + humor + '. Usa isso como pista, mais nada.'; },
+};
+
+function getTom(){
+  return localStorage.getItem('conselho_tom') || 'amigo';
+}
+function setTom(t){
+  localStorage.setItem('conselho_tom', t);
+}
+
+function gerarConselhoLongo(item, tom){
+  const info = NATAL_INFO[item.ponto];
+  const asp = ASPECTO_INFO[item.tipo];
+  const fato = 'A Lua em trânsito forma hoje ' + asp.artigo + ' com ' + info.comArtigo + ' natal.';
+  return fato + ' ' + asp.abertura[tom] + ' ' + info.tema + ' ' + info.convite[tom];
+}
+
+function gerarConselhoLongoLento(planetaNome, item, tom){
+  const info = NATAL_INFO[item.ponto];
+  const asp = ASPECTO_INFO[item.tipo];
+  const graus = item.exatidao.toFixed(2);
+  const fato = planetaNome + ' em trânsito forma ' + asp.artigo + ' com ' + info.comArtigo + ' natal, a ' + graus + '° do exato.';
+  return fato + ' ' + asp.abertura[tom] + ' ' + info.tema + ' ' + info.convite[tom];
+}
+
+function gerarTocoCurto(item, tom){
+  const info = NATAL_INFO[item.ponto];
+  const asp = ASPECTO_INFO[item.tipo];
+  return 'A Lua hoje ' + asp.verbo[tom] + ' ' + info.comArtigo + ' natal, ' + info.temaCurto + '.';
+}
+
+
+/* =====================================================================
+   RENDERIZAÇÃO
+===================================================================== */
+
+const NOME_PLANETA = { Marte: 'Marte', Jupiter: 'Júpiter', Saturno: 'Saturno' };
+const NOME_CORPO_EXIBICAO = { Sol:'Sol', Lua:'Lua', Mercurio:'Mercúrio', Venus:'Vénus', Marte:'Marte', Jupiter:'Júpiter', Saturno:'Saturno' };
+
+function iniciarApp(){
+  renderizar(new Date());
+}
+
+function renderizar(dataAtual){
+  const resultado = calcularTudo(dataAtual);
+  const tom = getTom();
+  const luaSGM = signoGrauMinuto(resultado.longitudes.Lua);
+
+  const dataBruta = dataAtual.toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const dataFormatada = dataBruta.charAt(0).toUpperCase() + dataBruta.slice(1);
+
+  let html = '';
+
+  // Bloco 1: cabeçalho
+  html += '<header class="topo">';
+  html += '  <div class="data">' + dataFormatada + '</div>';
+  html += '  <div class="lua-agora">Lua em ' + luaSGM.signo + ' ' + luaSGM.grau + '°' + String(luaSGM.minuto).padStart(2,'0') + "'</div>";
+  html += '  <div class="fase">' + resultado.fase.nome + ' · ' + resultado.fase.iluminacaoPct.toFixed(0) + '% iluminada</div>';
+  html += '</header>';
+
+  html += '<main>';
+
+  // Seletor de tom
+  html += '<div class="seletor-tom">';
+  const rotulos = { amigo:'Amigo', mistico:'Místico', direto:'Direto' };
+  for (const t of TONS){
+    html += '<button data-tom="' + t + '" class="' + (t === tom ? 'ativo' : '') + '">' + rotulos[t] + '</button>';
+  }
+  html += '</div>';
+
+  // Bloco 2: conselho do dia
+  html += '<section class="cartao">';
+  html += '<h2>Conselho do dia</h2>';
+  if (resultado.lunarAspetos.length > 0){
+    html += '<p>' + gerarConselhoLongo(resultado.lunarAspetos[0], tom) + '</p>';
+  } else {
+    const humor = HUMOR_SIGNO[luaSGM.signo];
+    html += '<p>' + FALLBACK_SEM_ASPETO[tom](luaSGM.signo, humor) + '</p>';
+  }
+  html += '</section>';
+
+  // Bloco 3: outros toques da Lua
+  const outros = resultado.lunarAspetos.slice(1);
+  if (outros.length > 0){
+    html += '<section class="cartao outros-toques">';
+    html += '<h2>Outros toques da Lua hoje</h2>';
+    html += '<ul>';
+    for (const item of outros){
+      html += '<li>' + gerarTocoCurto(item, tom) + '</li>';
+    }
+    html += '</ul>';
+    html += '</section>';
+  }
+
+  // Bloco 4: alertas de trânsito lento
+  if (resultado.alertasLentos.length > 0){
+    for (const item of resultado.alertasLentos){
+      html += '<section class="aviso-lento">';
+      html += '<h2>Alerta de trânsito lento</h2>';
+      html += '<p>' + gerarConselhoLongoLento(NOME_PLANETA[item.planeta], item, tom) + '</p>';
+      html += '</section>';
+    }
+  } else {
+    html += '<p class="nota-validacao" style="text-align:center;">Sem alertas de trânsito lento hoje. São raros por natureza.</p>';
+  }
+
+  // Bloco 5: cálculo exato (painel de validação, sempre visível)
+  html += '<details class="calculo-exato" open>';
+  html += '<summary>Cálculo exato (painel de validação)</summary>';
+  html += '<p class="nota-validacao">Momento do cálculo: ' + resultado.data.toISOString() + ' (UTC). Longitudes eclípticas geocêntricas tropicais de data (of-date), sem J2000.</p>';
+  html += '<table class="tabela-exata"><tr><th>Corpo</th><th>Signo</th><th>Grau</th><th>Longitude abs.</th></tr>';
+  for (const c of CORPOS_TRANSITO){
+    const p = signoGrauMinuto(resultado.longitudes[c.chave]);
+    html += '<tr><td>' + NOME_CORPO_EXIBICAO[c.chave] + '</td><td>' + p.signo + '</td><td>' + p.grau + '°' + String(p.minuto).padStart(2,'0') + "'</td><td>" + p.abs.toFixed(4) + '°</td></tr>';
+  }
+  html += '</table>';
+  html += '<div class="cruzamento">Cruzamento de validação: Sol via SunPosition (função de-data da biblioteca) difere ' + resultado.cruzamento.diffSol.toFixed(4) + '° do método GeoVector+Ecliptic. Lua via EclipticGeoMoon difere ' + resultado.cruzamento.diffLua.toFixed(4) + '° do mesmo método. Valores abaixo de 0.01° confirmam que não há erro de referencial (J2000 vs. de data).</div>';
+  html += '<p class="nota-validacao">Compara os valores da tabela acima com a página de trânsitos do Astro-Seek para a mesma data e hora (' + resultado.data.toISOString() + ' UTC). Se algum corpo divergir mais de 0,2°, há erro de referencial e é preciso corrigir antes de confiar no resto da app.</p>';
+  html += '</details>';
+
+  html += '<button class="botao-secundario" id="btn-atualizar">Recalcular para este instante</button>';
+
+  html += '</main>';
+
+  document.getElementById('raiz').innerHTML = html;
+
+  // ligações dos botões
+  document.querySelectorAll('.seletor-tom button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      setTom(btn.getAttribute('data-tom'));
+      renderizar(new Date());
+    });
+  });
+  document.getElementById('btn-atualizar').addEventListener('click', function(){
+    renderizar(new Date());
+  });
+}
+</script>
+</body>
+</html>
