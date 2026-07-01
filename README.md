@@ -1,182 +1,129 @@
-# N'ASA | Gestao da banda
+# 3 Sigilos | Organização da marca
 
-Aplicacao web de gestao interna dos N'ASA, banda de covers de rock portugues sediada em Leiria.
-Pensada para o telemovel (palco e estrada), partilhada pelos 5 elementos, instalavel como app (PWA).
+Aplicação web simples para organizares a tua marca de roupa esotérica, a 3 Sigilos.
+Feita para um único utilizador (tu), responsiva no telemóvel e no computador, com os
+dados guardados na nuvem para acederes de qualquer sítio.
 
-Tudo em portugues europeu. Estetica escura e crua, com o branco do logotipo a comandar e um unico
-acento de palco.
+Fluxo real que a app respeita: não há t-shirts já estampadas em stock. Há t-shirts em
+branco e há desenhos, e só se estampa quando alguém encomenda. Quando marcas uma
+encomenda como entregue, a app abate do stock uma t-shirt em branco da cor e tamanho
+da encomenda.
 
-## Stack
+## O que tens dentro da app
 
-- **Next.js** (App Router) e **TypeScript**
-- **Supabase**: base de dados Postgres, autenticacao e storage
-- Deploy no **Vercel**
-- PWA instalavel (manifesto e service worker)
+- **Painel** leve: t-shirts a repor, encomendas por estampar, dinheiro a receber e pagas por faturar.
+- **Registo rápido de encomenda**, sempre à mão pelo botão dourado, com total e margem em tempo real.
+- **Faturação pendente**, a vista central: encomendas pagas mas ainda por faturar, com um toque para marcar como faturada.
+- **Stock de t-shirts em branco**, com o que está a repor em destaque e entrada rápida quando compras mais.
+- **Catálogo de desenhos**, com filtros por categoria e estado, e desenhos personalizados de cliente.
+- **Clientes**, cujos dados são puxados ao registar uma encomenda.
 
-## Estado da construcao
+## Tecnologia
 
-A app esta a ser construida por fases. Concluido ate agora:
+- Next.js (React e TypeScript)
+- Tailwind CSS
+- Supabase (base de dados e autenticação por email e password)
+- Publicação gratuita no Vercel
 
-- **Fase 1**: projeto Next.js, ligacao ao Supabase, autenticacao dos elementos por link magico,
-  tema escuro base, navegacao inferior e app instalavel como PWA.
-- **Fase 2**: esquema da base de dados (tabelas, relacoes e valor total calculado), permissoes
-  finas com RLS (admin e membro) e dados de exemplo (equipa, escaloes e repertorio).
-- **Fase 3**: gestao de eventos (lista em agenda, ficha, criar e editar, valor total ao vivo,
-  deslocacao editavel, conflito de data e datas automaticas).
-- **Fase 4**: painel com indicadores, pipeline por estado e proximos concertos.
-- **Fase 5**: contactos (com historico), equipa (banda e tecnicos) e repertorio.
-- **Fase 6**: recibos e resumo fiscal por membro, com lista de recibos por emitir.
-- **Fase 7**: propostas (texto pronto a copiar, PDF com a referencia NASA, arquivo no Storage e
-  email ao contratante).
-- **Fase 8**: automacoes (follow-up de propostas paradas, lembretes pre-concerto e briefings de
-  semana e mes, com texto pronto a copiar e envio por email a banda).
-- **Fase 9**: definicoes de admin (parametros, textos da proposta e escaloes), afinacao visual e
-  preparacao do deploy no Vercel.
+---
 
-A aplicacao esta completa. As fases seguintes sao so afinacoes e o uso no dia a dia.
+# Guia passo a passo (para quem não percebe de alojamento)
 
-## Configurar as variaveis de ambiente
+Vais fazer três coisas: criar a base de dados no Supabase, publicar a app no Vercel, e
+ligar as duas com duas chaves. Segue pela ordem e não tem como falhar.
 
-As chaves do Supabase ficam sempre em variaveis de ambiente, nunca no codigo.
+## Parte 1: Criar a base de dados no Supabase
 
-1. Cria um projeto em [supabase.com](https://supabase.com).
-2. Copia o ficheiro de exemplo:
+1. Vai a `https://supabase.com` e carrega em **Start your project**. Cria conta (podes entrar com o Google).
+2. Carrega em **New project**.
+   - **Name**: `3sigilos`
+   - **Database Password**: inventa uma password forte e guarda-a num sítio seguro.
+   - **Region**: escolhe `West EU (London)` ou `Central EU (Frankfurt)`, mais perto de Portugal.
+   - Carrega em **Create new project** e espera um ou dois minutos até ficar pronto.
 
-   ```bash
-   cp .env.example .env.local
-   ```
+## Parte 2: Criar as tabelas
 
-3. Preenche o `.env.local` com os valores do teu projeto (em Supabase: Project Settings, API):
+1. No menu à esquerda, abre **SQL Editor**.
+2. Carrega em **New query**.
+3. Abre o ficheiro `supabase/setup_completo.sql` deste projeto, copia **tudo** e cola na caixa.
+4. Carrega em **Run** (canto inferior direito). Deve aparecer **Success**.
 
-   - `NEXT_PUBLIC_SUPABASE_URL`: o Project URL
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: a chave anon public
-   - `NEXT_PUBLIC_SITE_URL`: `http://localhost:3000` em local, ou o dominio do Vercel em producao
+Isto cria as quatro tabelas (t-shirts em branco, desenhos, clientes, encomendas), as
+regras de segurança, e já deixa o catálogo com os 14 desenhos mais o Pack Tarot, todos
+como "Pronto a estampar". As categorias vêm com um ponto de partida sensato e podes
+mudar cada uma dentro da app.
 
-O `.env.local` esta ignorado pelo git e nunca deve ir para o repositorio.
+## Parte 3: Criar o teu utilizador (o login só teu)
 
-## Correr localmente
+1. No menu à esquerda, abre **Authentication** e depois **Users**.
+2. Carrega em **Add user** e depois **Create new user**.
+3. Escreve o teu **email** e uma **password** à tua escolha (é este o login da app).
+4. Liga a opção **Auto Confirm User** (assim entras logo, sem email de confirmação).
+5. Carrega em **Create user**.
 
-```bash
-npm install
-npm run dev
-```
+Para garantir que mais ninguém se regista: em **Authentication**, **Sign In / Providers**,
+no fornecedor **Email**, desliga a opção **Allow new users to sign up**. A app não tem
+ecrã de registo, isto é só uma tranca extra.
 
-A app fica em `http://localhost:3000`.
+## Parte 4: Copiar as duas chaves
 
-### Configurar a autenticacao no Supabase
+1. No menu à esquerda, abre **Project Settings** (o ícone da roda dentada).
+2. Abre **Data API**. Copia o **Project URL** (algo como `https://xxxx.supabase.co`).
+3. Abre **API Keys**. Copia a chave **anon public** (uma chave longa).
 
-O login e feito por link magico (email, sem palavra-passe). No painel do Supabase:
+Guarda as duas, vais colá-las no Vercel a seguir. Estas duas chaves podem estar no site
+sem problema. Nunca uses a chave `service_role` nesta app.
 
-1. Em **Authentication, URL Configuration**, define o **Site URL** como `http://localhost:3000`
-   (e mais tarde o dominio do Vercel).
-2. Em **Redirect URLs**, acrescenta `http://localhost:3000/auth/confirmar` (e o equivalente em
-   producao).
+## Parte 5: Publicar no Vercel
 
-### Base de dados (esquema, permissoes e dados de exemplo)
+Este código já está no GitHub, no repositório `3sigilos-glitch/3sigilos-`.
 
-O esquema e as permissoes estao em `supabase/migrations` e os dados de exemplo em `supabase/seed.sql`.
+1. Vai a `https://vercel.com` e carrega em **Sign up**. Entra com a tua conta do **GitHub**.
+2. No painel do Vercel, carrega em **Add New** e depois **Project**.
+3. Escolhe o repositório `3sigilos-` e carrega em **Import**.
+4. Antes de publicar, abre a secção **Environment Variables** e cola estas duas:
 
-A forma mais simples, sem instalar nada:
+   | Name (nome)                     | Value (valor)                        |
+   | ------------------------------- | ------------------------------------ |
+   | `NEXT_PUBLIC_SUPABASE_URL`      | o Project URL que copiaste           |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | a chave anon public que copiaste     |
 
-1. No painel do Supabase, abre **SQL Editor**.
-2. Cola e corre, por esta ordem, o conteudo de:
-   - `supabase/migrations/0001_esquema.sql` (tabelas e relacoes)
-   - `supabase/migrations/0002_rls.sql` (permissoes RLS e criacao automatica de perfis)
-   - `supabase/seed.sql` (equipa, escaloes e repertorio de exemplo, opcional)
+   Escreve o nome à esquerda, cola o valor à direita, e faz **Add** para cada uma.
+5. Carrega em **Deploy** e espera. No fim, o Vercel dá-te um endereço tipo `https://3sigilos.vercel.app`.
 
-Corre tambem a migracao `0003_referencia.sql` (geracao da referencia das propostas) e, se quiseres
-arquivar os PDF, a `0004_storage.sql` (cria o balde de Storage "propostas" e as suas permissoes).
+## Parte 6: Dizer ao Supabase qual é o endereço da app
 
-Em alternativa, com a [CLI do Supabase](https://supabase.com/docs/guides/cli): `supabase db push`.
+1. Volta ao Supabase, **Authentication**, **URL Configuration**.
+2. Em **Site URL**, cola o endereço do Vercel (ex: `https://3sigilos.vercel.app`).
+3. Guarda.
 
-As permissoes ficam assim: todos os elementos leem tudo e podem criar e editar eventos, contactos,
-recibos e repertorio; so o admin pode apagar registos e mexer em equipa, escaloes e definicoes.
+## Parte 7: Entrar
 
-### Definir quem e admin
+Abre o endereço do Vercel no telemóvel ou no computador, escreve o teu email e password,
+e já está. No telemóvel, no menu do navegador, escolhe **Adicionar ao ecrã principal**
+para ficares com o ícone da app, como se fosse uma aplicação normal.
 
-Quando um elemento entra pela primeira vez, e criado automaticamente um perfil com papel `membro`.
-Para te tornares admin, corre no **SQL Editor** (troca pelo teu email):
+Sempre que quiseres mudar alguma coisa no código, basta enviar para o GitHub que o Vercel
+volta a publicar sozinho.
 
-```sql
-update public.perfis set papel = 'admin'
-where id = (select id from auth.users where email = '3sigilos@gmail.com');
-```
+---
 
-### Convidar os 5 elementos
+# Correr no teu computador (opcional)
 
-Em **Authentication, Users**, usa **Invite user** (ou **Add user**) para cada um dos 5 emails.
-Como o login e por link magico, basta o email estar registado para a pessoa conseguir entrar.
+Só precisas disto se quiseres experimentar mudanças antes de publicar.
 
-## Deploy no Vercel
+1. Instala o Node.js (versão 18 ou mais recente).
+2. Na pasta do projeto, corre `npm install`.
+3. Copia `.env.example` para `.env.local` e preenche com as tuas duas chaves do Supabase.
+4. Corre `npm run dev` e abre `http://localhost:3000`.
 
-1. Liga o repositorio em [vercel.com](https://vercel.com) (importar o projeto do GitHub).
-2. Em **Settings, Environment Variables**, define as mesmas tres variaveis do `.env.local`,
-   com `NEXT_PUBLIC_SITE_URL` a apontar para o dominio de producao.
-3. No Supabase, acrescenta o dominio de producao ao **Site URL** e as **Redirect URLs**
-   (`https://o-teu-dominio/auth/confirmar`).
-4. Faz deploy. O Vercel constroi e publica automaticamente a cada push.
+---
 
-### Lista rapida de verificacao do deploy
+# Notas sobre os cálculos
 
-- [ ] Variaveis NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY e NEXT_PUBLIC_SITE_URL
-- [ ] Migracoes 0001 a 0004 corridas no Supabase
-- [ ] Site URL e Redirect URLs do Supabase a apontar para o dominio de producao
-- [ ] Os 5 elementos convidados e o teu perfil definido como admin
-- [ ] Opcional: RESEND_API_KEY, SUPABASE_SERVICE_ROLE_KEY e CRON_SECRET para email e lembretes
-
-## Instalar no telemovel
-
-Abre a app no browser do telemovel e usa **Adicionar ao ecra inicial**. Fica com icone proprio
-e abre em ecra inteiro, com cara de app.
-
-## Logotipos
-
-O logotipo branco da banda esta em `public/logo-branco.jpg` e aparece no ecra de entrada (com
-mix-blend-mode para o fundo preto desaparecer sobre o tema escuro). A marca no cabecalho usa um
-nome desenhado em tipografia (ver `components/Marca.tsx`).
-
-O logotipo preto (`public/logo-preto.png`, gerado a partir do branco) e usado no PDF da proposta.
-Os icones da PWA em `public/icons` (192, 512 e maskable, mais o apple-touch-icon) ja estao feitos
-a partir do emblema da banda.
-
-O logotipo preto do PDF e os icones da PWA ja estao no repositorio. Se quiseres trocar por versoes
-oficiais, substitui `public/logo-preto.png` e os ficheiros em `public/icons`.
-
-## Automacoes
-
-Em **Automacoes** (atalho no painel) tens, sempre prontos a copiar para o WhatsApp:
-
-- **Follow-up**: propostas em orcamentado paradas ha mais dias do que o definido, com um texto de
-  reforco para o contratante.
-- **Lembretes pre-concerto**: concertos confirmados a chegar dentro da janela definida.
-- **Briefings**: agenda da semana e do mes, com opcao de envio por email a toda a banda.
-
-Para envio automatico agendado (sem ser a mao), o ficheiro `vercel.json` ja agenda o Vercel Cron
-para chamar `/api/cron/lembretes` todos os dias as 9h. Para funcionar, define no Vercel as variaveis
-`SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY` e, por seguranca, `CRON_SECRET`.
-
-## Propostas
-
-Na ficha de cada evento, em **Proposta**, geras a proposta: e atribuida uma referencia unica no
-formato `NASA-{ano}-{numero}` (a comecar em 50, contador em Definicoes), fica marcada a data da
-proposta, e podes copiar o texto pronto, ver e arquivar o PDF, e enviar por email. O envio
-automatico usa o Resend (ver variaveis de ambiente); sem ele, o botao de rascunho de email abre o
-teu cliente de email ja preenchido.
-
-## Estrutura
-
-```
-app/                  Rotas (App Router)
-  (app)/              Zona autenticada (cabecalho e navegacao inferior partilhados)
-    painel/           Painel
-    eventos/          Eventos
-    contactos/        Contactos
-    equipa/           Equipa
-    repertorio/       Repertorio
-  login/              Ecra de entrada
-  auth/               Confirmacao do link magico e fim de sessao
-  manifest.ts         Manifesto da PWA
-components/           Componentes de interface
-lib/supabase/         Ligacao ao Supabase (browser, servidor e middleware)
-public/               Ficheiros estaticos, icones e service worker
-```
+- **Total** de cada encomenda: preço por peça multiplicado pela quantidade.
+- **Margem**: (preço por peça menos custo por peça) multiplicado pela quantidade.
+- **Custo por peça** vem a 4 EUR por defeito e fica sempre editável.
+- **Preço sugerido** (sempre editável): comunidade ou terreiro 6 EUR, normal 19 EUR, Pack Tarot 50 EUR.
+- **Abate de stock**: ao marcar uma encomenda como entregue, desconta do stock as t-shirts
+  em branco da cor e tamanho indicados. Se voltares a pôr como "Por estampar", o stock é reposto.

@@ -1,18 +1,18 @@
 import type { MetadataRoute } from 'next';
 
 // Manifesto da PWA. Gera /manifest.webmanifest.
-// Define a app como instalavel, em ecra inteiro e com o tema escuro.
+// Define a app como instalavel, em ecra inteiro e com o tema escuro da marca.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "N'ASA Gestao",
-    short_name: "N'ASA",
-    description: 'Gestao interna dos N\'ASA: concertos, propostas, equipa e repertorio.',
+    name: '3 Sigilos | Organização',
+    short_name: '3 Sigilos',
+    description: 'Organização da 3 Sigilos: stock, desenhos, clientes, encomendas e faturação.',
     start_url: '/painel',
     scope: '/',
     display: 'standalone',
     orientation: 'portrait',
-    background_color: '#0a0a0b',
-    theme_color: '#0a0a0b',
+    background_color: '#0a090d',
+    theme_color: '#0a090d',
     lang: 'pt-PT',
     icons: [
       { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },

@@ -1,31 +1,23 @@
 import Cabecalho from '@/components/Cabecalho';
 import NavInferior from '@/components/NavInferior';
-import { criarClienteServidor } from '@/lib/supabase/server';
+import BotaoNovaEncomenda from '@/components/BotaoNovaEncomenda';
 
-// Esqueleto da zona autenticada: cabecalho fixo no topo,
-// conteudo no meio e navegacao inferior pensada para o polegar.
-export default async function LayoutApp({ children }: { children: React.ReactNode }) {
-  const supabase = await criarClienteServidor();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+// Esqueleto da zona autenticada: cabecalho fixo no topo, conteudo no meio,
+// botao de registo rapido sempre a mao e navegacao inferior para o polegar.
+export default function LayoutApp({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
-      <Cabecalho email={user?.email} />
+    <div className="flex min-h-[100dvh] flex-col">
+      <Cabecalho />
       <main
+        className="mx-auto w-full max-w-app flex-1 px-4 py-5"
         style={{
-          flex: 1,
-          padding: '20px 16px',
-          // Espaco para nao ficar tapado pela navegacao inferior.
-          paddingBottom: 'calc(var(--barra-inferior) + env(safe-area-inset-bottom) + 24px)',
-          maxWidth: 640,
-          width: '100%',
-          margin: '0 auto',
+          // Espaco para o conteudo nao ficar tapado pela navegacao inferior.
+          paddingBottom: 'calc(64px + env(safe-area-inset-bottom) + 24px)',
         }}
       >
         {children}
       </main>
+      <BotaoNovaEncomenda />
       <NavInferior />
     </div>
   );

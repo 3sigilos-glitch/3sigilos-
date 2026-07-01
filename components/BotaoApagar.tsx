@@ -2,11 +2,10 @@
 
 import { useTransition } from 'react';
 
-// Botao de apagar com confirmacao. So aparece para o admin (decidido por quem
-// o renderiza). A accao em si esta protegida pelo RLS no servidor.
+// Botao de apagar com confirmacao. A accao corre no servidor (server action).
 export default function BotaoApagar({
   acao,
-  confirmacao = 'Tens a certeza? Esta accao nao se pode desfazer.',
+  confirmacao = 'Tens a certeza? Esta acção não se pode desfazer.',
   etiqueta = 'Apagar',
 }: {
   acao: () => Promise<void>;
@@ -24,8 +23,7 @@ export default function BotaoApagar({
           iniciar(() => acao());
         }
       }}
-      className="botao botao-secundario"
-      style={{ color: 'var(--estado-recusado)', borderColor: 'var(--estado-recusado)' }}
+      className="botao-secundario border-estado-repor text-estado-repor hover:border-estado-repor"
     >
       {aProcessar ? 'A apagar...' : etiqueta}
     </button>

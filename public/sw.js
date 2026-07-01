@@ -1,10 +1,10 @@
-// Service worker dos N'ASA.
-// Objetivo na Fase 1: tornar a app instalavel e dar um arranque rapido.
+// Service worker da 3 Sigilos.
+// Objetivo: tornar a app instalavel e dar um arranque rapido.
 // Estrategia conservadora, para nao servir dados desatualizados do Supabase:
-//  - Os pedidos a API e a navegacao vao sempre a rede primeiro.
+//  - A navegacao e os dados vao sempre a rede primeiro.
 //  - So os recursos estaticos ficam em cache.
 
-const CACHE = 'nasa-cache-v1';
+const CACHE = '3sigilos-cache-v1';
 
 self.addEventListener('install', (evento) => {
   // Ativa esta versao imediatamente.

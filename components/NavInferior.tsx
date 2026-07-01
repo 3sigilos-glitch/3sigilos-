@@ -3,14 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-// Navegacao inferior, pensada para o polegar.
-// Alvos de toque grandes e indicacao clara da seccao ativa.
+// Navegacao inferior, pensada para o polegar: alvos de toque grandes
+// e indicacao clara da seccao ativa.
 const SECCOES = [
-  { href: '/painel', etiqueta: 'Painel', icone: IconePainel },
-  { href: '/eventos', etiqueta: 'Eventos', icone: IconeEventos },
-  { href: '/contactos', etiqueta: 'Contactos', icone: IconeContactos },
-  { href: '/equipa', etiqueta: 'Equipa', icone: IconeEquipa },
-  { href: '/repertorio', etiqueta: 'Repertorio', icone: IconeRepertorio },
+  { href: '/painel', etiqueta: 'Painel', Icone: IconePainel },
+  { href: '/encomendas', etiqueta: 'Encomendas', Icone: IconeEncomendas },
+  { href: '/faturacao', etiqueta: 'Faturar', Icone: IconeFaturacao },
+  { href: '/stock', etiqueta: 'Stock', Icone: IconeStock },
+  { href: '/desenhos', etiqueta: 'Desenhos', Icone: IconeDesenhos },
 ];
 
 export default function NavInferior() {
@@ -18,38 +18,21 @@ export default function NavInferior() {
 
   return (
     <nav
+      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-linha bg-superficie"
       style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 'calc(var(--barra-inferior) + env(safe-area-inset-bottom))',
+        height: 'calc(64px + env(safe-area-inset-bottom))',
         paddingBottom: 'env(safe-area-inset-bottom)',
-        background: 'var(--superficie)',
-        borderTop: '1px solid var(--linha)',
-        display: 'grid',
-        gridTemplateColumns: `repeat(${SECCOES.length}, 1fr)`,
-        zIndex: 50,
       }}
     >
-      {SECCOES.map(({ href, etiqueta, icone: Icone }) => {
+      {SECCOES.map(({ href, etiqueta, Icone }) => {
         const ativo = caminho === href || caminho.startsWith(`${href}/`);
         return (
           <Link
             key={href}
             href={href}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 4,
-              color: ativo ? 'var(--acento)' : 'var(--texto-suave)',
-              fontSize: 10,
-              letterSpacing: '0.03em',
-              textTransform: 'uppercase',
-              fontWeight: ativo ? 700 : 500,
-            }}
+            className={`flex flex-col items-center justify-center gap-1 text-[10px] uppercase tracking-wide ${
+              ativo ? 'font-bold text-dourado' : 'font-medium text-texto-suave'
+            }`}
           >
             <Icone />
             {etiqueta}
@@ -60,7 +43,7 @@ export default function NavInferior() {
   );
 }
 
-// Icones simples em linha fina, coerentes com a estetica industrial.
+// Icones em linha fina, coerentes com a estetica sobria da marca.
 function IconePainel() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -72,40 +55,38 @@ function IconePainel() {
   );
 }
 
-function IconeEventos() {
+function IconeEncomendas() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <rect x="3" y="4" width="18" height="17" rx="1" />
-      <path d="M3 9h18M8 2v4M16 2v4" />
+      <path d="M6 2h9l5 5v15H6z" />
+      <path d="M14 2v6h6M9 13h6M9 17h6" />
     </svg>
   );
 }
 
-function IconeContactos() {
+function IconeFaturacao() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <path d="M20 21a8 8 0 1 0-16 0" />
-      <circle cx="12" cy="8" r="4" />
+      <path d="M5 2h14v20l-3-2-2 2-2-2-2 2-2-2-3 2z" />
+      <path d="M9 8h6M9 12h6" />
     </svg>
   );
 }
 
-function IconeEquipa() {
+function IconeStock() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <circle cx="9" cy="8" r="3.5" />
-      <path d="M2 21a7 7 0 0 1 14 0" />
-      <path d="M17 5.5a3.5 3.5 0 0 1 0 6.5M22 21a7 7 0 0 0-5-6.7" />
+      <path d="M8 3 5 6v3h14V6l-3-3zM5 9v11h14V9" />
+      <path d="M10 13h4" />
     </svg>
   );
 }
 
-function IconeRepertorio() {
+function IconeDesenhos() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <path d="M9 18V5l11-2v13" />
-      <circle cx="6" cy="18" r="3" />
-      <circle cx="17" cy="16" r="3" />
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 3v18M3 12h18" />
     </svg>
   );
 }

@@ -1,89 +1,93 @@
 import Link from 'next/link';
-import CartaoEvento from '@/components/eventos/CartaoEvento';
-import { carregarPainel } from '@/lib/consultas';
-import { obterSessao } from '@/lib/sessao';
-import { euros, mesAno } from '@/lib/formatar';
-import { ESTADO_EVENTO, type EstadoEvento } from '@/lib/tipos';
+import { criarClienteServidor } from '@/lib/supabase/server';
+import { euros } from '@/lib/formatar';
 
-// Painel: visao rapida do estado da banda. Tudo tocavel para abrir o detalhe.
+// Painel inicial, leve e direto: so o que importa olhar todos os dias.
 export default async function PaginaPainel() {
-  const [dados, sessao] = await Promise.all([carregarPainel(), obterSessao()]);
-  const agora = new Date().toISOString();
+  const supabase = await criarClienteServidor();
+
+  const [{ data: tshirts }, { data: encomendas }] = await Promise.all([
+    supabase.from('tshirts_brancas').select('quantidade, minimo'),
+    supabase.from('encomendas').select('estado, pago, faturado, total'),
+  ]);
+
+  // T-shirts em branco a repor (quantidade no minimo ou abaixo).
+  const aRepor = (tshirts ?? []).filter((t) => t.quantidade <= t.minimo).length;
+
+  const enc = encomendas ?? [];
+  // Encomendas por estampar.
+  const porEstampar = enc.filter((e) => e.estado === 'Por estampar').length;
+  // Dinheiro a receber das que ainda nao estao pagas.
+  const aReceber = enc.filter((e) => !e.pago).reduce((s, e) => s + Number(e.total), 0);
+  // Pagas mas ainda por faturar.
+  const porFaturar = enc.filter((e) => e.pago && !e.faturado);
+  const totalPorFaturar = porFaturar.reduce((s, e) => s + Number(e.total), 0);
 
   return (
-    <section style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-      <div>
-        <p style={{ color: 'var(--texto-suave)', fontSize: 13, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-          {mesAno(agora)}
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, gap: 8 }}>
-          <h1 style={{ fontSize: 34 }}>Painel</h1>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Link href="/automacoes" className="botao botao-secundario" style={{ width: 'auto' }}>Automacoes</Link>
-            {sessao.ehAdmin && (
-              <Link href="/definicoes" className="botao botao-secundario" style={{ width: 'auto' }} aria-label="Definicoes">Definicoes</Link>
-            )}
-          </div>
-        </div>
+    <div className="flex flex-col gap-5">
+      <h1 className="text-xl text-texto">Painel</h1>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Indicador
+          href="/faturacao"
+          rotulo="Pagas por faturar"
+          valor={String(porFaturar.length)}
+          nota={euros(totalPorFaturar)}
+          destaque={porFaturar.length > 0}
+        />
+        <Indicador
+          href="/encomendas?f=nao_pagas"
+          rotulo="A receber"
+          valor={euros(aReceber)}
+          nota="Encomendas não pagas"
+        />
+        <Indicador
+          href="/encomendas?f=por_estampar"
+          rotulo="Por estampar"
+          valor={String(porEstampar)}
+          nota="Encomendas em produção"
+        />
+        <Indicador
+          href="/stock"
+          rotulo="T-shirts a repor"
+          valor={String(aRepor)}
+          nota="Stock no mínimo"
+          alerta={aRepor > 0}
+        />
       </div>
 
-      {/* Indicadores */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        <Indicador rotulo="Concertos do mes" valor={String(dados.indicadores.concertosDoMes)} href="/eventos" />
-        <Indicador rotulo="Faturacao prevista" valor={euros(dados.indicadores.faturacaoPrevista)} href="/eventos?estado=confirmado" destaque />
-        <Indicador rotulo="Propostas em aberto" valor={String(dados.indicadores.propostasEmAberto)} href="/eventos?estado=orcamentado" />
-        <Indicador rotulo="Recibos por passar" valor={String(dados.recibosPorPassar)} href="/recibos" />
-      </div>
-
-      {/* Pipeline por estado */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>Pipeline</h2>
-        <div className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: 0, overflow: 'hidden' }}>
-          {(Object.keys(ESTADO_EVENTO) as EstadoEvento[]).map((estado) => (
-            <Link
-              key={estado}
-              href={`/eventos?estado=${estado}`}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 16px', borderBottom: '1px solid var(--linha)' }}
-            >
-              <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ width: 8, height: 8, borderRadius: 999, background: ESTADO_EVENTO[estado].corVar }} />
-                <span style={{ fontSize: 15 }}>{ESTADO_EVENTO[estado].rotulo}</span>
-              </span>
-              <strong className="titulo" style={{ fontSize: 18 }}>{dados.pipeline[estado] ?? 0}</strong>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Proximos concertos */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>Proximos concertos</h2>
-          <Link href="/eventos" style={{ fontSize: 13, color: 'var(--acento)' }}>Ver todos</Link>
-        </div>
-        {dados.proximos.length === 0 ? (
-          <div className="cartao" style={{ color: 'var(--texto-suave)', textAlign: 'center' }}>
-            <p>Nada agendado para os proximos dias.</p>
-          </div>
-        ) : (
-          dados.proximos.map((ev) => <CartaoEvento key={ev.id} evento={ev} />)
-        )}
-      </div>
-
-      {!sessao.ehAdmin && (
-        <p style={{ fontSize: 12, color: 'var(--texto-fraco)', textAlign: 'center' }}>
-          Sessao de membro: podes criar e editar, mas nao apagar nem alterar a configuracao.
-        </p>
-      )}
-    </section>
+      <Link href="/encomendas/nova" className="botao">
+        Registar nova encomenda
+      </Link>
+    </div>
   );
 }
 
-function Indicador({ rotulo, valor, href, destaque }: { rotulo: string; valor: string; href: string; destaque?: boolean }) {
+// Cartao de indicador do painel. Toca para abrir a vista respetiva.
+function Indicador({
+  href,
+  rotulo,
+  valor,
+  nota,
+  destaque = false,
+  alerta = false,
+}: {
+  href: string;
+  rotulo: string;
+  valor: string;
+  nota: string;
+  destaque?: boolean;
+  alerta?: boolean;
+}) {
+  const corValor = alerta ? 'text-estado-repor' : destaque ? 'text-dourado' : 'text-texto';
   return (
-    <Link href={href} className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 6, minHeight: 92, justifyContent: 'center' }}>
-      <span style={{ fontSize: 12, color: 'var(--texto-suave)', textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.3 }}>{rotulo}</span>
-      <strong className="titulo" style={{ fontSize: 26, color: destaque ? 'var(--acento)' : 'var(--texto)' }}>{valor}</strong>
+    <Link
+      href={href}
+      className={`cartao flex flex-col gap-1 ${alerta ? 'border-estado-repor/60' : ''}`}
+    >
+      <p className="text-[12px] uppercase tracking-wide text-texto-fraco">{rotulo}</p>
+      <p className={`font-titulo text-2xl ${corValor}`}>{valor}</p>
+      <p className="text-[12px] text-texto-suave">{nota}</p>
     </Link>
   );
 }

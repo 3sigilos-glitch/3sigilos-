@@ -1,172 +1,172 @@
--- Esquema da base de dados dos N'ASA.
--- Postgres (Supabase). Identificadores em UUID, texto e datas com fuso.
+-- =============================================================================
+-- 3 Sigilos | Esquema da base de dados
+-- Quatro tabelas: t-shirts em branco, desenhos, clientes e encomendas.
+-- Pensado para organizacao pessoal, baixo volume, um unico utilizador.
+-- =============================================================================
 
--- Funcao auxiliar para manter a coluna atualizado_em sempre certa.
+-- Funcao reutilizavel: mantem a coluna atualizado_em sempre certa.
 create or replace function public.tocar_atualizado_em()
-returns trigger language plpgsql as $$
+returns trigger
+language plpgsql
+as $$
 begin
-  new.atualizado_em = now();
+  new.atualizado_em := now();
   return new;
 end;
 $$;
 
--- ---------------------------------------------------------------------------
--- Equipa: os 5 elementos e os tecnicos de som.
--- ---------------------------------------------------------------------------
-create table if not exists public.equipa (
-  id                 uuid primary key default gen_random_uuid(),
-  nome               text not null,
-  papel              text not null default 'membro' check (papel in ('membro', 'tecnico')),
-  funcao_instrumento text,
-  email              text,
-  telefone           text,
-  foto_url           text,
-  ativo              boolean not null default true,
-  criado_em          timestamptz not null default now(),
-  atualizado_em      timestamptz not null default now()
+-- -----------------------------------------------------------------------------
+-- 1. T-SHIRTS EM BRANCO
+-- O stock real que se gasta a cada encomenda entregue.
+-- Cada combinacao de cor e tamanho e unica (para o abate encontrar a linha certa).
+-- -----------------------------------------------------------------------------
+create table if not exists public.tshirts_brancas (
+  id           uuid primary key default gen_random_uuid(),
+  cor          text not null,
+  tamanho      text not null check (tamanho in ('S', 'M', 'L', 'XL', 'XXL')),
+  quantidade   integer not null default 0 check (quantidade >= 0),
+  minimo       integer not null default 0 check (minimo >= 0),
+  criado_em    timestamptz not null default now(),
+  atualizado_em timestamptz not null default now(),
+  unique (cor, tamanho)
 );
 
--- ---------------------------------------------------------------------------
--- Contactos: contratantes e entidades.
--- ---------------------------------------------------------------------------
-create table if not exists public.contactos (
-  id            uuid primary key default gen_random_uuid(),
-  nome          text not null,
-  entidade      text,
-  tipo          text check (tipo in ('camara', 'junta', 'associacao', 'clube_motard', 'empresa', 'privado')),
-  telefone      text,
-  email         text,
-  concelho      text,
-  notas         text,
-  criado_em     timestamptz not null default now(),
+drop trigger if exists tocar_tshirts on public.tshirts_brancas;
+create trigger tocar_tshirts
+  before update on public.tshirts_brancas
+  for each row execute function public.tocar_atualizado_em();
+
+-- -----------------------------------------------------------------------------
+-- 2. DESENHOS
+-- Catalogo do que esta disponivel para estampar. Sem contagem de unidades.
+-- -----------------------------------------------------------------------------
+create table if not exists public.desenhos (
+  id           uuid primary key default gen_random_uuid(),
+  nome         text not null,
+  categoria    text not null default 'Personalizado de cliente'
+                 check (categoria in ('Umbanda', 'Tarot', 'Mitologia', 'Oculto', 'Personalizado de cliente')),
+  estado       text not null default 'Só ideia'
+                 check (estado in ('Pronto a estampar', 'Por testar em DTF', 'Só ideia')),
+  descricao    text,
+  criado_em    timestamptz not null default now(),
   atualizado_em timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------------------
--- Escaloes: tabelas de preco base e condicoes. (configuracao, so admin escreve)
--- ---------------------------------------------------------------------------
-create table if not exists public.escaloes (
-  id            uuid primary key default gen_random_uuid(),
-  nome          text not null,
-  valor_base    numeric(10, 2) not null default 0,
-  condicoes     text,
-  criado_em     timestamptz not null default now(),
+drop trigger if exists tocar_desenhos on public.desenhos;
+create trigger tocar_desenhos
+  before update on public.desenhos
+  for each row execute function public.tocar_atualizado_em();
+
+-- -----------------------------------------------------------------------------
+-- 3. CLIENTES
+-- Dados que se puxam ao registar uma encomenda de um cliente ja existente.
+-- -----------------------------------------------------------------------------
+create table if not exists public.clientes (
+  id           uuid primary key default gen_random_uuid(),
+  nome         text not null,
+  contacto     text,
+  tipo         text not null default 'Normal'
+                 check (tipo in ('Normal', 'Terreiro', 'Pontual', 'Cliente marca')),
+  morada       text,
+  nif          text,
+  criado_em    timestamptz not null default now(),
   atualizado_em timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------------------
--- Eventos: a tabela central.
--- ---------------------------------------------------------------------------
-create table if not exists public.eventos (
-  id                     uuid primary key default gen_random_uuid(),
-  referencia             text unique,
-  evento                 text not null,
-  estado                 text not null default 'orcamentado'
-                           check (estado in ('orcamentado', 'pre_reserva', 'confirmado', 'realizado', 'recusado')),
-  data                   timestamptz,
-  local                  text,
-  concelho               text,
-  contratante_id         uuid references public.contactos(id) on delete set null,
-  quem_tratou_id         uuid references public.equipa(id) on delete set null,
-  escalao_id             uuid references public.escaloes(id) on delete set null,
-  valor_base             numeric(10, 2) not null default 0,
-  deslocacao_valor       numeric(10, 2) default 0,
-  deslocacao_descricao   text,
-  -- Valor total calculado pela propria base de dados, nunca a mao.
-  valor_total            numeric(10, 2)
-                           generated always as (coalesce(valor_base, 0) + coalesce(deslocacao_valor, 0)) stored,
-  tecnico_id             uuid references public.equipa(id) on delete set null,
-  disponibilidade_tecnico text not null default 'por_confirmar'
-                           check (disponibilidade_tecnico in ('por_confirmar', 'sim', 'nao')),
-  material               text[] not null default '{}',
-  data_proposta          date,
-  data_aprovacao         date,
-  pago                   text not null default 'por_receber' check (pago in ('por_receber', 'recebido')),
-  contactos_extra        text,
-  notas                  text,
-  calendar_event_id      text,
-  criado_em              timestamptz not null default now(),
-  atualizado_em          timestamptz not null default now()
+drop trigger if exists tocar_clientes on public.clientes;
+create trigger tocar_clientes
+  before update on public.clientes
+  for each row execute function public.tocar_atualizado_em();
+
+-- -----------------------------------------------------------------------------
+-- 4. ENCOMENDAS
+-- O total e a margem sao colunas calculadas pela base de dados.
+--   total  = preco unitario  x quantidade
+--   margem = (preco - custo)  x quantidade
+-- preco e custo sao sempre por peca. O custo vem a 4 EUR por defeito, editavel.
+-- -----------------------------------------------------------------------------
+create table if not exists public.encomendas (
+  id               uuid primary key default gen_random_uuid(),
+  data             date not null default current_date,
+  cliente_id       uuid references public.clientes(id) on delete set null,
+  desenho_id       uuid references public.desenhos(id) on delete set null,
+  descricao_livre  text,
+  cor              text,
+  tamanho          text check (tamanho in ('S', 'M', 'L', 'XL', 'XXL')),
+  quantidade       integer not null default 1 check (quantidade > 0),
+  preco            numeric(10, 2) not null default 0 check (preco >= 0),
+  custo            numeric(10, 2) not null default 4 check (custo >= 0),
+  metodo_pagamento text check (metodo_pagamento in ('Transferência', 'MB Way', 'Paypal', 'Dinheiro')),
+  pago             boolean not null default false,
+  data_pagamento   date,
+  estado           text not null default 'Por estampar' check (estado in ('Por estampar', 'Entregue')),
+  faturado         boolean not null default false,
+  data_faturacao   date,
+  notas            text,
+  -- Controla o abate de stock para nunca abater duas vezes a mesma encomenda.
+  stock_abatido    boolean not null default false,
+  -- Colunas calculadas: nunca precisam de ser escritas pela aplicacao.
+  total            numeric(12, 2) generated always as (preco * quantidade) stored,
+  margem           numeric(12, 2) generated always as ((preco - custo) * quantidade) stored,
+  criado_em        timestamptz not null default now(),
+  atualizado_em    timestamptz not null default now()
 );
 
-create index if not exists eventos_data_idx on public.eventos (data);
-create index if not exists eventos_estado_idx on public.eventos (estado);
-create index if not exists eventos_contratante_idx on public.eventos (contratante_id);
+drop trigger if exists tocar_encomendas on public.encomendas;
+create trigger tocar_encomendas
+  before update on public.encomendas
+  for each row execute function public.tocar_atualizado_em();
 
--- ---------------------------------------------------------------------------
--- Recibos: por evento e por membro.
--- ---------------------------------------------------------------------------
-create table if not exists public.recibos (
-  id            uuid primary key default gen_random_uuid(),
-  evento_id     uuid references public.eventos(id) on delete cascade,
-  membro_id     uuid references public.equipa(id) on delete set null,
-  valor         numeric(10, 2) not null default 0,
-  data          date,
-  passado       boolean not null default false,
-  criado_em     timestamptz not null default now(),
-  atualizado_em timestamptz not null default now()
-);
+-- Indices uteis para as vistas mais usadas.
+create index if not exists idx_encomendas_data on public.encomendas (data desc);
+create index if not exists idx_encomendas_estado on public.encomendas (estado);
+create index if not exists idx_encomendas_faturacao on public.encomendas (pago, faturado);
 
-create index if not exists recibos_evento_idx on public.recibos (evento_id);
-create index if not exists recibos_membro_idx on public.recibos (membro_id);
-
--- ---------------------------------------------------------------------------
--- Repertorio: biblioteca de musicas.
--- ---------------------------------------------------------------------------
-create table if not exists public.repertorio (
-  id                uuid primary key default gen_random_uuid(),
-  musica            text not null,
-  artista_original  text,
-  decada            text,
-  duracao           text,
-  tom               text,
-  ativo             boolean not null default true,
-  notas             text,
-  criado_em         timestamptz not null default now(),
-  atualizado_em     timestamptz not null default now()
-);
-
--- ---------------------------------------------------------------------------
--- Definicoes: uma unica linha com a configuracao da app. (so admin escreve)
--- ---------------------------------------------------------------------------
-create table if not exists public.definicoes (
-  id                        smallint primary key default 1 check (id = 1),
-  nome_banda                text not null default 'N''ASA',
-  localidade_base           text not null default 'Leiria',
-  proxima_referencia        integer not null default 50,
-  dias_followup             integer not null default 10,
-  dias_lembrete_preconcerto integer not null default 15,
-  link_materiais            text,
-  texto_proposta_intro      text,
-  texto_proposta_fecho      text,
-  atualizado_em             timestamptz not null default now()
-);
-
--- Garante que existe sempre a linha unica de definicoes.
-insert into public.definicoes (id) values (1) on conflict (id) do nothing;
-
--- ---------------------------------------------------------------------------
--- Perfis: liga as contas de autenticacao (auth.users) ao papel admin ou membro.
--- E aqui que vive o controlo fino de permissoes do RLS.
--- ---------------------------------------------------------------------------
-create table if not exists public.perfis (
-  id        uuid primary key references auth.users(id) on delete cascade,
-  papel     text not null default 'membro' check (papel in ('admin', 'membro')),
-  equipa_id uuid references public.equipa(id) on delete set null,
-  criado_em timestamptz not null default now()
-);
-
--- Gatilhos de atualizado_em nas tabelas que o tem.
-do $$
-declare
-  t text;
+-- -----------------------------------------------------------------------------
+-- Abate automatico de stock quando a encomenda fica entregue.
+-- Procura a t-shirt em branco da mesma cor e tamanho e desconta a quantidade.
+-- Se a encomenda deixar de estar entregue, repoe o stock que tinha descontado.
+-- -----------------------------------------------------------------------------
+create or replace function public.ajustar_stock_encomenda()
+returns trigger
+language plpgsql
+as $$
 begin
-  foreach t in array array['equipa','contactos','escaloes','eventos','recibos','repertorio','definicoes']
-  loop
-    execute format(
-      'drop trigger if exists tg_atualizado_em on public.%I;
-       create trigger tg_atualizado_em before update on public.%I
-       for each row execute function public.tocar_atualizado_em();', t, t);
-  end loop;
+  if (tg_op = 'INSERT') then
+    -- Encomenda criada ja como entregue: abate logo.
+    if (new.estado = 'Entregue' and new.cor is not null and new.tamanho is not null) then
+      update public.tshirts_brancas
+        set quantidade = greatest(quantidade - new.quantidade, 0)
+        where cor = new.cor and tamanho = new.tamanho;
+      new.stock_abatido := true;
+    end if;
+    return new;
+  end if;
+
+  -- Passou a entregue e ainda nao tinha abatido: desconta o stock.
+  if (new.estado = 'Entregue' and not old.stock_abatido) then
+    if (new.cor is not null and new.tamanho is not null) then
+      update public.tshirts_brancas
+        set quantidade = greatest(quantidade - new.quantidade, 0)
+        where cor = new.cor and tamanho = new.tamanho;
+      new.stock_abatido := true;
+    end if;
+
+  -- Deixou de estar entregue e ja tinha abatido: repoe o stock descontado.
+  elsif (new.estado <> 'Entregue' and old.stock_abatido) then
+    if (old.cor is not null and old.tamanho is not null) then
+      update public.tshirts_brancas
+        set quantidade = quantidade + old.quantidade
+        where cor = old.cor and tamanho = old.tamanho;
+    end if;
+    new.stock_abatido := false;
+  end if;
+
+  return new;
 end;
 $$;
+
+drop trigger if exists abater_stock on public.encomendas;
+create trigger abater_stock
+  before insert or update on public.encomendas
+  for each row execute function public.ajustar_stock_encomenda();

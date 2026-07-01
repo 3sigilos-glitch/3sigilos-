@@ -1,148 +1,124 @@
-// Tipos do dominio dos N'ASA, a espelhar o esquema da base de dados.
-// Servem para acesso tipado ao Supabase e para reutilizar rotulos em PT-PT.
+// Tipos do dominio da 3 Sigilos, a espelhar o esquema da base de dados.
+// Servem para acesso tipado ao Supabase e para reutilizar os rotulos em PT-PT.
 
-export type Papel = 'membro' | 'tecnico';
-export type PapelConta = 'admin' | 'membro';
-export type TipoContacto = 'camara' | 'junta' | 'associacao' | 'clube_motard' | 'empresa' | 'privado';
-export type EstadoEvento = 'orcamentado' | 'pre_reserva' | 'confirmado' | 'realizado' | 'recusado';
-export type DisponibilidadeTecnico = 'por_confirmar' | 'sim' | 'nao';
-export type EstadoPagamento = 'por_receber' | 'recebido';
+export type Tamanho = 'S' | 'M' | 'L' | 'XL' | 'XXL';
 
-export interface Equipa {
+export type CategoriaDesenho =
+  | 'Umbanda'
+  | 'Tarot'
+  | 'Mitologia'
+  | 'Oculto'
+  | 'Personalizado de cliente';
+
+export type EstadoDesenho = 'Pronto a estampar' | 'Por testar em DTF' | 'Só ideia';
+
+export type TipoCliente = 'Normal' | 'Terreiro' | 'Pontual' | 'Cliente marca';
+
+export type MetodoPagamento = 'Transferência' | 'MB Way' | 'Paypal' | 'Dinheiro';
+
+export type EstadoEncomenda = 'Por estampar' | 'Entregue';
+
+export interface TshirtBranca {
+  id: string;
+  cor: string;
+  tamanho: Tamanho;
+  quantidade: number;
+  minimo: number;
+  criado_em: string;
+  atualizado_em: string;
+}
+
+export interface Desenho {
   id: string;
   nome: string;
-  papel: Papel;
-  funcao_instrumento: string | null;
-  email: string | null;
-  telefone: string | null;
-  foto_url: string | null;
-  ativo: boolean;
+  categoria: CategoriaDesenho;
+  estado: EstadoDesenho;
+  descricao: string | null;
   criado_em: string;
   atualizado_em: string;
 }
 
-export interface Contacto {
+export interface Cliente {
   id: string;
   nome: string;
-  entidade: string | null;
-  tipo: TipoContacto | null;
-  telefone: string | null;
-  email: string | null;
-  concelho: string | null;
+  contacto: string | null;
+  tipo: TipoCliente;
+  morada: string | null;
+  nif: string | null;
+  criado_em: string;
+  atualizado_em: string;
+}
+
+export interface Encomenda {
+  id: string;
+  data: string;
+  cliente_id: string | null;
+  desenho_id: string | null;
+  descricao_livre: string | null;
+  cor: string | null;
+  tamanho: Tamanho | null;
+  quantidade: number;
+  preco: number;
+  custo: number;
+  metodo_pagamento: MetodoPagamento | null;
+  pago: boolean;
+  data_pagamento: string | null;
+  estado: EstadoEncomenda;
+  faturado: boolean;
+  data_faturacao: string | null;
   notas: string | null;
+  stock_abatido: boolean;
+  total: number; // calculado pela base de dados
+  margem: number; // calculado pela base de dados
   criado_em: string;
   atualizado_em: string;
 }
 
-export interface Escalao {
-  id: string;
-  nome: string;
-  valor_base: number;
-  condicoes: string | null;
-  criado_em: string;
-  atualizado_em: string;
-}
-
-export interface Evento {
-  id: string;
-  referencia: string | null;
-  evento: string;
-  estado: EstadoEvento;
-  data: string | null;
-  local: string | null;
-  concelho: string | null;
-  contratante_id: string | null;
-  quem_tratou_id: string | null;
-  escalao_id: string | null;
-  valor_base: number;
-  deslocacao_valor: number | null;
-  deslocacao_descricao: string | null;
-  valor_total: number; // calculado pela base de dados
-  tecnico_id: string | null;
-  disponibilidade_tecnico: DisponibilidadeTecnico;
-  material: string[];
-  data_proposta: string | null;
-  data_aprovacao: string | null;
-  pago: EstadoPagamento;
-  contactos_extra: string | null;
-  notas: string | null;
-  calendar_event_id: string | null;
-  criado_em: string;
-  atualizado_em: string;
-}
-
-export interface Recibo {
-  id: string;
-  evento_id: string | null;
-  membro_id: string | null;
-  valor: number;
-  data: string | null;
-  passado: boolean;
-  criado_em: string;
-  atualizado_em: string;
-}
-
-export interface Repertorio {
-  id: string;
-  musica: string;
-  artista_original: string | null;
-  decada: string | null;
-  duracao: string | null;
-  tom: string | null;
-  ativo: boolean;
-  notas: string | null;
-  criado_em: string;
-  atualizado_em: string;
-}
-
-export interface Definicoes {
-  id: number;
-  nome_banda: string;
-  localidade_base: string;
-  proxima_referencia: number;
-  dias_followup: number;
-  dias_lembrete_preconcerto: number;
-  link_materiais: string | null;
-  texto_proposta_intro: string | null;
-  texto_proposta_fecho: string | null;
-  atualizado_em: string;
-}
-
-export interface Perfil {
-  id: string;
-  papel: PapelConta;
-  equipa_id: string | null;
-  criado_em: string;
+// Encomenda com os dados do cliente e do desenho ja resolvidos (para listagens).
+export interface EncomendaComRelacoes extends Encomenda {
+  cliente: Pick<Cliente, 'id' | 'nome' | 'nif' | 'tipo'> | null;
+  desenho: Pick<Desenho, 'id' | 'nome'> | null;
 }
 
 // -----------------------------------------------------------------------------
-// Rotulos em PT-PT e cores dos estados, para usar na interface.
+// Listas de opcoes, reutilizadas nos formularios e nos filtros.
 // -----------------------------------------------------------------------------
 
-export const ESTADO_EVENTO: Record<EstadoEvento, { rotulo: string; corVar: string }> = {
-  orcamentado: { rotulo: 'Orcamentado', corVar: 'var(--estado-orcamentado)' },
-  pre_reserva: { rotulo: 'Pre-reserva', corVar: 'var(--estado-pre-reserva)' },
-  confirmado: { rotulo: 'Confirmado', corVar: 'var(--estado-confirmado)' },
-  realizado: { rotulo: 'Realizado', corVar: 'var(--estado-realizado)' },
-  recusado: { rotulo: 'Recusado', corVar: 'var(--estado-recusado)' },
+export const TAMANHOS: Tamanho[] = ['S', 'M', 'L', 'XL', 'XXL'];
+
+export const CATEGORIAS_DESENHO: CategoriaDesenho[] = [
+  'Umbanda',
+  'Tarot',
+  'Mitologia',
+  'Oculto',
+  'Personalizado de cliente',
+];
+
+export const ESTADOS_DESENHO: EstadoDesenho[] = [
+  'Pronto a estampar',
+  'Por testar em DTF',
+  'Só ideia',
+];
+
+export const TIPOS_CLIENTE: TipoCliente[] = ['Normal', 'Terreiro', 'Pontual', 'Cliente marca'];
+
+export const METODOS_PAGAMENTO: MetodoPagamento[] = [
+  'Transferência',
+  'MB Way',
+  'Paypal',
+  'Dinheiro',
+];
+
+export const ESTADOS_ENCOMENDA: EstadoEncomenda[] = ['Por estampar', 'Entregue'];
+
+// Cor (token do Tailwind) de cada estado, para as etiquetas visuais.
+export const COR_ESTADO_DESENHO: Record<EstadoDesenho, string> = {
+  'Pronto a estampar': 'text-estado-ok',
+  'Por testar em DTF': 'text-estado-aviso',
+  'Só ideia': 'text-texto-suave',
 };
 
-export const TIPO_CONTACTO: Record<TipoContacto, string> = {
-  camara: 'Camara',
-  junta: 'Junta',
-  associacao: 'Associacao',
-  clube_motard: 'Clube motard',
-  empresa: 'Empresa',
-  privado: 'Privado',
-};
-
-export const DISPONIBILIDADE_TECNICO: Record<DisponibilidadeTecnico, string> = {
-  por_confirmar: 'Por confirmar',
-  sim: 'Disponivel',
-  nao: 'Indisponivel',
-};
-
-export const ESTADO_PAGAMENTO: Record<EstadoPagamento, string> = {
-  por_receber: 'Por receber',
-  recebido: 'Recebido',
+export const COR_ESTADO_ENCOMENDA: Record<EstadoEncomenda, string> = {
+  'Por estampar': 'text-estado-aviso',
+  Entregue: 'text-estado-ok',
 };

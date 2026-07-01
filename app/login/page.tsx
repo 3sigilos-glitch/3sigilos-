@@ -1,68 +1,54 @@
 'use client';
 
 import { useState } from 'react';
-import Brasao from '@/components/Brasao';
+import { useRouter } from 'next/navigation';
+import Marca from '@/components/Marca';
 import { criarClienteBrowser } from '@/lib/supabase/client';
 
-// Ecra de entrada: logotipo branco sobre fundo escuro e login rapido
-// por link magico (sem palavra-passe para memorizar).
+// Ecra de entrada: login simples por email e password, so para a dona da marca.
+// A conta e criada uma unica vez no painel do Supabase (ver o guia no README).
 export default function PaginaLogin() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
-  const [estado, setEstado] = useState<'inicial' | 'a_enviar' | 'enviado' | 'erro'>('inicial');
-  const [mensagemErro, setMensagemErro] = useState('');
+  const [password, setPassword] = useState('');
+  const [aEntrar, setAEntrar] = useState(false);
+  const [erro, setErro] = useState('');
 
-  async function enviarLink(evento: React.FormEvent) {
+  async function entrar(evento: React.FormEvent) {
     evento.preventDefault();
-    setEstado('a_enviar');
-    setMensagemErro('');
+    setAEntrar(true);
+    setErro('');
 
     const supabase = criarClienteBrowser();
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/confirmar`,
-      },
+      password,
     });
 
     if (error) {
-      setMensagemErro('Nao foi possivel enviar o link. Confirma o email e tenta de novo.');
-      setEstado('erro');
-    } else {
-      setEstado('enviado');
+      setErro('Email ou password incorretos. Tenta de novo.');
+      setAEntrar(false);
+      return;
     }
+
+    // Sessao criada. Vai para o painel e atualiza o estado do servidor.
+    router.replace('/painel');
+    router.refresh();
   }
 
   return (
-    <main
-      style={{
-        minHeight: '100dvh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '24px',
-        gap: '40px',
-      }}
-    >
-      <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-        <Brasao largura={230} />
-        <p style={{ color: 'var(--texto-suave)', letterSpacing: '0.1em', fontSize: 13, textTransform: 'uppercase' }}>
-          Gestao da banda
+    <main className="flex min-h-[100dvh] flex-col items-center justify-center gap-10 px-6">
+      <div className="flex flex-col items-center gap-3 text-center">
+        <Marca tamanho="grande" />
+        <p className="text-[13px] uppercase tracking-[0.2em] text-texto-suave">
+          Organização da marca
         </p>
       </div>
 
-      {estado === 'enviado' ? (
-        <div className="cartao" style={{ maxWidth: 360, width: '100%', textAlign: 'center' }}>
-          <h2 style={{ fontSize: 20, marginBottom: 8 }}>Link enviado</h2>
-          <p style={{ color: 'var(--texto-suave)', fontSize: 14, lineHeight: 1.5 }}>
-            Verifica o email <strong style={{ color: 'var(--texto)' }}>{email}</strong> e toca no link
-            para entrares. Podes fechar este separador.
-          </p>
-        </div>
-      ) : (
-        <form onSubmit={enviarLink} style={{ maxWidth: 360, width: '100%', display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <label htmlFor="email" style={{ fontSize: 13, color: 'var(--texto-suave)', letterSpacing: '0.04em' }}>
-            O teu email
+      <form onSubmit={entrar} className="flex w-full max-w-sm flex-col gap-4">
+        <div>
+          <label htmlFor="email" className="rotulo">
+            Email
           </label>
           <input
             id="email"
@@ -75,20 +61,30 @@ export default function PaginaLogin() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+        </div>
 
-          {estado === 'erro' && (
-            <p style={{ color: 'var(--acento-forte)', fontSize: 13 }}>{mensagemErro}</p>
-          )}
+        <div>
+          <label htmlFor="password" className="rotulo">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="A tua password"
+            className="campo"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
 
-          <button type="submit" className="botao" disabled={estado === 'a_enviar' || !email}>
-            {estado === 'a_enviar' ? 'A enviar...' : 'Entrar com link magico'}
-          </button>
+        {erro && <p className="text-sm text-estado-repor">{erro}</p>}
 
-          <p style={{ color: 'var(--texto-fraco)', fontSize: 12, textAlign: 'center', lineHeight: 1.5 }}>
-            Enviamos um link de acesso para o teu email. Sem palavra-passe.
-          </p>
-        </form>
-      )}
+        <button type="submit" className="botao" disabled={aEntrar || !email || !password}>
+          {aEntrar ? 'A entrar...' : 'Entrar'}
+        </button>
+      </form>
     </main>
   );
 }

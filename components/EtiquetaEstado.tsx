@@ -1,11 +1,11 @@
-import { ESTADO_EVENTO, type EstadoEvento } from '@/lib/tipos';
-
-// Etiqueta de estado do evento, cada um com a sua cor propria e clara.
-export default function EtiquetaEstado({ estado }: { estado: EstadoEvento }) {
-  const { rotulo, corVar } = ESTADO_EVENTO[estado];
-  return (
-    <span className="estado" style={{ color: corVar }}>
-      {rotulo}
-    </span>
-  );
+// Etiqueta de estado generica. Recebe o texto e a classe de cor do Tailwind
+// (ex: "text-estado-ok"). A cor da borda acompanha o texto (border-current).
+export default function EtiquetaEstado({
+  texto,
+  cor = 'text-texto-suave',
+}: {
+  texto: string;
+  cor?: string;
+}) {
+  return <span className={`etiqueta ${cor}`}>{texto}</span>;
 }

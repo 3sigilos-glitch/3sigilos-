@@ -7,10 +7,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 // Forma de cada cookie passado pelo Supabase ao definir a sessao.
 type CookieParaDefinir = { name: string; value: string; options?: CookieOptions };
 
-// Rotas acessiveis sem sessao iniciada.
-// As rotas /api tratam da sua propria autenticacao (por exemplo, o cron usa um
-// segredo proprio), por isso nao sao redirecionadas pelo middleware.
-const ROTAS_PUBLICAS = ['/login', '/auth', '/api'];
+// Rotas acessiveis sem sessao iniciada (ecra de entrada e fim de sessao).
+const ROTAS_PUBLICAS = ['/login', '/auth'];
 
 export async function atualizarSessao(request: NextRequest) {
   let resposta = NextResponse.next({ request });
