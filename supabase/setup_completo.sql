@@ -143,7 +143,10 @@ as $$
 begin
   if (tg_op = 'INSERT') then
     -- Encomenda criada ja como entregue: abate logo.
-    if (new.estado = 'Entregue' and new.cor is not null and new.tamanho is not null) then
+    -- Excecao: se vier ja marcada como abatida (por exemplo, de uma copia de
+    -- seguranca restaurada), respeita esse estado e nao abate outra vez.
+    if (new.estado = 'Entregue' and not new.stock_abatido
+        and new.cor is not null and new.tamanho is not null) then
       update public.tshirts_brancas
         set quantidade = greatest(quantidade - new.quantidade, 0)
         where cor = new.cor and tamanho = new.tamanho;

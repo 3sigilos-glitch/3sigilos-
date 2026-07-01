@@ -17,6 +17,7 @@ da encomenda.
 - **Stock de t-shirts em branco**, com o que está a repor em destaque e entrada rápida quando compras mais.
 - **Catálogo de desenhos**, com filtros por categoria e estado, e desenhos personalizados de cliente.
 - **Clientes**, cujos dados são puxados ao registar uma encomenda.
+- **Cópias de segurança**: descarrega toda a informação num ficheiro e repõe quando precisares.
 
 ## Tecnologia
 
@@ -105,6 +106,23 @@ para ficares com o ícone da app, como se fosse uma aplicação normal.
 
 Sempre que quiseres mudar alguma coisa no código, basta enviar para o GitHub que o Vercel
 volta a publicar sozinho.
+
+---
+
+# Cópias de segurança
+
+No canto superior direito da app tens o ícone das cópias de segurança.
+
+- **Guardar cópia**: carrega em "Descarregar cópia de segurança" e a app cria um ficheiro
+  com toda a informação (t-shirts, desenhos, clientes e encomendas) e a data do dia. Guarda
+  esse ficheiro onde quiseres: no telemóvel, no computador, no Google Drive, ou envia por
+  email para ti própria. Faz isto de vez em quando.
+- **Repor de uma cópia**: carrega em "Restaurar de um ficheiro", escolhe um ficheiro que
+  tenhas guardado, e a informação é reposta. O restauro junta se à informação atual por id,
+  ou seja, repõe o que faltar e atualiza o que mudou, sem apagar o resto.
+
+Os teus dados já estão guardados na nuvem, no Supabase, que também tem cópias automáticas.
+Esta função é a tua cópia extra, sempre à mão e na tua posse.
 
 ---
 

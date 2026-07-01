@@ -25,6 +25,19 @@ export default function Cabecalho() {
           </svg>
         </Link>
 
+        <Link
+          href="/backups"
+          aria-label="Cópias de segurança"
+          title="Cópias de segurança"
+          className="flex h-10 w-10 items-center justify-center rounded-pequeno text-texto-suave transition-colors hover:text-dourado"
+        >
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <ellipse cx="12" cy="5" rx="8" ry="3" />
+            <path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5" />
+            <path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6" />
+          </svg>
+        </Link>
+
         <form action="/auth/sair" method="post">
           <button
             type="submit"
