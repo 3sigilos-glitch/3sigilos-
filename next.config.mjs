@@ -1,5 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Serve o ficheiro de verificacao da app Android (TWA) a partir da rota
+  // configuravel por variaveis de ambiente.
+  async rewrites() {
+    return [
+      { source: '/.well-known/assetlinks.json', destination: '/api/assetlinks' },
+    ];
+  },
   // Cabecalhos para o service worker e o manifesto da PWA serem servidos corretamente
   async headers() {
     return [

@@ -126,8 +126,30 @@ Como o login e por link magico, basta o email estar registado para a pessoa cons
 
 ## Instalar no telemovel
 
+### Opcao rapida (PWA)
+
 Abre a app no browser do telemovel e usa **Adicionar ao ecra inicial**. Fica com icone proprio
-e abre em ecra inteiro, com cara de app.
+e abre em ecra inteiro, com cara de app. Nao precisa de nada mais.
+
+### App Android instalavel (APK, opcional)
+
+Para um APK de verdade (que da para instalar diretamente e ate publicar na Play Store), a app usa
+uma TWA (a app Android abre esta PWA em ecra inteiro). A forma mais simples, sem instalar nada:
+
+1. Vai a [pwabuilder.com](https://www.pwabuilder.com) e mete o endereco da app (o dominio do Vercel).
+2. Escolhe **Android** e gera o pacote. Descarrega o zip.
+3. No zip vem o APK (e o AAB para a Play Store) e os dados de assinatura. Anota o **nome do pacote**
+   e a **impressao digital SHA256** do certificado (ficam no ficheiro assetlinks.json que o
+   PWABuilder inclui).
+4. No Vercel, em **Settings, Environment Variables**, define:
+   - `ANDROID_PACKAGE_NAME` (por exemplo pt.nasa.gestao)
+   - `ANDROID_CERT_SHA256` (a impressao digital; varias separam-se por virgulas)
+   Faz novo deploy.
+5. A app passa a servir `/.well-known/assetlinks.json` com esses valores, e a app Android abre em
+   ecra inteiro, sem a barra do browser.
+
+Instala o APK no telemovel (ativando **Instalar apps desconhecidas** para o teu gestor de ficheiros)
+ou publica na Play Store com o AAB.
 
 ## Logotipos
 
