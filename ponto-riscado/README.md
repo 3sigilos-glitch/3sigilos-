@@ -40,3 +40,19 @@ está desenhado:
 - Logunã `estrela`: "Espiral fechada…, com duas setas ascendentes" → "Espiral inscrita num círculo"
   (as setas são um símbolo à parte, não estão na estrela).
 - Obaluaiê `estrela`: "Hexágono/heptágono…" → "Hexágono geométrico…" (o desenho tem 6 lados).
+
+## Limpeza dos `elementos` (pós-verificação, a pedido)
+Reescrita fiel à fonte (e-books da Comunidade Alexandra Ferreira, secções de oferendas) do campo
+`elementos`, corrigindo a corrupção de extração (espaços comidos, truncamentos, duplicados, texto
+infiltrado, carateres de controlo):
+- **Confirmados na fonte:** Oxalá, Logunã, Oxum, Oxóssi (1.ª ronda) e Xangô, Obá, Iansã, Omolu,
+  Iemanjá, Oroiná, Nanã, Obaluaiê (2.ª ronda). Enriquecidos com os elementos que faltavam.
+- **Saudação corrigida:** Obá passou de "Obá Xi! (confirmar a vossa)" para **"Akirô Obá Yê!"**
+  (fórmula do e-book do terreiro).
+- **Dia do Exu:** preenchido "segunda-feira" (fonte: Verger, em Exu.pdf).
+
+### Ficou por confirmar
+- **Oxumaré** e **Ogum**: os e-books devolveram texto vazio (PDF achatado/imagem). Ogum manteve
+  a lista original (já limpa). Oxumaré foi apenas des-corrompido a partir do texto do próprio HTML
+  (removida uma frase de depoimento infiltrada), **sem fonte** — a confirmar.
+- Cores de Pombagira (preto/rosa) e a oferenda "rosas vermelhas"; saudação de Logunã.
