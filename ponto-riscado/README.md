@@ -45,14 +45,14 @@ está desenhado:
 Reescrita fiel à fonte (e-books da Comunidade Alexandra Ferreira, secções de oferendas) do campo
 `elementos`, corrigindo a corrupção de extração (espaços comidos, truncamentos, duplicados, texto
 infiltrado, carateres de controlo):
-- **Confirmados na fonte:** Oxalá, Logunã, Oxum, Oxóssi (1.ª ronda) e Xangô, Obá, Iansã, Omolu,
-  Iemanjá, Oroiná, Nanã, Obaluaiê (2.ª ronda). Enriquecidos com os elementos que faltavam.
+- **Confirmados na fonte: os 14 orixás.** Oxalá, Logunã, Oxum, Oxóssi (1.ª ronda); Xangô, Obá,
+  Iansã, Omolu, Iemanjá, Oroiná, Nanã, Obaluaiê (2.ª ronda); Oxumaré e Ogum (3.ª ronda, a partir
+  da transcrição dos e-books, já que os PDF originais não eram extraíveis). Enriquecidos com os
+  elementos que faltavam.
 - **Saudação corrigida:** Obá passou de "Obá Xi! (confirmar a vossa)" para **"Akirô Obá Yê!"**
   (fórmula do e-book do terreiro).
 - **Dia do Exu:** preenchido "segunda-feira" (fonte: Verger, em Exu.pdf).
 
 ### Ficou por confirmar
-- **Oxumaré** e **Ogum**: os e-books devolveram texto vazio (PDF achatado/imagem). Ogum manteve
-  a lista original (já limpa). Oxumaré foi apenas des-corrompido a partir do texto do próprio HTML
-  (removida uma frase de depoimento infiltrada), **sem fonte** — a confirmar.
+- Campos pedra/erva/dia por orixá (ausentes das fontes do terreiro — mantêm o placeholder da app).
 - Cores de Pombagira (preto/rosa) e a oferenda "rosas vermelhas"; saudação de Logunã.
