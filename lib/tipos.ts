@@ -67,6 +67,7 @@ export interface Evento {
   contactos_extra: string | null;
   notas: string | null;
   calendar_event_id: string | null;
+  setlist_id: string | null;
   criado_em: string;
   atualizado_em: string;
 }
@@ -93,6 +94,40 @@ export interface Repertorio {
   notas: string | null;
   criado_em: string;
   atualizado_em: string;
+}
+
+// Varias versoes de cifra por musica (tons e arranjos diferentes).
+export interface Cifra {
+  id: string;
+  musica_id: string;
+  nome_versao: string;
+  conteudo: string | null; // texto original da cifra (letra com ou sem acordes)
+  tom: string | null;
+  numero_som: string | null;
+  notas_pessoais: string | null;
+  por_defeito: boolean;
+  created_at: string;
+}
+
+// Alinhamento de musicas (setlist).
+export interface Setlist {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  por_defeito: boolean;
+  criada_por: string | null;
+  created_at: string;
+}
+
+// Junção que guarda a ordem das musicas na setlist.
+export interface SetlistMusica {
+  id: string;
+  setlist_id: string;
+  musica_id: string;
+  ordem: number;
+  cifra_id: string | null;
+  nota_rapida: string | null;
+  created_at: string;
 }
 
 export interface Definicoes {
