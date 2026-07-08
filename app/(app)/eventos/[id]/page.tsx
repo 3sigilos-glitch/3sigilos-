@@ -73,6 +73,16 @@ export default async function PaginaFichaEvento({ params }: { params: Promise<{ 
         {evento.material.length > 0 && <Linha rotulo="Material" valor={evento.material.join(', ')} />}
       </Bloco>
 
+      {evento.setlist && (
+        <div className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <span style={{ fontSize: 12, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>SETLIST</span>
+            <Link href={`/setlists/${evento.setlist.id}`} style={{ fontSize: 16, fontWeight: 700 }}>{evento.setlist.nome}</Link>
+          </div>
+          <Link href={`/setlists/${evento.setlist.id}/palco`} className="botao" style={{ width: 'auto' }}>Modo palco</Link>
+        </div>
+      )}
+
       <Bloco titulo="Estado e pagamento">
         <Linha rotulo="Pagamento" valor={ESTADO_PAGAMENTO[evento.pago]} />
         {evento.data_proposta && <Linha rotulo="Data da proposta" valor={evento.data_proposta} />}

@@ -19,22 +19,28 @@ export interface OpcoesEvento {
   membros: Pick<Equipa, 'id' | 'nome'>[];
   tecnicos: Pick<Equipa, 'id' | 'nome'>[];
   escaloes: Pick<Escalao, 'id' | 'nome' | 'valor_base'>[];
+  setlists: Pick<Setlist, 'id' | 'nome' | 'por_defeito'>[];
+  setlistPorDefeitoId: string | null;
 }
 
 export async function carregarOpcoesEvento(): Promise<OpcoesEvento> {
   const supabase = await criarClienteServidor();
-  const [contactos, equipa, escaloes] = await Promise.all([
+  const [contactos, equipa, escaloes, setlistsRes] = await Promise.all([
     supabase.from('contactos').select('id, nome, entidade').order('nome'),
     supabase.from('equipa').select('id, nome, papel').eq('ativo', true).order('nome'),
     supabase.from('escaloes').select('id, nome, valor_base').order('nome'),
+    supabase.from('setlists').select('id, nome, por_defeito').order('por_defeito', { ascending: false }).order('nome'),
   ]);
 
   const elementos = equipa.data ?? [];
+  const setlists = (setlistsRes.data as any[]) ?? [];
   return {
     contactos: contactos.data ?? [],
     membros: elementos.filter((e: any) => e.papel === 'membro'),
     tecnicos: elementos.filter((e: any) => e.papel === 'tecnico'),
     escaloes: escaloes.data ?? [],
+    setlists,
+    setlistPorDefeitoId: setlists.find((s) => s.por_defeito)?.id ?? null,
   };
 }
 
@@ -44,6 +50,7 @@ export interface EventoDetalhado extends Evento {
   quem_tratou: { nome: string } | null;
   tecnico: { nome: string } | null;
   escalao: { nome: string; condicoes: string | null } | null;
+  setlist: { id: string; nome: string } | null;
 }
 
 export async function obterEvento(id: string): Promise<EventoDetalhado | null> {
@@ -55,7 +62,8 @@ export async function obterEvento(id: string): Promise<EventoDetalhado | null> {
        contratante:contactos!eventos_contratante_id_fkey (nome, telefone, email),
        quem_tratou:equipa!eventos_quem_tratou_id_fkey (nome),
        tecnico:equipa!eventos_tecnico_id_fkey (nome),
-       escalao:escaloes!eventos_escalao_id_fkey (nome, condicoes)`
+       escalao:escaloes!eventos_escalao_id_fkey (nome, condicoes),
+       setlist:setlists!eventos_setlist_id_fkey (id, nome)`
     )
     .eq('id', id)
     .single();
@@ -192,6 +200,25 @@ export async function obterCifra(id: string): Promise<Cifra | null> {
   const { data, error } = await supabase.from('cifras').select('*').eq('id', id).single();
   if (error || !data) return null;
   return data as Cifra;
+}
+
+// Cifras de varias musicas de uma vez, agrupadas por musica (para as setlists).
+export async function cifrasPorMusicas(
+  ids: string[]
+): Promise<Record<string, Pick<Cifra, 'id' | 'nome_versao' | 'por_defeito'>[]>> {
+  if (ids.length === 0) return {};
+  const supabase = await criarClienteServidor();
+  const { data } = await supabase
+    .from('cifras')
+    .select('id, musica_id, nome_versao, por_defeito')
+    .in('musica_id', ids)
+    .order('por_defeito', { ascending: false })
+    .order('nome_versao');
+  const mapa: Record<string, any[]> = {};
+  for (const c of (data as any[]) ?? []) {
+    (mapa[c.musica_id] ??= []).push(c);
+  }
+  return mapa;
 }
 
 // -----------------------------------------------------------------------------

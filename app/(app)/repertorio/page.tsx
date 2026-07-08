@@ -16,7 +16,10 @@ export default async function PaginaRepertorio({
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={{ fontSize: 30 }}>Repertorio</h1>
-        <Link href="/repertorio/novo" className="botao" style={{ width: 'auto' }}>Nova</Link>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Link href="/setlists" className="botao botao-secundario" style={{ width: 'auto' }}>Setlists</Link>
+          <Link href="/repertorio/novo" className="botao" style={{ width: 'auto' }}>Nova</Link>
+        </div>
       </div>
 
       <Suspense>

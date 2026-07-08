@@ -11,6 +11,7 @@ import {
   type Contacto,
   type Equipa,
   type Escalao,
+  type Setlist,
 } from '@/lib/tipos';
 
 type Acao = (formData: FormData) => void | Promise<void>;
@@ -22,9 +23,13 @@ interface Props {
   membros: Pick<Equipa, 'id' | 'nome'>[];
   tecnicos: Pick<Equipa, 'id' | 'nome'>[];
   escaloes: Pick<Escalao, 'id' | 'nome' | 'valor_base'>[];
+  setlists: Pick<Setlist, 'id' | 'nome' | 'por_defeito'>[];
+  setlistPorDefeitoId: string | null;
 }
 
-export default function FormularioEvento({ acao, evento, contactos, membros, tecnicos, escaloes }: Props) {
+export default function FormularioEvento({ acao, evento, contactos, membros, tecnicos, escaloes, setlists, setlistPorDefeitoId }: Props) {
+  // Num evento novo, pre-seleciona a setlist por defeito, deixando trocar.
+  const setlistInicial = evento ? evento.setlist_id ?? '' : setlistPorDefeitoId ?? '';
   // Estado controlado apenas para o que precisa de reagir ao vivo.
   const [valorBase, setValorBase] = useState<string>(String(evento?.valor_base ?? ''));
   const [deslocacao, setDeslocacao] = useState<string>(String(evento?.deslocacao_valor ?? ''));
@@ -175,6 +180,15 @@ export default function FormularioEvento({ acao, evento, contactos, membros, tec
           </select>
         </Campo>
       </DuasColunas>
+
+      <Campo etiqueta="Setlist">
+        <select name="setlist_id" className="campo" defaultValue={setlistInicial}>
+          <option value="">Sem setlist</option>
+          {setlists.map((s) => (
+            <option key={s.id} value={s.id}>{s.nome}{s.por_defeito ? ' (por defeito)' : ''}</option>
+          ))}
+        </select>
+      </Campo>
 
       <Campo etiqueta="Material (um por linha)">
         <textarea name="material" className="campo" rows={3} style={{ paddingTop: 12, height: 'auto', resize: 'vertical' }} defaultValue={(evento?.material ?? []).join('\n')} placeholder={'PA\nMonitores\nBackline'} />

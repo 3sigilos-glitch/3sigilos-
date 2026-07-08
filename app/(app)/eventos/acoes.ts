@@ -49,6 +49,7 @@ function lerFormulario(formData: FormData) {
     pago: texto('pago') ?? 'por_receber',
     contactos_extra: texto('contactos_extra'),
     notas: texto('notas'),
+    setlist_id: texto('setlist_id'),
   };
 
   // Estado com data automatica: ao confirmar, preenche a data de aprovacao

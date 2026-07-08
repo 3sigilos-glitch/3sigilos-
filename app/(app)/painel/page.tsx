@@ -24,7 +24,8 @@ export default async function PaginaPainel() {
         </p>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, gap: 8 }}>
           <h1 style={{ fontSize: 34 }}>Painel</h1>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <Link href="/setlists" className="botao botao-secundario" style={{ width: 'auto' }}>Setlists</Link>
             <Link href="/automacoes" className="botao botao-secundario" style={{ width: 'auto' }}>Automacoes</Link>
             {sessao.ehAdmin && (
               <Link href="/definicoes" className="botao botao-secundario" style={{ width: 'auto' }} aria-label="Definicoes">Definicoes</Link>
