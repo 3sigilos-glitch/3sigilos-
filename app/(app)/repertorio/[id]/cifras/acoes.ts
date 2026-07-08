@@ -20,18 +20,36 @@ function lerFormulario(formData: FormData) {
   };
 }
 
-export async function criarCifra(musicaId: string, formData: FormData) {
+// Estado devolvido ao formulario, para mostrar o erro na propria pagina em vez
+// de rebentar com uma excecao no servidor.
+export type EstadoCifra = { erro?: string } | null;
+
+// Traduz erros comuns da base de dados numa mensagem util.
+function mensagemErro(error: { message: string; code?: string }): string {
+  const m = error.message ?? '';
+  if (error.code === '42P01' || /does not exist/i.test(m)) {
+    return 'A tabela de cifras ainda nao existe. Corre a migracao 0005 no SQL Editor do Supabase (ver README).';
+  }
+  return m || 'Nao foi possivel guardar.';
+}
+
+export async function criarCifra(musicaId: string, _prev: EstadoCifra, formData: FormData): Promise<EstadoCifra> {
   const supabase = await criarClienteServidor();
   const { error } = await supabase.from('cifras').insert({ musica_id: musicaId, ...lerFormulario(formData) });
-  if (error) throw new Error(`Nao foi possivel criar a cifra: ${error.message}`);
+  if (error) return { erro: mensagemErro(error) };
   revalidatePath(`/repertorio/${musicaId}`);
   redirect(`/repertorio/${musicaId}`);
 }
 
-export async function atualizarCifra(musicaId: string, cifraId: string, formData: FormData) {
+export async function atualizarCifra(
+  musicaId: string,
+  cifraId: string,
+  _prev: EstadoCifra,
+  formData: FormData
+): Promise<EstadoCifra> {
   const supabase = await criarClienteServidor();
   const { error } = await supabase.from('cifras').update(lerFormulario(formData)).eq('id', cifraId);
-  if (error) throw new Error(`Nao foi possivel guardar a cifra: ${error.message}`);
+  if (error) return { erro: mensagemErro(error) };
   revalidatePath(`/repertorio/${musicaId}`);
   redirect(`/repertorio/${musicaId}`);
 }

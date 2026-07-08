@@ -1,13 +1,15 @@
 'use client';
 
 import { useRef, useState, useTransition } from 'react';
+import { useFormState } from 'react-dom';
 import CifraFormatada from '@/components/cifras/CifraFormatada';
-import { importarDoDrive } from '@/app/(app)/repertorio/[id]/cifras/acoes';
+import { importarDoDrive, type EstadoCifra } from '@/app/(app)/repertorio/[id]/cifras/acoes';
 import type { Cifra } from '@/lib/tipos';
 
-type Acao = (formData: FormData) => void | Promise<void>;
+type Acao = (prev: EstadoCifra, formData: FormData) => Promise<EstadoCifra>;
 
 export default function EditorCifra({ acao, cifra }: { acao: Acao; cifra?: Cifra }) {
+  const [estado, formAction] = useFormState(acao, null);
   const [conteudo, setConteudo] = useState(cifra?.conteudo ?? '');
   const [linkDrive, setLinkDrive] = useState('');
   const [mensagem, setMensagem] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null);
@@ -40,7 +42,7 @@ export default function EditorCifra({ acao, cifra }: { acao: Acao; cifra?: Cifra
   }
 
   return (
-    <form action={acao} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <form action={formAction} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <Campo etiqueta="Nome da versao" obrigatorio>
         <input name="nome_versao" required className="campo" defaultValue={cifra?.nome_versao ?? ''} placeholder="Tom original, Meio tom abaixo, Acustica..." />
       </Campo>
@@ -105,6 +107,9 @@ export default function EditorCifra({ acao, cifra }: { acao: Acao; cifra?: Cifra
 
       {mensagem && (
         <p style={{ fontSize: 13, color: mensagem.tipo === 'ok' ? 'var(--estado-confirmado)' : 'var(--acento-forte)' }}>{mensagem.texto}</p>
+      )}
+      {estado?.erro && (
+        <p style={{ fontSize: 13, color: 'var(--acento-forte)', lineHeight: 1.5 }}>{estado.erro}</p>
       )}
 
       <button type="submit" className="botao">{cifra ? 'Guardar cifra' : 'Criar cifra'}</button>
