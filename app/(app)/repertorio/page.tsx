@@ -32,7 +32,7 @@ export default async function PaginaRepertorio({
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {musicas.map((m) => (
-            <Link key={m.id} href={`/repertorio/${m.id}/editar`} className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, opacity: m.ativo ? 1 : 0.55 }}>
+            <Link key={m.id} href={`/repertorio/${m.id}`} className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, opacity: m.ativo ? 1 : 0.55 }}>
               <span style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 <strong style={{ fontSize: 16 }}>{m.musica}</strong>
                 <span style={{ fontSize: 13, color: 'var(--texto-suave)' }}>{m.artista_original ?? 'Sem artista'}</span>

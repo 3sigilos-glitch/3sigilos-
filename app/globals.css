@@ -282,3 +282,36 @@ textarea {
   text-transform: uppercase;
   border: 1px solid currentColor;
 }
+
+/* ---------------------------------------------------------------------------
+ * Cifras: tres estilos claros e distintos (seccao, acordes, letra).
+ * Monoespacado para os acordes e a letra manterem o alinhamento em coluna.
+ * ------------------------------------------------------------------------- */
+.cifra {
+  font-family: var(--fonte-mono), ui-monospace, monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.cifra-seccao {
+  color: var(--texto);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 0.8em;
+}
+
+.cifra-acordes {
+  color: var(--acento-forte);
+  font-weight: 700;
+}
+
+.cifra-letra {
+  color: var(--texto);
+}
+
+.cifra-vazia {
+  height: 0.7em;
+}

@@ -1,5 +1,8 @@
 import { criarClienteServidor } from '@/lib/supabase/server';
-import type { Evento, Contacto, Equipa, Escalao, Repertorio, Recibo, Definicoes } from '@/lib/tipos';
+import type {
+  Evento, Contacto, Equipa, Escalao, Repertorio, Recibo, Definicoes,
+  Cifra, Setlist, SetlistMusica,
+} from '@/lib/tipos';
 
 // Definicoes da app (linha unica). Devolve null se ainda nao houver ligacao.
 export async function obterDefinicoes(): Promise<Definicoes | null> {
@@ -167,6 +170,101 @@ export async function obterMusica(id: string): Promise<Repertorio | null> {
   const { data, error } = await supabase.from('repertorio').select('*').eq('id', id).single();
   if (error || !data) return null;
   return data as Repertorio;
+}
+
+// -----------------------------------------------------------------------------
+// Cifras.
+// -----------------------------------------------------------------------------
+
+export async function listarCifras(musicaId: string): Promise<Cifra[]> {
+  const supabase = await criarClienteServidor();
+  const { data } = await supabase
+    .from('cifras')
+    .select('*')
+    .eq('musica_id', musicaId)
+    .order('por_defeito', { ascending: false })
+    .order('nome_versao');
+  return (data as Cifra[]) ?? [];
+}
+
+export async function obterCifra(id: string): Promise<Cifra | null> {
+  const supabase = await criarClienteServidor();
+  const { data, error } = await supabase.from('cifras').select('*').eq('id', id).single();
+  if (error || !data) return null;
+  return data as Cifra;
+}
+
+// -----------------------------------------------------------------------------
+// Setlists.
+// -----------------------------------------------------------------------------
+
+export interface SetlistComContagem extends Setlist {
+  total: number;
+}
+
+export async function listarSetlists(): Promise<SetlistComContagem[]> {
+  const supabase = await criarClienteServidor();
+  const { data } = await supabase
+    .from('setlists')
+    .select('*, setlist_musicas(count)')
+    .order('por_defeito', { ascending: false })
+    .order('nome');
+  return ((data as any[]) ?? []).map((s) => ({
+    ...s,
+    total: s.setlist_musicas?.[0]?.count ?? 0,
+  }));
+}
+
+export async function setlistPorDefeito(): Promise<Setlist | null> {
+  const supabase = await criarClienteServidor();
+  const { data } = await supabase.from('setlists').select('*').eq('por_defeito', true).limit(1).maybeSingle();
+  return (data as Setlist) ?? null;
+}
+
+// Item de setlist ja com a musica e a cifra escolhida (ou a por defeito).
+export interface ItemSetlist extends SetlistMusica {
+  musica: Pick<Repertorio, 'id' | 'musica' | 'artista_original' | 'duracao' | 'tom'> | null;
+  cifra: Cifra | null;
+}
+
+export interface SetlistDetalhada extends Setlist {
+  itens: ItemSetlist[];
+}
+
+export async function obterSetlist(id: string): Promise<SetlistDetalhada | null> {
+  const supabase = await criarClienteServidor();
+  const { data: setlist, error } = await supabase.from('setlists').select('*').eq('id', id).single();
+  if (error || !setlist) return null;
+
+  const { data: itens } = await supabase
+    .from('setlist_musicas')
+    .select(
+      `*,
+       musica:repertorio!setlist_musicas_musica_id_fkey (id, musica, artista_original, duracao, tom),
+       cifra:cifras!setlist_musicas_cifra_id_fkey (*)`
+    )
+    .eq('setlist_id', id)
+    .order('ordem', { ascending: true });
+
+  // Para os itens sem cifra escolhida, usa a cifra por defeito da musica.
+  const lista = (itens as any[]) ?? [];
+  const semCifra = lista.filter((i) => !i.cifra && i.musica?.id).map((i) => i.musica.id);
+  let porDefeito: Record<string, Cifra> = {};
+  if (semCifra.length > 0) {
+    const { data: cifrasDef } = await supabase
+      .from('cifras')
+      .select('*')
+      .in('musica_id', semCifra)
+      .eq('por_defeito', true);
+    for (const c of (cifrasDef as Cifra[]) ?? []) porDefeito[c.musica_id] = c;
+  }
+
+  const itensFinais: ItemSetlist[] = lista.map((i) => ({
+    ...i,
+    cifra: i.cifra ?? (i.musica?.id ? porDefeito[i.musica.id] ?? null : null),
+  }));
+
+  return { ...(setlist as Setlist), itens: itensFinais };
 }
 
 // -----------------------------------------------------------------------------
