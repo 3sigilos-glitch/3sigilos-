@@ -28,10 +28,36 @@
   --estado-realizado: #8a8f98;     /* cinza neutro */
   --estado-recusado: #d8514a;      /* vermelho apagado */
 
+  /* Camada de superficie elevada (menus, folhas, cartao-heroi) */
+  --superficie-elevada: #232327;
+
+  /* Escala de espacamento unica, usada em toda a app */
+  --e1: 4px;
+  --e2: 8px;
+  --e3: 12px;
+  --e4: 16px;
+  --e6: 24px;
+  --e8: 32px;
+  --e12: 48px;
+
+  /* Tipografia: tamanhos com proposito claro */
+  --t-titulo: 28px;
+  --t-subtitulo: 19px;
+  --t-corpo: 15px;
+  --t-meta: 12px;
+
   /* Geometria */
-  --raio: 12px;
-  --raio-pequeno: 8px;
+  --raio: 14px;
+  --raio-pequeno: 10px;
   --barra-inferior: 64px;
+
+  /* Elevacao (sombras subtis e coerentes) */
+  --sombra-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sombra-2: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  /* Movimento: uma curva e uma duracao base para tudo */
+  --curva: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur: 200ms;
 
   /* Alvo de toque minimo confortavel para o polegar */
   --toque: 48px;
@@ -314,4 +340,168 @@ textarea {
 
 .cifra-vazia {
   height: 0.7em;
+}
+
+/* ---------------------------------------------------------------------------
+ * Sistema de tipografia: quatro tamanhos com proposito.
+ * ------------------------------------------------------------------------- */
+.t-titulo {
+  font-family: var(--fonte-titulo), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: var(--t-titulo);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.t-subtitulo {
+  font-size: var(--t-subtitulo);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.t-corpo {
+  font-size: var(--t-corpo);
+  line-height: 1.55;
+}
+.t-meta {
+  font-size: var(--t-meta);
+  color: var(--texto-suave);
+  letter-spacing: 0.02em;
+}
+/* Rotulo de seccao: pequeno, apagado e espacado, para agrupar sem molduras. */
+.rotulo-seccao {
+  font-size: var(--t-meta);
+  color: var(--texto-fraco);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Cartao ganha elevacao subtil e coerente em toda a app. */
+.cartao {
+  box-shadow: var(--sombra-1);
+}
+
+/* Superficie elevada, para o cartao-heroi e folhas. */
+.elevado {
+  background: var(--superficie-elevada);
+  box-shadow: var(--sombra-2);
+}
+
+/* ---------------------------------------------------------------------------
+ * Movimento contido: entrada suave e escalonamento leve das listas.
+ * Cada animacao tem funcao (orientar ou ligar estados). Respeita a preferencia
+ * de reduzir movimento do sistema.
+ * ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .entra {
+    animation: entra var(--dur) var(--curva) both;
+  }
+  @keyframes entra {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  /* Escalonamento: cada filho entra ligeiramente depois do anterior. */
+  .lista-escalonada > * {
+    animation: entra var(--dur) var(--curva) both;
+  }
+  .lista-escalonada > *:nth-child(1) { animation-delay: 0ms; }
+  .lista-escalonada > *:nth-child(2) { animation-delay: 30ms; }
+  .lista-escalonada > *:nth-child(3) { animation-delay: 60ms; }
+  .lista-escalonada > *:nth-child(4) { animation-delay: 90ms; }
+  .lista-escalonada > *:nth-child(5) { animation-delay: 120ms; }
+  .lista-escalonada > *:nth-child(6) { animation-delay: 150ms; }
+  .lista-escalonada > *:nth-child(7) { animation-delay: 180ms; }
+  .lista-escalonada > *:nth-child(n + 8) { animation-delay: 210ms; }
+}
+
+/* Esqueleto de carregamento: superficie com brilho a passar. */
+.esqueleto {
+  position: relative;
+  overflow: hidden;
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+}
+.esqueleto::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .esqueleto::after {
+    animation: brilho 1.3s var(--curva) infinite;
+  }
+  @keyframes brilho {
+    to {
+      transform: translateX(100%);
+    }
+  }
+}
+
+/* Botao flutuante de criar (FAB), sempre ao alcance do polegar. */
+.fab {
+  position: fixed;
+  right: var(--e4);
+  bottom: calc(var(--barra-inferior) + env(safe-area-inset-bottom) + var(--e3));
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: var(--acento);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--sombra-2), 0 0 20px rgba(226, 59, 46, 0.4);
+  z-index: 60;
+  transition: transform 0.08s var(--curva), background var(--dur) var(--curva);
+}
+.fab:hover {
+  background: var(--acento-forte);
+}
+.fab:active {
+  transform: scale(0.92);
+}
+
+/* Toasts: confirmacoes curtas que aparecem e saem sozinhas. */
+.toaster {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--barra-inferior) + env(safe-area-inset-bottom) + var(--e6));
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  width: min(92vw, 420px);
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  padding: 12px 14px;
+  border-radius: var(--raio-pequeno);
+  background: var(--superficie-elevada);
+  border: 1px solid var(--linha);
+  box-shadow: var(--sombra-2);
+  color: var(--texto);
+  font-size: 14px;
+}
+.toast--ok { border-left: 3px solid var(--estado-confirmado); }
+.toast--erro { border-left: 3px solid var(--acento-forte); }
+@media (prefers-reduced-motion: no-preference) {
+  .toast { animation: toast-entra var(--dur) var(--curva) both; }
+  @keyframes toast-entra {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
 }

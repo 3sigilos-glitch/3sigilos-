@@ -1,5 +1,7 @@
 import Cabecalho from '@/components/Cabecalho';
 import NavInferior from '@/components/NavInferior';
+import BotaoCriar from '@/components/BotaoCriar';
+import Toaster from '@/components/Toaster';
 import { criarClienteServidor } from '@/lib/supabase/server';
 
 // Esqueleto da zona autenticada: cabecalho fixo no topo,
@@ -26,7 +28,9 @@ export default async function LayoutApp({ children }: { children: React.ReactNod
       >
         {children}
       </main>
+      <BotaoCriar />
       <NavInferior />
+      <Toaster />
     </div>
   );
 }

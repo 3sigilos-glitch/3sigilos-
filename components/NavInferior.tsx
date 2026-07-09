@@ -3,14 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-// Navegacao inferior, pensada para o polegar.
-// Alvos de toque grandes e indicacao clara da seccao ativa.
+// Navegacao inferior, quatro destinos ao alcance do polegar.
+// A Agenda aponta para a lista de eventos (rota /eventos, rotulo Agenda).
 const SECCOES = [
   { href: '/painel', etiqueta: 'Painel', icone: IconePainel },
-  { href: '/eventos', etiqueta: 'Eventos', icone: IconeEventos },
-  { href: '/contactos', etiqueta: 'Contactos', icone: IconeContactos },
-  { href: '/equipa', etiqueta: 'Equipa', icone: IconeEquipa },
-  { href: '/repertorio', etiqueta: 'Repertorio', icone: IconeRepertorio },
+  { href: '/eventos', etiqueta: 'Agenda', icone: IconeAgenda },
+  { href: '/setlists', etiqueta: 'Setlists', icone: IconeSetlists },
+  { href: '/recibos', etiqueta: 'Recibos', icone: IconeRecibos },
 ];
 
 export default function NavInferior() {
@@ -50,6 +49,7 @@ export default function NavInferior() {
               letterSpacing: '0.03em',
               textTransform: 'uppercase',
               fontWeight: ativo ? 700 : 500,
+              transition: 'color var(--dur) var(--curva)',
             }}
           >
             {ativo && (
@@ -60,6 +60,7 @@ export default function NavInferior() {
                   top: 0,
                   width: 26,
                   height: 2,
+                  borderRadius: 2,
                   background: 'var(--acento)',
                   boxShadow: '0 0 8px var(--acento)',
                 }}
@@ -74,52 +75,41 @@ export default function NavInferior() {
   );
 }
 
-// Icones simples em linha fina, coerentes com a estetica industrial.
 function IconePainel() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <rect x="3" y="3" width="7" height="9" />
-      <rect x="14" y="3" width="7" height="5" />
-      <rect x="14" y="12" width="7" height="9" />
-      <rect x="3" y="16" width="7" height="5" />
+      <rect x="3" y="3" width="7" height="9" rx="1" />
+      <rect x="14" y="3" width="7" height="5" rx="1" />
+      <rect x="14" y="12" width="7" height="9" rx="1" />
+      <rect x="3" y="16" width="7" height="5" rx="1" />
     </svg>
   );
 }
 
-function IconeEventos() {
+function IconeAgenda() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <rect x="3" y="4" width="18" height="17" rx="1" />
+      <rect x="3" y="4" width="18" height="17" rx="2" />
       <path d="M3 9h18M8 2v4M16 2v4" />
     </svg>
   );
 }
 
-function IconeContactos() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <path d="M20 21a8 8 0 1 0-16 0" />
-      <circle cx="12" cy="8" r="4" />
-    </svg>
-  );
-}
-
-function IconeEquipa() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <circle cx="9" cy="8" r="3.5" />
-      <path d="M2 21a7 7 0 0 1 14 0" />
-      <path d="M17 5.5a3.5 3.5 0 0 1 0 6.5M22 21a7 7 0 0 0-5-6.7" />
-    </svg>
-  );
-}
-
-function IconeRepertorio() {
+function IconeSetlists() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
       <path d="M9 18V5l11-2v13" />
       <circle cx="6" cy="18" r="3" />
       <circle cx="17" cy="16" r="3" />
+    </svg>
+  );
+}
+
+function IconeRecibos() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d="M5 3v18l2-1 2 1 2-1 2 1 2-1 2 1V3l-2 1-2-1-2 1-2-1-2 1z" />
+      <path d="M9 8h6M9 12h6" />
     </svg>
   );
 }

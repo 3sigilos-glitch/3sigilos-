@@ -1,10 +1,27 @@
+'use client';
+
 /* eslint-disable @next/next/no-img-element */
+import { useEffect, useState } from 'react';
 import Marca from '@/components/Marca';
 
-// Barra de topo com o emblema da banda, o logotipo em tipografia e a accao de
-// sair. Um fino traco de luz vermelha por baixo da barra (o "palco a acender").
-// O email do utilizador com sessao iniciada e mostrado de forma discreta.
+// Barra de topo com o emblema e o nome. Recua ao rolar para baixo, para dar o
+// ecra ao conteudo, e volta assim que se rola para cima.
 export default function Cabecalho({ email }: { email?: string }) {
+  const [escondido, setEscondido] = useState(false);
+
+  useEffect(() => {
+    let ultimo = window.scrollY;
+    const aoRolar = () => {
+      const y = window.scrollY;
+      // So esconde depois de sair do topo, e reage a direcao.
+      if (y > 64 && y > ultimo + 6) setEscondido(true);
+      else if (y < ultimo - 6) setEscondido(false);
+      ultimo = y;
+    };
+    window.addEventListener('scroll', aoRolar, { passive: true });
+    return () => window.removeEventListener('scroll', aoRolar);
+  }, []);
+
   return (
     <header
       style={{
@@ -14,11 +31,13 @@ export default function Cabecalho({ email }: { email?: string }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '14px 16px',
-        paddingTop: 'calc(14px + env(safe-area-inset-top))',
+        padding: '12px 16px',
+        paddingTop: 'calc(12px + env(safe-area-inset-top))',
         background: 'var(--fundo)',
         borderBottom: '1px solid var(--linha)',
-        boxShadow: '0 1px 0 rgba(226, 59, 46, 0.5)',
+        boxShadow: '0 1px 0 rgba(226, 59, 46, 0.4)',
+        transform: escondido ? 'translateY(-100%)' : 'translateY(0)',
+        transition: 'transform var(--dur) var(--curva)',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
@@ -27,7 +46,7 @@ export default function Cabecalho({ email }: { email?: string }) {
           alt=""
           width={30}
           height={30}
-          style={{ width: 30, height: 30, objectFit: 'cover', borderRadius: 6, mixBlendMode: 'screen' }}
+          style={{ width: 30, height: 30, objectFit: 'cover', borderRadius: 8, mixBlendMode: 'screen' }}
         />
         <Marca tamanho="medio" />
       </div>
@@ -37,16 +56,7 @@ export default function Cabecalho({ email }: { email?: string }) {
           type="submit"
           title="Sair"
           aria-label="Sair"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--texto-suave)',
-            fontSize: 12,
-            padding: 8,
-          }}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', color: 'var(--texto-suave)', fontSize: 12, padding: 8 }}
         >
           {email && <span style={{ maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email}</span>}
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">

@@ -29,7 +29,7 @@ export default async function PaginaEventos({
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ fontSize: 30 }}>Eventos</h1>
+        <h1 className="t-titulo" style={{ fontSize: 30 }}>Agenda</h1>
         <Link href="/eventos/novo" className="botao" style={{ width: 'auto' }}>
           Novo
         </Link>
