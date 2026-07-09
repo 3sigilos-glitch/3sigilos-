@@ -31,7 +31,7 @@ export default async function PaginaEquipa() {
 function Grupo({ titulo, elementos, podeEditar }: { titulo: string; elementos: Equipa[]; podeEditar: boolean }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>{titulo}</h2>
+      <h2 className="rotulo-seccao">{titulo}</h2>
       {elementos.map((e) => {
         const conteudo = (
           <>

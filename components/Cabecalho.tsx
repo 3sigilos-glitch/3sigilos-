@@ -35,7 +35,7 @@ export default function Cabecalho({ email }: { email?: string }) {
         paddingTop: 'calc(12px + env(safe-area-inset-top))',
         background: 'var(--fundo)',
         borderBottom: '1px solid var(--linha)',
-        boxShadow: '0 1px 0 rgba(226, 59, 46, 0.4)',
+        boxShadow: '0 1px 0 rgba(var(--acento-rgb), 0.4)',
         transform: escondido ? 'translateY(-100%)' : 'translateY(0)',
         transition: 'transform var(--dur) var(--curva)',
       }}

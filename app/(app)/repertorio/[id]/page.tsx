@@ -27,7 +27,7 @@ export default async function PaginaMusica({ params }: { params: Promise<{ id: s
       {/* Cifras */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>Cifras ({cifras.length})</h2>
+          <h2 className="rotulo-seccao">Cifras ({cifras.length})</h2>
           <Link href={`/repertorio/${id}/cifras/nova`} className="botao" style={{ width: 'auto' }}>Nova cifra</Link>
         </div>
 
@@ -56,7 +56,7 @@ export default async function PaginaMusica({ params }: { params: Promise<{ id: s
       {/* Pre-visualizacao da cifra por defeito */}
       {porDefeito?.conteudo && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>{porDefeito.nome_versao}</h2>
+          <h2 className="rotulo-seccao">{porDefeito.nome_versao}</h2>
           <div className="cartao" style={{ overflowX: 'auto' }}>
             <CifraFormatada conteudo={porDefeito.conteudo} />
           </div>

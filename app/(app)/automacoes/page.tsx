@@ -18,7 +18,7 @@ export default async function PaginaAutomacoes() {
 
       {/* Follow-up de propostas */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>
+        <h2 className="rotulo-seccao">
           Follow-up (propostas paradas ha mais de {followups.dias} dias)
         </h2>
         {followups.itens.length === 0 ? (
@@ -38,7 +38,7 @@ export default async function PaginaAutomacoes() {
 
       {/* Lembretes pre-concerto */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>
+        <h2 className="rotulo-seccao">
           Lembretes pre-concerto (proximos {lembretes.dias} dias)
         </h2>
         {lembretes.itens.length === 0 ? (
@@ -59,7 +59,7 @@ export default async function PaginaAutomacoes() {
 
       {/* Briefings */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>Briefings para o grupo</h2>
+        <h2 className="rotulo-seccao">Briefings para o grupo</h2>
 
         <div className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <strong style={{ fontSize: 16 }}>Esta semana</strong>

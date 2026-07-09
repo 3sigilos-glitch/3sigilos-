@@ -18,7 +18,7 @@ export default async function PaginaDefinicoes() {
 
       {/* Parametros gerais e textos da proposta */}
       <form action={guardarDefinicoes} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>Geral</h2>
+        <h2 className="rotulo-seccao">Geral</h2>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <Campo etiqueta="Nome da banda">
@@ -45,7 +45,7 @@ export default async function PaginaDefinicoes() {
           <input name="link_materiais" className="campo" defaultValue={definicoes?.link_materiais ?? ''} placeholder="https://..." />
         </Campo>
 
-        <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em', marginTop: 8 }}>Textos da proposta</h2>
+        <h2 className="rotulo-seccao" style={{ marginTop: 8 }}>Textos da proposta</h2>
         <Campo etiqueta="Introducao">
           <textarea name="texto_proposta_intro" className="campo" rows={3} style={{ paddingTop: 12, height: 'auto', resize: 'vertical' }} defaultValue={definicoes?.texto_proposta_intro ?? ''} />
         </Campo>
@@ -59,7 +59,7 @@ export default async function PaginaDefinicoes() {
       {/* Escaloes */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>Escaloes</h2>
+          <h2 className="rotulo-seccao">Escaloes</h2>
           <Link href="/definicoes/escaloes/novo" className="botao" style={{ width: 'auto' }}>Novo</Link>
         </div>
         {escaloes.length === 0 ? (
@@ -79,7 +79,7 @@ export default async function PaginaDefinicoes() {
 
       {/* Copias de seguranca */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>Copias de seguranca</h2>
+        <h2 className="rotulo-seccao">Copias de seguranca</h2>
         <div className="cartao">
           <CopiaSeguranca />
         </div>

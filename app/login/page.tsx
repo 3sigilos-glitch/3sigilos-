@@ -45,7 +45,7 @@ export default function PaginaLogin() {
       }}
     >
       <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-        <div style={{ filter: 'drop-shadow(0 0 24px rgba(226, 59, 46, 0.25))' }}>
+        <div style={{ filter: 'drop-shadow(0 0 24px rgba(var(--acento-rgb), 0.25))' }}>
           <Brasao largura={230} />
         </div>
         <p style={{ color: 'var(--texto-suave)', letterSpacing: '0.1em', fontSize: 13, textTransform: 'uppercase' }}>

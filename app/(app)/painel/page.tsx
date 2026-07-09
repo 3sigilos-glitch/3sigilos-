@@ -67,7 +67,7 @@ export default async function PaginaPainel() {
 
       {/* Pipeline por estado */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>Pipeline</h2>
+        <h2 className="rotulo-seccao">Pipeline</h2>
         {totalPipeline > 0 && (
           <div className="barra-pipeline">
             {estados.map((estado) => {
@@ -98,7 +98,7 @@ export default async function PaginaPainel() {
       {restantes.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>Proximos concertos</h2>
+            <h2 className="rotulo-seccao">Proximos concertos</h2>
             <Link href="/eventos" style={{ fontSize: 13, color: 'var(--acento)' }}>Ver todos</Link>
           </div>
           {restantes.map((ev) => <CartaoEvento key={ev.id} evento={ev} />)}
@@ -172,7 +172,7 @@ function Indicador({ rotulo, valor, href, destaque }: { rotulo: string; valor: s
         gap: 6,
         minHeight: 92,
         justifyContent: 'center',
-        ...(destaque ? { background: 'linear-gradient(135deg, #1a1213, var(--superficie) 70%)', borderColor: '#3a2422' } : {}),
+        ...(destaque ? { background: 'linear-gradient(135deg, var(--superficie-quente), var(--superficie) 70%)', borderColor: 'var(--linha-quente)' } : {}),
       }}
     >
       <span style={{ fontSize: 12, color: 'var(--texto-suave)', textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.3 }}>{rotulo}</span>

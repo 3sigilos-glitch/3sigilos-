@@ -29,15 +29,15 @@ export default async function PaginaRecibos({
         <Link href={`/recibos?ano=${ano + 1}`} className="botao botao-secundario" style={{ width: 'auto' }}>{ano + 1}</Link>
       </div>
 
-      <div className="cartao" style={{ position: 'relative', overflow: 'hidden', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', background: 'linear-gradient(135deg, #1a1213, var(--superficie) 70%)', borderColor: '#3a2422' }}>
-        <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'var(--acento)', boxShadow: '0 0 18px rgba(226, 59, 46, 0.6)' }} />
+      <div className="cartao" style={{ position: 'relative', overflow: 'hidden', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', background: 'linear-gradient(135deg, var(--superficie-quente), var(--superficie) 70%)', borderColor: 'var(--linha-quente)' }}>
+        <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'var(--acento)', boxShadow: '0 0 18px rgba(var(--acento-rgb), 0.6)' }} />
         <span style={{ fontSize: 12, color: 'var(--texto-suave)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Total do ano</span>
         <strong className="titulo numero" style={{ fontSize: 28, color: 'var(--acento-forte)' }}>{euros(totalAno)}</strong>
       </div>
 
       {/* Recibos por emitir */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>Por emitir ({porEmitir.length})</h2>
+        <h2 className="rotulo-seccao">Por emitir ({porEmitir.length})</h2>
         {porEmitir.length === 0 ? (
           <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Tudo em dia, sem recibos por emitir neste ano.</p>
         ) : (
@@ -60,7 +60,7 @@ export default async function PaginaRecibos({
 
       {/* Resumo por membro */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>Resumo por membro</h2>
+        <h2 className="rotulo-seccao">Resumo por membro</h2>
         {resumo.length === 0 ? (
           <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Sem recibos registados em {ano}.</p>
         ) : (

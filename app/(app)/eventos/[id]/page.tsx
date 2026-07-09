@@ -38,8 +38,8 @@ export default async function PaginaFichaEvento({ params }: { params: Promise<{ 
       </div>
 
       {/* Valor em destaque */}
-      <div className="cartao" style={{ position: 'relative', overflow: 'hidden', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', background: 'linear-gradient(135deg, #1a1213, var(--superficie) 70%)', borderColor: '#3a2422' }}>
-        <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'var(--acento)', boxShadow: '0 0 18px rgba(226, 59, 46, 0.6)' }} />
+      <div className="cartao" style={{ position: 'relative', overflow: 'hidden', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', background: 'linear-gradient(135deg, var(--superficie-quente), var(--superficie) 70%)', borderColor: 'var(--linha-quente)' }}>
+        <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'var(--acento)', boxShadow: '0 0 18px rgba(var(--acento-rgb), 0.6)' }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <span style={{ fontSize: 12, color: 'var(--texto-suave)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Valor total</span>
           {(evento.deslocacao_valor ?? 0) > 0 && (
@@ -76,7 +76,7 @@ export default async function PaginaFichaEvento({ params }: { params: Promise<{ 
       {evento.setlist && (
         <div className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <span style={{ fontSize: 12, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>SETLIST</span>
+            <span className="rotulo-seccao">Setlist</span>
             <Link href={`/setlists/${evento.setlist.id}`} style={{ fontSize: 16, fontWeight: 700 }}>{evento.setlist.nome}</Link>
           </div>
           <Link href={`/setlists/${evento.setlist.id}/palco`} className="botao" style={{ width: 'auto' }}>Modo palco</Link>
@@ -109,7 +109,7 @@ export default async function PaginaFichaEvento({ params }: { params: Promise<{ 
 function Bloco({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <div className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <h2 style={{ fontSize: 13, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>{titulo}</h2>
+      <h2 className="rotulo-seccao">{titulo}</h2>
       {children}
     </div>
   );

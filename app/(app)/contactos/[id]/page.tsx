@@ -37,7 +37,7 @@ export default async function PaginaFichaContacto({ params }: { params: Promise<
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>
+        <h2 className="rotulo-seccao">
           Historico de eventos ({contacto.eventos.length})
         </h2>
         {contacto.eventos.length === 0 ? (

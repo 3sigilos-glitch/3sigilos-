@@ -16,10 +16,14 @@
   --texto-suave: #a8a6a0;    /* secundario */
   --texto-fraco: #6b6963;    /* legendas e pistas */
 
-  /* Acento de palco (vermelho) */
-  --acento: #e23b2e;
-  --acento-forte: #ff4a3d;
-  --acento-suave: rgba(226, 59, 46, 0.14);
+  /* Acento de palco (laranja) */
+  --acento: #f5811e;
+  --acento-forte: #ff9a3d;
+  --acento-suave: rgba(245, 129, 30, 0.14);
+  --acento-rgb: 245, 129, 30; /* para brilhos: rgba(var(--acento-rgb), alfa) */
+  /* Superficies com o calor do acento, para os destaques */
+  --superficie-quente: #1c1610;
+  --linha-quente: #3a2e1c;
 
   /* Estados dos eventos, cada um com cor propria e clara */
   --estado-orcamentado: #d89b2c;   /* ambar */
@@ -96,7 +100,7 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background: radial-gradient(ellipse 560px 360px at 50% -40px,
-    rgba(226, 59, 46, 0.16), transparent 70%);
+    rgba(var(--acento-rgb), 0.16), transparent 70%);
 }
 
 body::after {
@@ -261,10 +265,10 @@ textarea {
   flex-direction: column;
   gap: 12px;
   padding: 16px 16px 16px 20px;
-  border: 1px solid #3a2422;
+  border: 1px solid var(--linha-quente);
   border-radius: 14px;
   overflow: hidden;
-  background: linear-gradient(135deg, #1a1213, var(--superficie) 60%);
+  background: linear-gradient(135deg, var(--superficie-quente), var(--superficie) 60%);
 }
 .cartao-heroi::before {
   content: '';
@@ -274,7 +278,7 @@ textarea {
   bottom: 0;
   width: 4px;
   background: var(--acento);
-  box-shadow: 0 0 18px rgba(226, 59, 46, 0.6);
+  box-shadow: 0 0 18px rgba(var(--acento-rgb), 0.6);
 }
 
 /* Barra de pipeline empilhada, uma fatia por estado. */
@@ -459,7 +463,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--sombra-2), 0 0 20px rgba(226, 59, 46, 0.4);
+  box-shadow: var(--sombra-2), 0 0 20px rgba(var(--acento-rgb), 0.4);
   z-index: 60;
   transition: transform 0.08s var(--curva), background var(--dur) var(--curva);
 }

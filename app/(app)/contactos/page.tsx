@@ -31,7 +31,7 @@ export default async function PaginaContactos() {
       ) : (
         grupos.map(([tipo, lista]) => (
           <div key={tipo} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>{tipo}</h2>
+            <h2 className="rotulo-seccao">{tipo}</h2>
             {lista.map((c) => (
               <Link key={c.id} href={`/contactos/${c.id}`} className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <strong style={{ fontSize: 16 }}>{c.nome}</strong>
