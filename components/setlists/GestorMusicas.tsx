@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { adicionarMusica, removerItem, guardarOrdem, atualizarItem } from '@/app/(app)/setlists/acoes';
+import { mostrarToast } from '@/lib/toast';
 import type { ItemSetlist } from '@/lib/consultas';
 import type { Cifra } from '@/lib/tipos';
 
@@ -43,6 +44,8 @@ export default function GestorMusicas({ setlistId, itens, cifrasPorMusica, music
   function aoAgarrar(e: React.PointerEvent, index: number) {
     e.preventDefault();
     setAArrastar(index);
+    // Vibracao curta ao agarrar, para dar retorno ao toque.
+    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(12);
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
   }
 
@@ -148,7 +151,7 @@ export default function GestorMusicas({ setlistId, itens, cifrasPorMusica, music
                         onBlur={(e) => iniciar(() => atualizarItem(setlistId, item.id, { nota_rapida: e.target.value }))}
                       />
                     </label>
-                    <button type="button" className="botao botao-secundario" style={{ width: 'auto', color: 'var(--estado-recusado)', borderColor: 'var(--estado-recusado)' }} onClick={() => iniciar(() => removerItem(setlistId, item.id))}>
+                    <button type="button" className="botao botao-secundario" style={{ width: 'auto', color: 'var(--estado-recusado)', borderColor: 'var(--estado-recusado)' }} onClick={() => iniciar(async () => { await removerItem(setlistId, item.id); mostrarToast('ok', 'Musica removida da setlist'); })}>
                       Remover da setlist
                     </button>
                   </div>
@@ -188,7 +191,7 @@ function AdicionarMusica({ setlistId, musicas }: { setlistId: string; musicas: {
         className="botao"
         style={{ width: 'auto' }}
         disabled={!escolhida}
-        onClick={() => { if (escolhida) { iniciar(() => adicionarMusica(setlistId, escolhida)); setEscolhida(''); } }}
+        onClick={() => { if (escolhida) { iniciar(async () => { await adicionarMusica(setlistId, escolhida); mostrarToast('ok', 'Musica adicionada'); }); setEscolhida(''); } }}
       >
         Adicionar
       </button>

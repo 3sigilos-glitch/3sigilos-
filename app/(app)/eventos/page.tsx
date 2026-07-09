@@ -46,10 +46,12 @@ export default async function PaginaEventos({
       ) : (
         grupos.map(([mes, lista]) => (
           <div key={mes} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <h2 style={{ fontSize: 14, color: 'var(--texto-fraco)', letterSpacing: '0.08em' }}>{mes}</h2>
-            {lista.map((ev) => (
-              <CartaoEvento key={ev.id} evento={ev} />
-            ))}
+            <h2 className="rotulo-seccao">{mes}</h2>
+            <div className="lista-escalonada" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {lista.map((ev) => (
+                <CartaoEvento key={ev.id} evento={ev} />
+              ))}
+            </div>
           </div>
         ))
       )}

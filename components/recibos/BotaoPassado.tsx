@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react';
 import { alternarPassado } from '@/app/(app)/recibos/acoes';
+import { mostrarToast } from '@/lib/toast';
 
 // Alterna o estado de um recibo entre "por passar" e "passado", no proprio sitio.
 export default function BotaoPassado({ id, passado }: { id: string; passado: boolean }) {
@@ -11,7 +12,16 @@ export default function BotaoPassado({ id, passado }: { id: string; passado: boo
     <button
       type="button"
       disabled={aProcessar}
-      onClick={() => iniciar(() => alternarPassado(id, !passado))}
+      onClick={() =>
+        iniciar(async () => {
+          try {
+            await alternarPassado(id, !passado);
+            mostrarToast('ok', !passado ? 'Recibo marcado como passado' : 'Recibo por passar');
+          } catch {
+            mostrarToast('erro', 'Nao foi possivel atualizar o recibo');
+          }
+        })
+      }
       className="botao botao-secundario"
       style={{
         width: 'auto',

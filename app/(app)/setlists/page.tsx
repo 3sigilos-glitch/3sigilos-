@@ -16,7 +16,8 @@ export default async function PaginaSetlists() {
           <p style={{ lineHeight: 1.6 }}>Sem setlists. Toca em <strong style={{ color: 'var(--texto)' }}>Nova</strong> para criar a primeira.</p>
         </div>
       ) : (
-        setlists.map((s) => (
+        <div className="lista-escalonada" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--e2)' }}>
+        {setlists.map((s) => (
           <Link key={s.id} href={`/setlists/${s.id}`} className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
             <span style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <strong style={{ fontSize: 16 }}>
@@ -27,7 +28,8 @@ export default async function PaginaSetlists() {
             </span>
             <span className="carimbo">{s.total} musicas</span>
           </Link>
-        ))
+        ))}
+        </div>
       )}
     </section>
   );
