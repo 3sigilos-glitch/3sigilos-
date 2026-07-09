@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { adicionarMusica, removerItem, guardarOrdem, atualizarItem } from '@/app/(app)/setlists/acoes';
 import { mostrarToast } from '@/lib/toast';
@@ -119,6 +120,15 @@ export default function GestorMusicas({ setlistId, itens, cifrasPorMusica, music
                       </span>
                     </span>
                   </button>
+
+                  {/* Abrir esta musica direto no modo palco */}
+                  <Link
+                    href={`/setlists/${setlistId}/palco?i=${index}`}
+                    aria-label="Abrir em palco"
+                    style={{ color: 'var(--acento)', display: 'flex', padding: 6 }}
+                  >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                  </Link>
 
                   {/* Setas de reserva, garantidas no telemovel */}
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
