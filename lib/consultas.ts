@@ -55,21 +55,28 @@ export interface EventoDetalhado extends Evento {
 
 export async function obterEvento(id: string): Promise<EventoDetalhado | null> {
   const supabase = await criarClienteServidor();
-  const { data, error } = await supabase
-    .from('eventos')
-    .select(
-      `*,
+
+  const base = `*,
        contratante:contactos!eventos_contratante_id_fkey (nome, telefone, email),
        quem_tratou:equipa!eventos_quem_tratou_id_fkey (nome),
        tecnico:equipa!eventos_tecnico_id_fkey (nome),
-       escalao:escaloes!eventos_escalao_id_fkey (nome, condicoes),
-       setlist:setlists!eventos_setlist_id_fkey (id, nome)`
-    )
+       escalao:escaloes!eventos_escalao_id_fkey (nome, condicoes)`;
+
+  // Tenta com a setlist. Se a tabela ainda nao existir (migracao 0005 por
+  // aplicar), volta a consultar sem a setlist, para o evento abrir na mesma.
+  const comSetlist = await supabase
+    .from('eventos')
+    .select(`${base},\n       setlist:setlists!eventos_setlist_id_fkey (id, nome)`)
     .eq('id', id)
     .single();
 
-  if (error || !data) return null;
-  return data as unknown as EventoDetalhado;
+  if (!comSetlist.error && comSetlist.data) {
+    return comSetlist.data as unknown as EventoDetalhado;
+  }
+
+  const semSetlist = await supabase.from('eventos').select(base).eq('id', id).single();
+  if (semSetlist.error || !semSetlist.data) return null;
+  return { ...(semSetlist.data as any), setlist: null } as EventoDetalhado;
 }
 
 export interface FiltrosEventos {
