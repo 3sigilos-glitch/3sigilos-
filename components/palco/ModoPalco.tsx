@@ -30,8 +30,53 @@ export default function ModoPalco({
   const [semitons, setSemitons] = useState(0);
   const [tamanho, setTamanho] = useState(18);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Guarda o tamanho atual para o gesto de pinca o poder ler sem se re-subscrever.
+  const tamanhoRef = useRef(tamanho);
+  tamanhoRef.current = tamanho;
 
   const musica = musicas[indice];
+
+  // Pinca com dois dedos (pinch): aumenta ou diminui so o tamanho do texto da
+  // cifra, sem mexer na pagina. Usa um ouvinte nao-passivo para poder impedir
+  // o scroll enquanto se faz o gesto.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    let distInicial = 0;
+    let tamanhoInicial = 0;
+    const distancia = (toques: TouchList) =>
+      Math.hypot(toques[1].clientX - toques[0].clientX, toques[1].clientY - toques[0].clientY);
+
+    const aoIniciar = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        distInicial = distancia(e.touches);
+        tamanhoInicial = tamanhoRef.current;
+      }
+    };
+    const aoMover = (e: TouchEvent) => {
+      if (e.touches.length === 2 && distInicial > 0) {
+        e.preventDefault(); // nao deixa a pagina fazer scroll durante a pinca
+        const razao = distancia(e.touches) / distInicial;
+        const novo = Math.min(48, Math.max(12, Math.round(tamanhoInicial * razao)));
+        setTamanho(novo);
+      }
+    };
+    const aoTerminar = (e: TouchEvent) => {
+      if (e.touches.length < 2) distInicial = 0;
+    };
+
+    el.addEventListener('touchstart', aoIniciar, { passive: false });
+    el.addEventListener('touchmove', aoMover, { passive: false });
+    el.addEventListener('touchend', aoTerminar);
+    el.addEventListener('touchcancel', aoTerminar);
+    return () => {
+      el.removeEventListener('touchstart', aoIniciar);
+      el.removeEventListener('touchmove', aoMover);
+      el.removeEventListener('touchend', aoTerminar);
+      el.removeEventListener('touchcancel', aoTerminar);
+    };
+  }, []);
 
   // Manter o ecra aceso enquanto o modo palco esta aberto.
   useEffect(() => {
@@ -90,7 +135,7 @@ export default function ModoPalco({
       </div>
 
       {/* Cifra, area grande e com scroll suave */}
-      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 16px 16px', scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' as any }}>
+      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 16px 16px', scrollBehavior: 'smooth', touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' as any }}>
         {musica.conteudo ? (
           <CifraFormatada conteudo={musica.conteudo} semitons={semitons} tamanho={tamanho} />
         ) : (
@@ -103,11 +148,11 @@ export default function ModoPalco({
         <button type="button" onClick={() => irPara(indice - 1)} disabled={indice === 0} className="botao botao-secundario" style={{ width: 'auto', minWidth: 64, opacity: indice === 0 ? 0.4 : 1 }}>Anterior</button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <ControloRedondo etiqueta="A-" onClick={() => setTamanho((t) => Math.max(13, t - 1))} />
+          <ControloRedondo etiqueta="A-" onClick={() => setTamanho((t) => Math.max(12, t - 1))} />
           <ControloRedondo etiqueta="-1" onClick={() => setSemitons((s) => s - 1)} titulo="Descer meio tom" />
           <span style={{ minWidth: 34, textAlign: 'center', fontSize: 12, color: 'var(--texto-suave)' }}>{semitons > 0 ? `+${semitons}` : semitons}</span>
           <ControloRedondo etiqueta="+1" onClick={() => setSemitons((s) => s + 1)} titulo="Subir meio tom" />
-          <ControloRedondo etiqueta="A+" onClick={() => setTamanho((t) => Math.min(30, t + 1))} />
+          <ControloRedondo etiqueta="A+" onClick={() => setTamanho((t) => Math.min(48, t + 1))} />
         </div>
 
         <button type="button" onClick={() => irPara(indice + 1)} disabled={indice === musicas.length - 1} className="botao" style={{ width: 'auto', minWidth: 64, opacity: indice === musicas.length - 1 ? 0.4 : 1 }}>Seguinte</button>
