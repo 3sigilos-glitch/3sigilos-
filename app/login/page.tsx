@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Marca from '@/components/Marca';
-import Sigilo from '@/components/Sigilo';
 import { criarClienteBrowser } from '@/lib/supabase/client';
 
 // Ecra de entrada: login simples por email e password, so para a dona da marca.
@@ -39,14 +37,18 @@ export default function PaginaLogin() {
 
   return (
     <main className="relative flex min-h-[100dvh] flex-col items-center justify-center gap-9 overflow-hidden px-6">
-      <div className="flex flex-col items-center gap-5 text-center">
-        <Sigilo tamanho={92} className="text-dourado" />
-        <div className="flex flex-col items-center gap-2">
-          <Marca tamanho="grande" />
-          <p className="text-[13px] uppercase tracking-[0.2em] text-texto-suave">
-            Organização da marca
-          </p>
-        </div>
+      <div className="flex flex-col items-center gap-4 text-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo-3sigilos.png"
+          alt="3 Sigilos"
+          width={230}
+          height={230}
+          className="w-56 max-w-[68vw] select-none"
+        />
+        <p className="text-[13px] uppercase tracking-[0.2em] text-texto-suave">
+          Organização da marca
+        </p>
       </div>
 
       <form

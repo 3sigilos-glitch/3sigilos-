@@ -1,14 +1,16 @@
-// Logotipo em texto da 3 Sigilos. Sem imagens externas: usa a serif mistica
-// dos titulos com o numero a dourado, para um arranque rapido e nitido.
+// Emblema da 3 Sigilos (o monograma no circulo), o logotipo oficial da marca.
+// Usado no cabecalho e onde e preciso a marca de forma compacta.
 export default function Marca({ tamanho = 'medio' }: { tamanho?: 'medio' | 'grande' }) {
-  const grande = tamanho === 'grande';
+  const px = tamanho === 'grande' ? 88 : 34;
   return (
-    <span
-      className={`font-titulo font-semibold tracking-[0.18em] text-texto ${
-        grande ? 'text-3xl' : 'text-lg'
-      }`}
-    >
-      <span className="text-dourado">3</span> SIGILOS
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/emblema-3sigilos.png"
+      alt="3 Sigilos"
+      width={px}
+      height={px}
+      style={{ width: px, height: px }}
+      className="select-none"
+    />
   );
 }
