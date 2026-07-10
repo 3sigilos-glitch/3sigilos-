@@ -27,8 +27,8 @@ const fonteMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "N'ASA | Gestao",
-  description: 'Gestao interna dos N\'ASA, concertos, propostas, equipa e repertorio.',
+  title: "N'ASA | Backoffice",
+  description: 'Backoffice dos N\'ASA, concertos, propostas, equipa, repertorio e setlists.',
   manifest: '/manifest.webmanifest',
   icons: {
     icon: '/icons/icon-192.png',
