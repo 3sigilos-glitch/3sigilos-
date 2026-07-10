@@ -41,7 +41,7 @@ export default async function PaginaFichaEvento({ params }: { params: Promise<{ 
       <div className="cartao" style={{ position: 'relative', overflow: 'hidden', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', background: 'linear-gradient(135deg, var(--superficie-quente), var(--superficie) 70%)', borderColor: 'var(--linha-quente)' }}>
         <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'var(--acento)', boxShadow: '0 0 18px rgba(var(--acento-rgb), 0.6)' }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: 12, color: 'var(--texto-suave)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Valor total</span>
+          <span style={{ fontSize: 12, color: 'var(--texto-suave)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Valor liquido</span>
           {(evento.deslocacao_valor ?? 0) > 0 && (
             <span style={{ fontSize: 12, color: 'var(--texto-fraco)' }}>
               {euros(evento.valor_base)} base + {euros(evento.deslocacao_valor)} deslocacao

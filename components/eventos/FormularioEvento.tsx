@@ -158,7 +158,7 @@ export default function FormularioEvento({ acao, evento, contactos, membros, tec
           </Campo>
         </DuasColunas>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderTop: '1px solid var(--linha)', paddingTop: 12 }}>
-          <span style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Total automatico</span>
+          <span style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Valor liquido</span>
           <strong className="titulo" style={{ fontSize: 26, color: 'var(--acento)' }}>{euros(total)}</strong>
         </div>
       </div>
