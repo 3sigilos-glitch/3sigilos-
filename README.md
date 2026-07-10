@@ -1,4 +1,4 @@
-# N'ASA | Gestao da banda
+# N'ASA Backoffice
 
 Aplicacao web de gestao interna dos N'ASA, banda de covers de rock portugues sediada em Leiria.
 Pensada para o telemovel (palco e estrada), partilhada pelos 5 elementos, instalavel como app (PWA).
@@ -113,7 +113,9 @@ Como o login e por link magico, basta o email estar registado para a pessoa cons
 2. Em **Settings, Environment Variables**, define as mesmas tres variaveis do `.env.local`,
    com `NEXT_PUBLIC_SITE_URL` a apontar para o dominio de producao.
 3. No Supabase, acrescenta o dominio de producao ao **Site URL** e as **Redirect URLs**
-   (`https://o-teu-dominio/auth/confirmar`).
+   (por exemplo `https://nasarockpt.vercel.app` e `https://nasarockpt.vercel.app/auth/confirmar`).
+   Sempre que o dominio do Vercel mudar, atualiza tambem estes dois campos no Supabase, senao
+   o link magico de login deixa de funcionar.
 4. Faz deploy. O Vercel constroi e publica automaticamente a cada push.
 
 ### Lista rapida de verificacao do deploy

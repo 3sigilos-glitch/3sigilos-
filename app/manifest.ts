@@ -4,9 +4,9 @@ import type { MetadataRoute } from 'next';
 // Define a app como instalavel, em ecra inteiro e com o tema escuro.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "N'ASA Gestao",
+    name: "N'ASA Backoffice",
     short_name: "N'ASA",
-    description: 'Gestao interna dos N\'ASA: concertos, propostas, equipa e repertorio.',
+    description: 'Backoffice dos N\'ASA: concertos, propostas, equipa, repertorio e setlists.',
     start_url: '/painel',
     scope: '/',
     display: 'standalone',
