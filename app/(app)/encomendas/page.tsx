@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import EtiquetaEstado from '@/components/EtiquetaEstado';
+import EstadoVazio from '@/components/EstadoVazio';
 import { criarClienteServidor } from '@/lib/supabase/server';
 import { euros, data as fmtData } from '@/lib/formatar';
 import { COR_ESTADO_ENCOMENDA, type EncomendaComRelacoes } from '@/lib/tipos';
@@ -64,7 +65,7 @@ export default async function PaginaEncomendas({
       </div>
 
       {lista.length === 0 ? (
-        <p className="py-10 text-center text-texto-suave">Sem encomendas nesta vista.</p>
+        <EstadoVazio texto="Sem encomendas nesta vista. Toca no botão para registar a primeira." />
       ) : (
         <ul className="flex flex-col gap-3">
           {lista.map((e) => (

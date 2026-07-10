@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import EstadoVazio from '@/components/EstadoVazio';
 import { criarClienteServidor } from '@/lib/supabase/server';
 import type { Cliente } from '@/lib/tipos';
 
@@ -18,7 +19,7 @@ export default async function PaginaClientes() {
       </div>
 
       {lista.length === 0 ? (
-        <p className="py-10 text-center text-texto-suave">Ainda não há clientes.</p>
+        <EstadoVazio texto="Ainda não há clientes. Cria o primeiro no botão Novo." />
       ) : (
         <ul className="flex flex-col gap-3">
           {lista.map((c) => (

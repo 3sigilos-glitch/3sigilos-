@@ -5,7 +5,7 @@ import Marca from '@/components/Marca';
 export default function Cabecalho() {
   return (
     <header
-      className="sticky top-0 z-30 flex items-center justify-between border-b border-linha bg-fundo px-4 py-3"
+      className="sticky top-0 z-30 flex items-center justify-between border-b border-linha bg-fundo/80 px-4 py-3 backdrop-blur-md"
       style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))' }}
     >
       <Link href="/painel" aria-label="Ir para o painel">

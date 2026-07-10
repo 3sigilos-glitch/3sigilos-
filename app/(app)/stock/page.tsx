@@ -1,5 +1,6 @@
 import LinhaStock from '@/components/stock/LinhaStock';
 import FormularioNovaTshirt from '@/components/stock/FormularioNovaTshirt';
+import EstadoVazio from '@/components/EstadoVazio';
 import { criarClienteServidor } from '@/lib/supabase/server';
 import { TAMANHOS, type TshirtBranca } from '@/lib/tipos';
 
@@ -25,9 +26,7 @@ export default async function PaginaStock() {
       <FormularioNovaTshirt />
 
       {lista.length === 0 ? (
-        <p className="py-10 text-center text-texto-suave">
-          Ainda não há stock. Adiciona a primeira cor e tamanho.
-        </p>
+        <EstadoVazio texto="Ainda não há stock. Adiciona a primeira cor e tamanho." />
       ) : (
         <>
           {aRepor.length > 0 && (

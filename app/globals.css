@@ -20,6 +20,14 @@
     min-height: 100dvh;
     /* Respeita as zonas seguras dos telemoveis (entalhes e barras). */
     padding-bottom: env(safe-area-inset-bottom);
+    /* Profundidade mistica: brilhos suaves de dourado e violeta, fixos ao fundo. */
+    background-color: #0a090d;
+    background-image:
+      radial-gradient(62% 48% at 50% -12%, rgba(201, 162, 75, 0.1), transparent 70%),
+      radial-gradient(45% 38% at 100% 0%, rgba(122, 84, 158, 0.09), transparent 72%),
+      radial-gradient(48% 42% at 0% 100%, rgba(201, 162, 75, 0.05), transparent 72%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
 
   h1,
@@ -50,12 +58,19 @@
 }
 
 @layer components {
-  /* Botao principal de acao, com o acento dourado. */
+  /* Botao principal de acao, dourado com um leve brilho quente. */
   .botao {
     @apply inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-media
-           bg-dourado px-5 text-[15px] font-semibold tracking-wide text-fundo
-           transition-colors hover:bg-dourado-claro active:scale-[0.99]
+           px-5 text-[15px] font-semibold tracking-wide text-fundo
+           transition-[filter,transform] duration-150 active:scale-[0.99]
            disabled:cursor-not-allowed disabled:opacity-50;
+    background-image: linear-gradient(180deg, #e6c878, #c9a24b);
+    box-shadow: 0 8px 22px -10px rgba(201, 162, 75, 0.65),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+
+  .botao:hover:not(:disabled) {
+    filter: brightness(1.06);
   }
 
   /* Botao secundario, discreto sobre o fundo escuro. */
@@ -73,20 +88,47 @@
            placeholder:text-texto-fraco focus:border-dourado;
   }
 
+  .campo:focus {
+    box-shadow: 0 0 0 3px rgba(201, 162, 75, 0.14);
+  }
+
   /* Rotulo de campo. */
   .rotulo {
     @apply mb-1.5 block text-[13px] tracking-wide text-texto-suave;
   }
 
-  /* Cartao de superficie. */
+  /* Cartao de superficie, com um leve relevo e sombra para dar profundidade. */
   .cartao {
-    @apply rounded-suave border border-linha bg-superficie p-4;
+    @apply rounded-suave border border-linha p-4;
+    background-image: linear-gradient(180deg, rgba(29, 26, 37, 0.55), rgba(20, 18, 26, 0.55));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 10px 26px -20px rgba(0, 0, 0, 0.9);
   }
 
-  /* Etiqueta de estado, base comum. */
+  /* Cartao tocavel (link ou botao): leve resposta ao toque e realce no rato. */
+  a.cartao,
+  button.cartao {
+    @apply transition-[border-color,transform] duration-150;
+  }
+
+  a.cartao:hover,
+  button.cartao:hover {
+    @apply border-dourado/40;
+  }
+
+  a.cartao:active,
+  button.cartao:active {
+    transform: scale(0.995);
+  }
+
+  /* Etiqueta de estado, base comum: contorno fino da cor do estado. */
   .etiqueta {
     @apply inline-flex items-center gap-1.5 rounded-full border border-current
            px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide;
+  }
+
+  /* Tira de secao com um tique dourado a esquerda. */
+  .titulo-seccao {
+    @apply flex items-center gap-2 text-sm uppercase tracking-wide text-texto-suave;
   }
 }
 

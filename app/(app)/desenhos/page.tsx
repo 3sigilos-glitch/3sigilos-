@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import EtiquetaEstado from '@/components/EtiquetaEstado';
+import EstadoVazio from '@/components/EstadoVazio';
 import { criarClienteServidor } from '@/lib/supabase/server';
 import {
   CATEGORIAS_DESENHO,
@@ -61,7 +62,7 @@ export default async function PaginaDesenhos({
       </div>
 
       {lista.length === 0 ? (
-        <p className="py-10 text-center text-texto-suave">Sem desenhos nesta vista.</p>
+        <EstadoVazio texto="Sem desenhos nesta vista. Ajusta os filtros ou cria um novo." />
       ) : (
         <ul className="flex flex-col gap-3">
           {lista.map((d) => (

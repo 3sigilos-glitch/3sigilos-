@@ -1,3 +1,4 @@
+import EstadoVazio from '@/components/EstadoVazio';
 import { criarClienteServidor } from '@/lib/supabase/server';
 import { euros, data as fmtData } from '@/lib/formatar';
 import type { EncomendaComRelacoes } from '@/lib/tipos';
@@ -34,9 +35,7 @@ export default async function PaginaFaturacao() {
       </div>
 
       {lista.length === 0 ? (
-        <p className="py-10 text-center text-texto-suave">
-          Tudo faturado. Não há nada pendente.
-        </p>
+        <EstadoVazio texto="Tudo faturado. Não há nada pendente." />
       ) : (
         <ul className="flex flex-col gap-3">
           {lista.map((e) => (

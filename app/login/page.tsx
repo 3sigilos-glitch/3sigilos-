@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Marca from '@/components/Marca';
+import Sigilo from '@/components/Sigilo';
 import { criarClienteBrowser } from '@/lib/supabase/client';
 
 // Ecra de entrada: login simples por email e password, so para a dona da marca.
@@ -37,15 +38,21 @@ export default function PaginaLogin() {
   }
 
   return (
-    <main className="flex min-h-[100dvh] flex-col items-center justify-center gap-10 px-6">
-      <div className="flex flex-col items-center gap-3 text-center">
-        <Marca tamanho="grande" />
-        <p className="text-[13px] uppercase tracking-[0.2em] text-texto-suave">
-          Organização da marca
-        </p>
+    <main className="relative flex min-h-[100dvh] flex-col items-center justify-center gap-9 overflow-hidden px-6">
+      <div className="flex flex-col items-center gap-5 text-center">
+        <Sigilo tamanho={92} className="text-dourado" />
+        <div className="flex flex-col items-center gap-2">
+          <Marca tamanho="grande" />
+          <p className="text-[13px] uppercase tracking-[0.2em] text-texto-suave">
+            Organização da marca
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={entrar} className="flex w-full max-w-sm flex-col gap-4">
+      <form
+        onSubmit={entrar}
+        className="cartao flex w-full max-w-sm flex-col gap-4 p-6"
+      >
         <div>
           <label htmlFor="email" className="rotulo">
             Email

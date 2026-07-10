@@ -18,7 +18,7 @@ export default function NavInferior() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-linha bg-superficie"
+      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-linha bg-superficie/85 backdrop-blur-md"
       style={{
         height: 'calc(64px + env(safe-area-inset-bottom))',
         paddingBottom: 'env(safe-area-inset-bottom)',
@@ -30,10 +30,14 @@ export default function NavInferior() {
           <Link
             key={href}
             href={href}
-            className={`flex flex-col items-center justify-center gap-1 text-[10px] uppercase tracking-wide ${
-              ativo ? 'font-bold text-dourado' : 'font-medium text-texto-suave'
+            className={`relative flex flex-col items-center justify-center gap-1 text-[10px] uppercase tracking-wide transition-colors ${
+              ativo ? 'font-bold text-dourado' : 'font-medium text-texto-suave hover:text-texto'
             }`}
           >
+            {/* Indicador dourado do separador ativo. */}
+            {ativo && (
+              <span className="absolute top-0 h-0.5 w-8 rounded-full bg-dourado shadow-[0_0_8px_rgba(201,162,75,0.7)]" />
+            )}
             <Icone />
             {etiqueta}
           </Link>
