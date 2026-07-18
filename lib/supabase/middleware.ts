@@ -10,7 +10,7 @@ type CookieParaDefinir = { name: string; value: string; options?: CookieOptions 
 // Rotas acessiveis sem sessao iniciada.
 // As rotas /api tratam da sua propria autenticacao (por exemplo, o cron usa um
 // segredo proprio), por isso nao sao redirecionadas pelo middleware.
-const ROTAS_PUBLICAS = ['/login', '/auth', '/api', '/.well-known', '/pontoriscado'];
+const ROTAS_PUBLICAS = ['/login', '/auth', '/api', '/.well-known', '/assistente-ponto-riscado'];
 
 export async function atualizarSessao(request: NextRequest) {
   let resposta = NextResponse.next({ request });

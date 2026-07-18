@@ -6,7 +6,7 @@ const nextConfig = {
     return [
       { source: '/.well-known/assetlinks.json', destination: '/api/assetlinks' },
       // URL limpo para a app estatica do Ponto Riscado servida a partir de public/.
-      { source: '/pontoriscado', destination: '/pontoriscado/index.html' },
+      { source: '/assistente-ponto-riscado', destination: '/assistente-ponto-riscado/index.html' },
     ];
   },
   // Cabecalhos para o service worker e o manifesto da PWA serem servidos corretamente
