@@ -550,7 +550,10 @@ async function consultarIA(){
     });
     const data=await r.json();
     if(!r.ok||!data||!Array.isArray(data.orixas)||!data.orixas.length){
-      alvo.innerHTML='<div class="empty">'+escapar((data&&data.erro)||"Os mistérios não responderam. Tenta novamente.")+'</div>';
+      const msg=(data&&data.erro)||"Os mistérios não responderam. Tenta novamente.";
+      const bruto=data&&(data.detalhe||data.bruto);
+      const det=bruto?'<div style="font-size:.72rem;opacity:.65;margin-top:8px;word-break:break-word;text-align:left">'+escapar(String(bruto).slice(0,300))+'</div>':'';
+      alvo.innerHTML='<div class="empty">'+escapar(msg)+det+'</div>';
       return;
     }
 
