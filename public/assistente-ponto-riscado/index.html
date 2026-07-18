@@ -518,7 +518,7 @@ function init(){
   document.addEventListener("keydown",e=>{if(e.key==="Escape")fecharModal();});
 }
 // ---- Assistente Mágico (IA) ----
-// Consulta a Serverless Function /api/gemini, que fala com o Google Gemini,
+// Consulta a Serverless Function /api/assistente (o modelo de IA)
 // e desenha as estrelas dos orixás sugeridos com a função estrela() já existente.
 async function consultarIA(){
   const campo=document.getElementById("pedido-ia");
@@ -534,7 +534,7 @@ async function consultarIA(){
   btn.disabled=true;
   alvo.innerHTML="";
 
-  // resolve o nome devolvido pelo Gemini para a chave exata da estrela()
+  // resolve o nome devolvido pelo assistente para a chave exata da estrela()
   const chaveDe=(nome)=>{
     const alvoN=norm(nome);
     const achado=ORIXAS.find(o=>norm(o.key)===alvoN || norm(o.nome)===alvoN);
@@ -543,7 +543,7 @@ async function consultarIA(){
   const escapar=(t)=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
   try{
-    const r=await fetch("/api/gemini",{
+    const r=await fetch("/api/assistente",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({necessidade})

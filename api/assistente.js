@@ -1,10 +1,10 @@
 // Vercel Serverless Function — "Mago Assistente" do Ponto Riscado.
 //
-// Recebe um POST com { necessidade } e pede ao Google Gemini (Flash) que
-// eleja 1 a 3 orixás para compor um ponto riscado. Devolve ao frontend um
-// JSON no formato { orixas: [...], explicacao: "..." }.
+// Recebe um POST com { necessidade } e pede a um modelo de IA que eleja 1 a 3
+// orixás para compor um ponto riscado. Devolve ao frontend um JSON no formato
+// { orixas: [...], explicacao: "..." }.
 //
-// A chave da API fica sempre na variável de ambiente GEMINI_API_KEY
+// A chave da API fica sempre na variável de ambiente ASSISTENTE_API_KEY
 // (Vercel > Settings > Environment Variables), nunca no código.
 
 const ORIXAS_VALIDOS = [
@@ -28,14 +28,14 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ erro: 'Falta o campo "necessidade".' });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.ASSISTENTE_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ erro: 'GEMINI_API_KEY não está configurada no servidor.' });
+      return res.status(500).json({ erro: 'A chave do assistente não está configurada no servidor.' });
     }
 
     const prompt = `És um mestre de Umbanda Sagrada especialista em Magia do Ponto Riscado. O utilizador precisa de resolver o seguinte: '${necessidade}'. Os Orixás disponíveis são: Oxalá, Logunã, Oxumaré, Oxum, Oxóssi, Obá, Xangô, Oroiná, Ogum, Iansã, Obaluaiê, Nanã, Omolu, Iemanjá. Elege 1 a 3 orixás ideais para compor um ponto riscado que resolva a questão. Deves responder ESTRITAMENTE com um objeto JSON válido, sem formatação markdown ou blocos de código, com esta estrutura exata: { "orixas": ["Nome do Orixa"], "explicacao": "Justificação mágica curta e direta do porquê desta combinação e como a força deles atua no ponto." }`;
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const resposta = await fetch(endpoint, {
       method: 'POST',
@@ -53,7 +53,7 @@ module.exports = async function handler(req, res) {
     if (!resposta.ok) {
       const detalhe = await resposta.text();
       return res.status(502).json({
-        erro: 'A API do Gemini devolveu um erro.',
+        erro: 'O assistente devolveu um erro.',
         detalhe: detalhe.slice(0, 500),
       });
     }
@@ -63,7 +63,7 @@ module.exports = async function handler(req, res) {
     // Extrai o texto da resposta do modelo.
     const texto = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!texto) {
-      return res.status(502).json({ erro: 'Resposta vazia ou inesperada do Gemini.' });
+      return res.status(502).json({ erro: 'Resposta vazia ou inesperada do assistente.' });
     }
 
     // Limpa eventuais crases de markdown (```json ... ```) caso o modelo falhe a restrição.
@@ -84,7 +84,7 @@ module.exports = async function handler(req, res) {
       parsed = JSON.parse(limpo);
     } catch (e) {
       return res.status(502).json({
-        erro: 'Não foi possível interpretar o JSON devolvido pelo Gemini.',
+        erro: 'Não foi possível interpretar a resposta do assistente.',
         bruto: texto.slice(0, 500),
       });
     }
@@ -102,7 +102,7 @@ module.exports = async function handler(req, res) {
 
     if (!orixas.length) {
       return res.status(502).json({
-        erro: 'O Gemini não indicou orixás válidos para esta necessidade.',
+        erro: 'O assistente não indicou orixás válidos para esta necessidade.',
         bruto: texto.slice(0, 500),
       });
     }
