@@ -35,7 +35,10 @@ module.exports = async function handler(req, res) {
 
     const prompt = `És um mestre de Umbanda Sagrada especialista em Magia do Ponto Riscado. O utilizador precisa de resolver o seguinte: '${necessidade}'. Os Orixás disponíveis são: Oxalá, Logunã, Oxumaré, Oxum, Oxóssi, Obá, Xangô, Oroiná, Ogum, Iansã, Obaluaiê, Nanã, Omolu, Iemanjá. Elege 1 a 3 orixás ideais para compor um ponto riscado que resolva a questão. Deves responder ESTRITAMENTE com um objeto JSON válido, sem formatação markdown ou blocos de código, com esta estrutura exata: { "orixas": ["Nome do Orixa"], "explicacao": "Justificação mágica curta e direta do porquê desta combinação e como a força deles atua no ponto." }`;
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Modelo configurável por env (ASSISTENTE_MODELO). O predefinido é um
+    // modelo Flash atual; modelos mais antigos podem já estar descontinuados.
+    const modelo = process.env.ASSISTENTE_MODELO || 'gemini-2.0-flash';
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${apiKey}`;
 
     const resposta = await fetch(endpoint, {
       method: 'POST',
