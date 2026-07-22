@@ -20,6 +20,22 @@ const PREFERENCIAS_DEFEITO: PreferenciasCifra = {
   tamanho: 18,
 };
 
+// Escolhe, de entre as versoes de uma musica, a que um membro deve ver:
+// primeiro a versao com a etiqueta do seu instrumento (por exemplo "BAIXO"),
+// senao a versao geral (por defeito), senao a primeira. Usada no palco e na
+// ficha da musica, para nao haver duas regras diferentes.
+export function escolherCifraPreferida<T extends { nome_versao: string | null; por_defeito: boolean }>(
+  cifras: T[],
+  tag: string | null | undefined
+): T | null {
+  if (cifras.length === 0) return null;
+  const t = (tag ?? '').trim().toLowerCase();
+  const porTag = t
+    ? cifras.find((c) => (c.nome_versao ?? '').trim().toLowerCase().includes(t))
+    : undefined;
+  return porTag ?? cifras.find((c) => c.por_defeito) ?? cifras[0];
+}
+
 export async function obterPreferenciasCifra(): Promise<PreferenciasCifra> {
   try {
     const supabase = await criarClienteServidor();
@@ -337,11 +353,8 @@ export async function obterSetlist(id: string): Promise<SetlistDetalhada | null>
     for (const c of (todas as Cifra[]) ?? []) (porMusica[c.musica_id] ??= []).push(c);
 
     for (const [mid, cifras] of Object.entries(porMusica)) {
-      const porTag = tag
-        ? cifras.find((c) => (c.nome_versao ?? '').trim().toLowerCase().includes(tag))
-        : undefined;
-      const porDef = cifras.find((c) => c.por_defeito);
-      escolhida[mid] = porTag ?? porDef ?? cifras[0];
+      const escolha = escolherCifraPreferida(cifras, tag);
+      if (escolha) escolhida[mid] = escolha;
     }
   }
 

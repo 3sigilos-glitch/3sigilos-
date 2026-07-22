@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import CifraFormatada from '@/components/cifras/CifraFormatada';
 import { tomTransposto } from '@/lib/acordes';
@@ -39,6 +40,11 @@ export default function ModoPalco({
   inicio?: number;
   preferencias?: PreferenciasPalco;
 }) {
+  // O palco e desenhado por cima de tudo (portal no body), para cobrir mesmo o
+  // cabecalho e a navegacao. So depois de montar no cliente e que existe body.
+  const [montado, setMontado] = useState(false);
+  useEffect(() => setMontado(true), []);
+
   const [indice, setIndice] = useState(Math.min(Math.max(inicio, 0), Math.max(musicas.length - 1, 0)));
   const [semitons, setSemitons] = useState(0);
   const [tamanho, setTamanho] = useState(preferencias?.tamanho ?? 18);
@@ -70,7 +76,8 @@ export default function ModoPalco({
 
   // Pinca com dois dedos (pinch): aumenta ou diminui so o tamanho do texto da
   // cifra, sem mexer na pagina. Usa um ouvinte nao-passivo para poder impedir
-  // o scroll enquanto se faz o gesto.
+  // o scroll enquanto se faz o gesto. Depende de "montado" para so ligar quando
+  // o conteudo (e a referencia) ja existe no portal.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -108,7 +115,7 @@ export default function ModoPalco({
       el.removeEventListener('touchend', aoTerminar);
       el.removeEventListener('touchcancel', aoTerminar);
     };
-  }, []);
+  }, [montado]);
 
   // Manter o ecra aceso enquanto o modo palco esta aberto.
   useEffect(() => {
@@ -139,12 +146,12 @@ export default function ModoPalco({
     scrollRef.current?.scrollTo({ top: 0, behavior: 'auto' });
   }
 
-  if (!musica) return null;
+  if (!montado || !musica) return null;
   const tomBase = musica.tom;
   const tomAtual = tomTransposto(tomBase, semitons) || (semitons !== 0 ? `${semitons > 0 ? '+' : ''}${semitons}` : '');
 
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'var(--fundo)', display: 'flex', flexDirection: 'column' }}>
+  return createPortal(
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'var(--fundo)', display: 'flex', flexDirection: 'column' }}>
       {/* Barra de topo */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: 'calc(10px + env(safe-area-inset-top)) 14px 10px', borderBottom: '1px solid var(--linha)' }}>
         <Link href={`/setlists/${setlistId}`} aria-label="Sair do modo palco" style={{ color: 'var(--texto-suave)', display: 'flex', alignItems: 'center', gap: 6, fontSize: 14 }}>
@@ -203,7 +210,8 @@ export default function ModoPalco({
 
         <button type="button" onClick={() => irPara(indice + 1)} disabled={indice === musicas.length - 1} className="botao" style={{ width: 'auto', minWidth: 64, opacity: indice === musicas.length - 1 ? 0.4 : 1 }}>Seguinte</button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
