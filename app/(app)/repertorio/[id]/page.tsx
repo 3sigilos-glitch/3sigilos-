@@ -1,23 +1,31 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import CifraFormatada from '@/components/cifras/CifraFormatada';
-import BotaoPorDefeito from '@/components/cifras/BotaoPorDefeito';
-import { obterMusica, listarCifras, obterPreferenciasCifra, escolherCifraPreferida } from '@/lib/consultas';
+import {
+  obterMusica,
+  listarCifras,
+  obterPreferenciasCifra,
+  obterEscolhasCifra,
+  escolherCifraPreferida,
+} from '@/lib/consultas';
+import { escolherVersaoCifra, limparEscolhaVersao } from './cifras/acoes';
 
 export const dynamic = 'force-dynamic';
 
 export default async function PaginaMusica({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [musica, cifras, pref] = await Promise.all([
+  const [musica, cifras, pref, escolhas] = await Promise.all([
     obterMusica(id),
     listarCifras(id),
     obterPreferenciasCifra(),
+    obterEscolhasCifra([id]),
   ]);
   if (!musica) notFound();
 
-  // A versao que ESTE membro vai ver no palco (etiqueta do instrumento, senao a
-  // geral, senao a primeira). Serve para marcar claramente qual e a "minha".
-  const minha = escolherCifraPreferida(cifras, pref.tag);
+  // Escolha manual desta musica (se houver) e a versao que este membro ve:
+  // manual > instrumento > base > primeira.
+  const escolhaId = escolhas[id] ?? null;
+  const minha = escolherCifraPreferida(cifras, pref.tag, escolhaId);
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -33,7 +41,7 @@ export default async function PaginaMusica({ params }: { params: Promise<{ id: s
         </span>
       </div>
 
-      {/* Cifras */}
+      {/* Versoes: cada um escolhe a que quer ver */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 className="rotulo-seccao">Versoes ({cifras.length})</h2>
@@ -42,9 +50,12 @@ export default async function PaginaMusica({ params }: { params: Promise<{ id: s
 
         {cifras.length > 0 && (
           <p style={{ fontSize: 12, color: 'var(--texto-fraco)', lineHeight: 1.5 }}>
-            A <strong style={{ color: 'var(--acento)' }}>Geral</strong> e a que todos veem por defeito. As versoes com
-            etiqueta de instrumento (BAIXO, TECLAS...) so aparecem a quem escolheu esse instrumento em
-            <Link href="/preferencias" style={{ color: 'var(--acento)' }}> As minhas cifras</Link>.
+            Toca em <strong style={{ color: 'var(--texto)' }}>Ver esta</strong> para escolheres a versao que queres ver no palco.
+            {escolhaId ? (
+              <> A tua escolha manda. </>
+            ) : (
+              <> Sem escolher, aparece a versao do teu instrumento (definido em <Link href="/preferencias" style={{ color: 'var(--acento)' }}>As minhas cifras</Link>). </>
+            )}
           </p>
         )}
 
@@ -53,21 +64,53 @@ export default async function PaginaMusica({ params }: { params: Promise<{ id: s
             <p style={{ lineHeight: 1.6 }}>Sem cifras. Toca em <strong style={{ color: 'var(--texto)' }}>Nova versao</strong> para colar a primeira.</p>
           </div>
         ) : (
-          cifras.map((c) => (
-            <div key={c.id} className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, borderColor: c.id === minha?.id ? 'var(--acento)' : undefined }}>
-              <Link href={`/repertorio/${id}/cifras/${c.id}`} style={{ display: 'flex', flexDirection: 'column', gap: 5, flex: 1 }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                  <strong style={{ fontSize: 15 }}>{c.nome_versao}</strong>
-                  {c.por_defeito && <Etiqueta texto="Geral" forte />}
-                  {c.id === minha?.id && <Etiqueta texto="A que tu ves" />}
-                </span>
-                <span style={{ fontSize: 12, color: 'var(--texto-suave)' }}>
-                  {[c.tom && `tom ${c.tom}`, c.numero_som && `som ${c.numero_som}`].filter(Boolean).join('  |  ') || 'sem tom definido'}
-                </span>
-              </Link>
-              {!c.por_defeito && <BotaoPorDefeito musicaId={id} cifraId={c.id} />}
-            </div>
-          ))
+          cifras.map((c) => {
+            const eMinha = c.id === minha?.id;
+            return (
+              <div
+                key={c.id}
+                className="cartao"
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 10,
+                  borderColor: eMinha ? 'var(--acento)' : undefined,
+                  background: eMinha ? 'var(--acento-suave)' : undefined,
+                }}
+              >
+                <Link href={`/repertorio/${id}/cifras/${c.id}`} style={{ display: 'flex', flexDirection: 'column', gap: 5, flex: 1, minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <strong style={{ fontSize: 15 }}>{c.nome_versao}</strong>
+                    {eMinha && <Etiqueta texto="A que tu ves" />}
+                  </span>
+                  <span style={{ fontSize: 12, color: 'var(--texto-suave)' }}>
+                    {[c.tom && `tom ${c.tom}`, c.numero_som && `som ${c.numero_som}`].filter(Boolean).join('  |  ') || 'sem tom definido'}
+                  </span>
+                </Link>
+
+                {/* Escolher esta versao (acao de servidor, guardada por membro). */}
+                <form action={escolherVersaoCifra.bind(null, id, c.id)}>
+                  <button
+                    type="submit"
+                    className={eMinha ? 'botao' : 'botao botao-secundario'}
+                    style={{ width: 'auto', minHeight: 40, fontSize: 13, whiteSpace: 'nowrap' }}
+                  >
+                    {eMinha ? 'A ver ✓' : 'Ver esta'}
+                  </button>
+                </form>
+              </div>
+            );
+          })
+        )}
+
+        {/* Voltar ao automatico (so aparece se houver escolha manual). */}
+        {escolhaId && (
+          <form action={limparEscolhaVersao.bind(null, id)}>
+            <button type="submit" style={{ background: 'transparent', border: 'none', color: 'var(--texto-suave)', fontSize: 13, textDecoration: 'underline', padding: '4px 0' }}>
+              Voltar ao automatico (pelo instrumento)
+            </button>
+          </form>
         )}
       </div>
 
@@ -84,8 +127,8 @@ export default async function PaginaMusica({ params }: { params: Promise<{ id: s
   );
 }
 
-// Etiqueta pequena em pilula, para marcar a versao geral e a do proprio.
-function Etiqueta({ texto, forte }: { texto: string; forte?: boolean }) {
+// Etiqueta pequena em pilula, para assinalar a versao que o proprio ve.
+function Etiqueta({ texto }: { texto: string }) {
   return (
     <span
       style={{
@@ -95,9 +138,9 @@ function Etiqueta({ texto, forte }: { texto: string; forte?: boolean }) {
         textTransform: 'uppercase',
         padding: '2px 8px',
         borderRadius: 999,
-        color: forte ? 'var(--acento-forte)' : 'var(--texto-suave)',
-        background: forte ? 'var(--acento-suave)' : 'var(--superficie-2)',
-        border: `1px solid ${forte ? 'var(--acento)' : 'var(--linha)'}`,
+        color: 'var(--acento-forte)',
+        background: 'var(--fundo)',
+        border: '1px solid var(--acento)',
       }}
     >
       {texto}

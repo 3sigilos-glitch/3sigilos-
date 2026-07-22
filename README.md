@@ -88,7 +88,8 @@ Corre tambem a migracao `0003_referencia.sql` (geracao da referencia das propost
 arquivar os PDF, a `0004_storage.sql` (cria o balde de Storage "propostas" e as suas permissoes).
 
 Para as setlists e cifras, corre a `0005_setlists_cifras.sql`. Para as preferencias de cifra por
-membro (cada um escolhe como ve o palco), corre a `0006_preferencias_cifra.sql`.
+membro (cada um escolhe como ve o palco), corre a `0006_preferencias_cifra.sql`. Para a escolha
+pessoal de versao por musica (cada um marca a versao que quer ver), corre a `0007_cifra_escolhida.sql`.
 
 Em alternativa, com a [CLI do Supabase](https://supabase.com/docs/guides/cli): `supabase db push`.
 
