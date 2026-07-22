@@ -116,9 +116,14 @@ export default function EditorCifra({ acao, cifra }: { acao: Acao; cifra?: Cifra
         <textarea name="notas_pessoais" className="campo" rows={2} style={{ paddingTop: 12, height: 'auto', resize: 'vertical' }} defaultValue={cifra?.notas_pessoais ?? ''} placeholder="Entra a seguir ao discurso, cuidado com o final..." />
       </Campo>
 
-      <label style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 'var(--toque)' }}>
-        <input type="checkbox" name="por_defeito" defaultChecked={cifra?.por_defeito ?? false} style={{ width: 20, height: 20, accentColor: 'var(--acento)' }} />
-        <span style={{ fontSize: 15 }}>Versao por defeito desta musica</span>
+      <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, minHeight: 'var(--toque)' }}>
+        <input type="checkbox" name="por_defeito" defaultChecked={cifra?.por_defeito ?? false} style={{ width: 20, height: 20, accentColor: 'var(--acento)', marginTop: 2 }} />
+        <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <span style={{ fontSize: 15 }}>Versao geral (a que todos veem por defeito)</span>
+          <span style={{ fontSize: 12, color: 'var(--texto-fraco)' }}>
+            Deixa desligado se esta e uma versao so para um instrumento (BAIXO, TECLAS...).
+          </span>
+        </span>
       </label>
 
       {mensagem && (
