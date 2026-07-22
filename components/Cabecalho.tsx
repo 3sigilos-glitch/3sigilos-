@@ -2,6 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import Marca from '@/components/Marca';
 
 // Barra de topo com o emblema e o nome. Recua ao rolar para baixo, para dar o
@@ -51,20 +52,35 @@ export default function Cabecalho({ email }: { email?: string }) {
         <Marca tamanho="medio" />
       </div>
 
-      <form action="/auth/sair" method="post">
-        <button
-          type="submit"
-          title="Sair"
-          aria-label="Sair"
-          style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', color: 'var(--texto-suave)', fontSize: 12, padding: 8 }}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        {/* Preferencias pessoais de cifra (como cada um ve o palco). */}
+        <Link
+          href="/preferencias"
+          title="As minhas cifras"
+          aria-label="As minhas cifras"
+          style={{ display: 'flex', alignItems: 'center', color: 'var(--texto-suave)', padding: 8 }}
         >
-          {email && <span style={{ maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email}</span>}
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <path d="M16 17l5-5-5-5M21 12H9" />
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
           </svg>
-        </button>
-      </form>
+        </Link>
+
+        <form action="/auth/sair" method="post">
+          <button
+            type="submit"
+            title="Sair"
+            aria-label="Sair"
+            style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', color: 'var(--texto-suave)', fontSize: 12, padding: 8 }}
+          >
+            {email && <span style={{ maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email}</span>}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <path d="M16 17l5-5-5-5M21 12H9" />
+            </svg>
+          </button>
+        </form>
+      </div>
     </header>
   );
 }

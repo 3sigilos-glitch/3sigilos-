@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import CifraFormatada from '@/components/cifras/CifraFormatada';
 import { tomTransposto } from '@/lib/acordes';
+import { guardarPreferenciasRapido } from '@/app/(app)/preferencias/acoes';
 
 export interface MusicaPalco {
   titulo: string;
@@ -13,28 +14,59 @@ export interface MusicaPalco {
   conteudo: string | null;
 }
 
+// Preferencias de cifra do membro, para semear os controlos e serem lembradas.
+export interface PreferenciasPalco {
+  tag: string | null;
+  esconderAcordes: boolean;
+  soTonica: boolean;
+  tamanho: number;
+}
+
 // Modo palco: ecra cheio, texto grande, fundo escuro, ecra sempre aceso,
-// transposicao dos acordes e navegacao entre musicas da setlist.
+// transposicao dos acordes e navegacao entre musicas da setlist. As opcoes de
+// visualizacao (tamanho, esconder acordes, so a tonica) sao por membro e ficam
+// guardadas assim que se mexe nelas.
 export default function ModoPalco({
   setlistId,
   nomeSetlist,
   musicas,
   inicio = 0,
+  preferencias,
 }: {
   setlistId: string;
   nomeSetlist: string;
   musicas: MusicaPalco[];
   inicio?: number;
+  preferencias?: PreferenciasPalco;
 }) {
   const [indice, setIndice] = useState(Math.min(Math.max(inicio, 0), Math.max(musicas.length - 1, 0)));
   const [semitons, setSemitons] = useState(0);
-  const [tamanho, setTamanho] = useState(18);
+  const [tamanho, setTamanho] = useState(preferencias?.tamanho ?? 18);
+  const [esconderAcordes, setEsconderAcordes] = useState(preferencias?.esconderAcordes ?? false);
+  const [soTonica, setSoTonica] = useState(preferencias?.soTonica ?? false);
   const scrollRef = useRef<HTMLDivElement>(null);
   // Guarda o tamanho atual para o gesto de pinca o poder ler sem se re-subscrever.
   const tamanhoRef = useRef(tamanho);
   tamanhoRef.current = tamanho;
+  // A etiqueta do instrumento nao se muda aqui, mas viaja nas gravacoes rapidas.
+  const tag = preferencias?.tag ?? null;
 
   const musica = musicas[indice];
+
+  // Guarda as opcoes de visualizacao assim que mudam, para virem assim da
+  // proxima vez. Espera um pouco (o tamanho muda muito depressa na pinca) e nao
+  // guarda na primeira renderizacao.
+  const primeiraRef = useRef(true);
+  useEffect(() => {
+    if (primeiraRef.current) {
+      primeiraRef.current = false;
+      return;
+    }
+    const t = setTimeout(() => {
+      guardarPreferenciasRapido({ tag, esconderAcordes, soTonica, tamanho }).catch(() => {});
+    }, 700);
+    return () => clearTimeout(t);
+  }, [esconderAcordes, soTonica, tamanho, tag]);
 
   // Pinca com dois dedos (pinch): aumenta ou diminui so o tamanho do texto da
   // cifra, sem mexer na pagina. Usa um ouvinte nao-passivo para poder impedir
@@ -137,14 +169,28 @@ export default function ModoPalco({
       {/* Cifra, area grande e com scroll suave */}
       <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 16px 16px', scrollBehavior: 'smooth', touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' as any }}>
         {musica.conteudo ? (
-          <CifraFormatada conteudo={musica.conteudo} semitons={semitons} tamanho={tamanho} />
+          <CifraFormatada conteudo={musica.conteudo} semitons={semitons} tamanho={tamanho} esconderAcordes={esconderAcordes} soTonica={soTonica} />
         ) : (
           <p style={{ color: 'var(--texto-suave)', fontSize: 15 }}>Esta musica ainda nao tem cifra. Acrescenta uma no repertorio.</p>
         )}
       </div>
 
+      {/* Vistas por instrumento: esconder acordes (voz) e so a tonica (baixo) */}
+      <div style={{ display: 'flex', gap: 8, padding: '8px 12px 0', justifyContent: 'center' }}>
+        <Alternador
+          ativo={esconderAcordes}
+          onClick={() => setEsconderAcordes((v) => !v)}
+          etiqueta={esconderAcordes ? 'So letra' : 'Esconder acordes'}
+        />
+        <Alternador
+          ativo={soTonica}
+          onClick={() => setSoTonica((v) => !v)}
+          etiqueta="So a tonica"
+        />
+      </div>
+
       {/* Controlos */}
-      <div style={{ borderTop: '1px solid var(--linha)', padding: '10px 12px calc(10px + env(safe-area-inset-bottom))', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+      <div style={{ padding: '8px 12px calc(10px + env(safe-area-inset-bottom))', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
         <button type="button" onClick={() => irPara(indice - 1)} disabled={indice === 0} className="botao botao-secundario" style={{ width: 'auto', minWidth: 64, opacity: indice === 0 ? 0.4 : 1 }}>Anterior</button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -176,6 +222,29 @@ function ControloRedondo({ etiqueta, onClick, titulo }: { etiqueta: string; onCl
         color: 'var(--texto)',
         fontSize: 13,
         fontWeight: 700,
+      }}
+    >
+      {etiqueta}
+    </button>
+  );
+}
+
+// Botao em pilula que fica aceso quando a vista esta ativa.
+function Alternador({ ativo, onClick, etiqueta }: { ativo: boolean; onClick: () => void; etiqueta: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={ativo}
+      style={{
+        minHeight: 34,
+        padding: '6px 14px',
+        borderRadius: 999,
+        fontSize: 13,
+        fontWeight: 600,
+        background: ativo ? 'var(--acento-suave)' : 'var(--superficie-2)',
+        border: `1px solid ${ativo ? 'var(--acento)' : 'var(--linha)'}`,
+        color: ativo ? 'var(--acento-forte)' : 'var(--texto-suave)',
       }}
     >
       {etiqueta}

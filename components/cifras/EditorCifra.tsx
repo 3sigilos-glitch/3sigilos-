@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from 'react';
 import { useFormState } from 'react-dom';
 import CifraFormatada from '@/components/cifras/CifraFormatada';
 import { importarDoDrive, type EstadoCifra } from '@/app/(app)/repertorio/[id]/cifras/acoes';
-import type { Cifra } from '@/lib/tipos';
+import { TAGS_CIFRA, type Cifra } from '@/lib/tipos';
 
 type Acao = (prev: EstadoCifra, formData: FormData) => Promise<EstadoCifra>;
 
@@ -44,7 +44,23 @@ export default function EditorCifra({ acao, cifra }: { acao: Acao; cifra?: Cifra
   return (
     <form action={formAction} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <Campo etiqueta="Nome da versao" obrigatorio>
-        <input name="nome_versao" required className="campo" defaultValue={cifra?.nome_versao ?? ''} placeholder="Tom original, Meio tom abaixo, Acustica..." />
+        <input
+          name="nome_versao"
+          required
+          className="campo"
+          list="tags-versao"
+          defaultValue={cifra?.nome_versao ?? ''}
+          placeholder="GERAL, BAIXO, TECLAS, Meio tom abaixo..."
+        />
+        <datalist id="tags-versao">
+          {TAGS_CIFRA.map((t) => (
+            <option key={t} value={t} />
+          ))}
+        </datalist>
+        <span style={{ fontSize: 11, color: 'var(--texto-fraco)', lineHeight: 1.5 }}>
+          Usa uma etiqueta de instrumento (BAIXO, TECLAS, VOZ) para cada um ver a sua versao no palco,
+          ou um nome livre para versoes de tom (Meio tom abaixo).
+        </span>
       </Campo>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

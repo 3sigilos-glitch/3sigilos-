@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import ModoPalco, { type MusicaPalco } from '@/components/palco/ModoPalco';
-import { obterSetlist } from '@/lib/consultas';
+import { obterSetlist, obterPreferenciasCifra } from '@/lib/consultas';
 
 // O modo palco cobre o ecra todo, por isso desativa a cache e le sempre fresco.
 export const dynamic = 'force-dynamic';
@@ -14,7 +14,7 @@ export default async function PaginaPalco({
 }) {
   const { id } = await params;
   const { i } = await searchParams;
-  const setlist = await obterSetlist(id);
+  const [setlist, preferencias] = await Promise.all([obterSetlist(id), obterPreferenciasCifra()]);
   if (!setlist) notFound();
 
   const musicas: MusicaPalco[] = setlist.itens.map((item) => ({
@@ -31,6 +31,7 @@ export default async function PaginaPalco({
       nomeSetlist={setlist.nome}
       musicas={musicas}
       inicio={Number(i) || 0}
+      preferencias={preferencias}
     />
   );
 }
