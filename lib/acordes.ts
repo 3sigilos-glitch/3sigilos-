@@ -84,6 +84,39 @@ export function transporAcorde(token: string, semitons: number): string {
   return resultado;
 }
 
+// Reduz um acorde a nota que o baixo toca: a nota do baixo se houver barra
+// (por exemplo Am/C toca C), senao a fundamental. Ignora qualidade e extensoes.
+// Aplica tambem a transposicao. Serve para a vista "so a tonica" do baixista.
+export function apenasTonica(token: string, semitons = 0): string {
+  const m = token.match(RE_ACORDE);
+  if (!m) return token;
+  const [, raiz, acc = '', , baixoRaiz, baixoAcc = ''] = m;
+  if (baixoRaiz) return transporRaiz(baixoRaiz + baixoAcc, semitons, baixoAcc === 'b');
+  return transporRaiz(raiz + acc, semitons, acc === 'b');
+}
+
+// Como transporLinhaAcordes, mas substitui cada acorde pela sua tonica (nota do
+// baixo). Mantem, tanto quanto possivel, o alinhamento por cima da letra.
+export function reduzirLinhaTonica(linha: string, semitons: number): string {
+  let resultado = '';
+  const re = /(\S+)(\s*)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(linha)) !== null) {
+    const palavra = m[1];
+    let espacos = m[2];
+    if (ehAcorde(palavra)) {
+      const novo = apenasTonica(palavra, semitons);
+      const diff = novo.length - palavra.length;
+      if (diff > 0) espacos = espacos.length > diff ? espacos.slice(diff) : ' ';
+      else if (diff < 0) espacos = espacos + ' '.repeat(-diff);
+      resultado += novo + espacos;
+    } else {
+      resultado += palavra + espacos;
+    }
+  }
+  return resultado;
+}
+
 // Transpoe uma linha de acordes, ajustando os espacos para manter, tanto quanto
 // possivel, o alinhamento dos acordes sobre a letra.
 export function transporLinhaAcordes(linha: string, semitons: number): string {

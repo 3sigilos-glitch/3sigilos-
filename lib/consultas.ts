@@ -4,6 +4,48 @@ import type {
   Cifra, Setlist, SetlistMusica,
 } from '@/lib/tipos';
 
+// Preferencias de cifra do login atual (privadas). Resiliente: se a migracao
+// 0006 ainda nao tiver corrido, devolve os valores por defeito sem rebentar.
+export interface PreferenciasCifra {
+  tag: string | null;
+  esconderAcordes: boolean;
+  soTonica: boolean;
+  tamanho: number;
+}
+
+const PREFERENCIAS_DEFEITO: PreferenciasCifra = {
+  tag: null,
+  esconderAcordes: false,
+  soTonica: false,
+  tamanho: 18,
+};
+
+export async function obterPreferenciasCifra(): Promise<PreferenciasCifra> {
+  try {
+    const supabase = await criarClienteServidor();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return PREFERENCIAS_DEFEITO;
+
+    const { data, error } = await supabase
+      .from('perfis')
+      .select('cifra_tag, cifra_esconder_acordes, cifra_so_tonica, cifra_tamanho')
+      .eq('id', user.id)
+      .single();
+
+    if (error || !data) return PREFERENCIAS_DEFEITO;
+    return {
+      tag: (data as any).cifra_tag ?? null,
+      esconderAcordes: !!(data as any).cifra_esconder_acordes,
+      soTonica: !!(data as any).cifra_so_tonica,
+      tamanho: (data as any).cifra_tamanho ?? 18,
+    };
+  } catch {
+    return PREFERENCIAS_DEFEITO;
+  }
+}
+
 // Definicoes da app (linha unica). Devolve null se ainda nao houver ligacao.
 export async function obterDefinicoes(): Promise<Definicoes | null> {
   const supabase = await criarClienteServidor();
@@ -280,22 +322,32 @@ export async function obterSetlist(id: string): Promise<SetlistDetalhada | null>
     .eq('setlist_id', id)
     .order('ordem', { ascending: true });
 
-  // Para os itens sem cifra escolhida, usa a cifra por defeito da musica.
+  // Para os itens sem cifra escolhida na setlist, escolhe a melhor versao para
+  // quem esta a ver: primeiro a versao com a etiqueta do seu instrumento (por
+  // exemplo "BAIXO"), senao a versao por defeito, senao a primeira que houver.
   const lista = (itens as any[]) ?? [];
   const semCifra = lista.filter((i) => !i.cifra && i.musica?.id).map((i) => i.musica.id);
-  let porDefeito: Record<string, Cifra> = {};
+  let escolhida: Record<string, Cifra> = {};
   if (semCifra.length > 0) {
-    const { data: cifrasDef } = await supabase
-      .from('cifras')
-      .select('*')
-      .in('musica_id', semCifra)
-      .eq('por_defeito', true);
-    for (const c of (cifrasDef as Cifra[]) ?? []) porDefeito[c.musica_id] = c;
+    const pref = await obterPreferenciasCifra();
+    const tag = (pref.tag ?? '').trim().toLowerCase();
+    const { data: todas } = await supabase.from('cifras').select('*').in('musica_id', semCifra);
+
+    const porMusica: Record<string, Cifra[]> = {};
+    for (const c of (todas as Cifra[]) ?? []) (porMusica[c.musica_id] ??= []).push(c);
+
+    for (const [mid, cifras] of Object.entries(porMusica)) {
+      const porTag = tag
+        ? cifras.find((c) => (c.nome_versao ?? '').trim().toLowerCase().includes(tag))
+        : undefined;
+      const porDef = cifras.find((c) => c.por_defeito);
+      escolhida[mid] = porTag ?? porDef ?? cifras[0];
+    }
   }
 
   const itensFinais: ItemSetlist[] = lista.map((i) => ({
     ...i,
-    cifra: i.cifra ?? (i.musica?.id ? porDefeito[i.musica.id] ?? null : null),
+    cifra: i.cifra ?? (i.musica?.id ? escolhida[i.musica.id] ?? null : null),
   }));
 
   return { ...(setlist as Setlist), itens: itensFinais };

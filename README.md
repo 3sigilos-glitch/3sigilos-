@@ -87,6 +87,9 @@ A forma mais simples, sem instalar nada:
 Corre tambem a migracao `0003_referencia.sql` (geracao da referencia das propostas) e, se quiseres
 arquivar os PDF, a `0004_storage.sql` (cria o balde de Storage "propostas" e as suas permissoes).
 
+Para as setlists e cifras, corre a `0005_setlists_cifras.sql`. Para as preferencias de cifra por
+membro (cada um escolhe como ve o palco), corre a `0006_preferencias_cifra.sql`.
+
 Em alternativa, com a [CLI do Supabase](https://supabase.com/docs/guides/cli): `supabase db push`.
 
 As permissoes ficam assim: todos os elementos leem tudo e podem criar e editar eventos, contactos,

@@ -148,7 +148,16 @@ export interface Perfil {
   papel: PapelConta;
   equipa_id: string | null;
   criado_em: string;
+  // Preferencias de cifra por login (ver migracao 0006).
+  cifra_tag: string | null;
+  cifra_esconder_acordes: boolean;
+  cifra_so_tonica: boolean;
+  cifra_tamanho: number;
 }
+
+// Etiquetas sugeridas para as versoes de cifra, por instrumento. Guiam o nome
+// da versao (nome_versao) e a preferencia de cada membro. Nao sao obrigatorias.
+export const TAGS_CIFRA = ['GERAL', 'VOZ', 'GUITARRA', 'BAIXO', 'TECLAS', 'BATERIA'] as const;
 
 // -----------------------------------------------------------------------------
 // Rotulos em PT-PT e cores dos estados, para usar na interface.
