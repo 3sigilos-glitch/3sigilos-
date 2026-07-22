@@ -21,19 +21,52 @@ const PREFERENCIAS_DEFEITO: PreferenciasCifra = {
 };
 
 // Escolhe, de entre as versoes de uma musica, a que um membro deve ver:
-// primeiro a versao com a etiqueta do seu instrumento (por exemplo "BAIXO"),
-// senao a versao geral (por defeito), senao a primeira. Usada no palco e na
-// ficha da musica, para nao haver duas regras diferentes.
-export function escolherCifraPreferida<T extends { nome_versao: string | null; por_defeito: boolean }>(
+//   1. a escolha manual desta musica (escolhidaId), se existir
+//   2. a versao com a etiqueta do seu instrumento (por exemplo "BAIXO")
+//   3. a versao base (por_defeito)
+//   4. a primeira que houver
+// Usada no palco e na ficha da musica, para nao haver duas regras diferentes.
+export function escolherCifraPreferida<T extends { id: string; nome_versao: string | null; por_defeito: boolean }>(
   cifras: T[],
-  tag: string | null | undefined
+  tag: string | null | undefined,
+  escolhidaId?: string | null
 ): T | null {
   if (cifras.length === 0) return null;
+  if (escolhidaId) {
+    const manual = cifras.find((c) => c.id === escolhidaId);
+    if (manual) return manual;
+  }
   const t = (tag ?? '').trim().toLowerCase();
   const porTag = t
     ? cifras.find((c) => (c.nome_versao ?? '').trim().toLowerCase().includes(t))
     : undefined;
   return porTag ?? cifras.find((c) => c.por_defeito) ?? cifras[0];
+}
+
+// Escolhas manuais de versao do login atual, por musica: { musica_id: cifra_id }.
+// Resiliente: se a tabela ainda nao existir (migracao 0007), devolve vazio.
+export async function obterEscolhasCifra(musicaIds: string[]): Promise<Record<string, string>> {
+  if (musicaIds.length === 0) return {};
+  try {
+    const supabase = await criarClienteServidor();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return {};
+
+    const { data, error } = await supabase
+      .from('cifras_escolhidas')
+      .select('musica_id, cifra_id')
+      .eq('user_id', user.id)
+      .in('musica_id', musicaIds);
+    if (error || !data) return {};
+
+    const mapa: Record<string, string> = {};
+    for (const linha of data as { musica_id: string; cifra_id: string }[]) mapa[linha.musica_id] = linha.cifra_id;
+    return mapa;
+  } catch {
+    return {};
+  }
 }
 
 export async function obterPreferenciasCifra(): Promise<PreferenciasCifra> {
@@ -345,7 +378,10 @@ export async function obterSetlist(id: string): Promise<SetlistDetalhada | null>
   const semCifra = lista.filter((i) => !i.cifra && i.musica?.id).map((i) => i.musica.id);
   let escolhida: Record<string, Cifra> = {};
   if (semCifra.length > 0) {
-    const pref = await obterPreferenciasCifra();
+    const [pref, escolhasManuais] = await Promise.all([
+      obterPreferenciasCifra(),
+      obterEscolhasCifra(semCifra),
+    ]);
     const tag = (pref.tag ?? '').trim().toLowerCase();
     const { data: todas } = await supabase.from('cifras').select('*').in('musica_id', semCifra);
 
@@ -353,7 +389,7 @@ export async function obterSetlist(id: string): Promise<SetlistDetalhada | null>
     for (const c of (todas as Cifra[]) ?? []) (porMusica[c.musica_id] ??= []).push(c);
 
     for (const [mid, cifras] of Object.entries(porMusica)) {
-      const escolha = escolherCifraPreferida(cifras, tag);
+      const escolha = escolherCifraPreferida(cifras, tag, escolhasManuais[mid]);
       if (escolha) escolhida[mid] = escolha;
     }
   }

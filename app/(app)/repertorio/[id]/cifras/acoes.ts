@@ -62,6 +62,44 @@ export async function apagarCifra(musicaId: string, cifraId: string) {
   redirect(`/repertorio/${musicaId}`);
 }
 
+// Escolha pessoal: este membro passa a ver ESTA versao nesta musica (manda
+// sobre a automatica). Guardado so para o proprio login (ver migracao 0007).
+export async function escolherVersaoCifra(musicaId: string, cifraId: string) {
+  const supabase = await criarClienteServidor();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error('A sessao expirou. Entra de novo.');
+
+  const { error } = await supabase
+    .from('cifras_escolhidas')
+    .upsert({ user_id: user.id, musica_id: musicaId, cifra_id: cifraId, atualizado_em: new Date().toISOString() });
+  if (error) {
+    if (error.code === '42P01' || /does not exist/i.test(error.message ?? '')) {
+      throw new Error('Corre a migracao 0007 no SQL Editor do Supabase (ver README).');
+    }
+    throw new Error(`Nao foi possivel escolher: ${error.message}`);
+  }
+  revalidatePath(`/repertorio/${musicaId}`);
+}
+
+// Volta ao automatico: apaga a escolha manual desta musica para este membro.
+export async function limparEscolhaVersao(musicaId: string) {
+  const supabase = await criarClienteServidor();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error('A sessao expirou. Entra de novo.');
+
+  const { error } = await supabase
+    .from('cifras_escolhidas')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('musica_id', musicaId);
+  if (error) throw new Error(`Nao foi possivel limpar: ${error.message}`);
+  revalidatePath(`/repertorio/${musicaId}`);
+}
+
 // Marca uma cifra como a versao por defeito da musica (o gatilho desmarca as outras).
 export async function definirCifraPorDefeito(musicaId: string, cifraId: string) {
   const supabase = await criarClienteServidor();
