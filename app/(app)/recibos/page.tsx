@@ -13,6 +13,7 @@ export default async function PaginaRecibos({
   const recibos = await listarRecibos(ano);
   const resumo = resumirPorMembro(recibos);
   const porEmitir = recibos.filter((r) => !r.passado);
+  const passados = recibos.filter((r) => r.passado);
   const totalAno = recibos.reduce((s, r) => s + Number(r.valor ?? 0), 0);
 
   return (
@@ -35,11 +36,11 @@ export default async function PaginaRecibos({
         <strong className="titulo numero" style={{ fontSize: 28, color: 'var(--acento-forte)' }}>{euros(totalAno)}</strong>
       </div>
 
-      {/* Recibos por emitir */}
+      {/* Recibos em falta */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <h2 className="rotulo-seccao">Por emitir ({porEmitir.length})</h2>
+        <h2 className="rotulo-seccao">Em falta ({porEmitir.length})</h2>
         {porEmitir.length === 0 ? (
-          <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Tudo em dia, sem recibos por emitir neste ano.</p>
+          <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Tudo em dia, sem recibos em falta neste ano.</p>
         ) : (
           porEmitir.map((r) => {
             // Lembrete automatico de um concerto realizado: sem membro e sem valor.
@@ -65,6 +66,29 @@ export default async function PaginaRecibos({
               </div>
             );
           })
+        )}
+      </div>
+
+      {/* Recibos passados */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <h2 className="rotulo-seccao">Passados ({passados.length})</h2>
+        {passados.length === 0 ? (
+          <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Ainda sem recibos passados em {ano}.</p>
+        ) : (
+          passados.map((r) => (
+            <div key={r.id} className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+              <Link href={`/recibos/${r.id}/editar`} style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1, minWidth: 0 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  <strong style={{ fontSize: 15 }}>{r.membro?.nome ?? 'Sem musico'}</strong>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--estado-confirmado)" strokeWidth="2.4"><path d="M20 6L9 17l-5-5" /></svg>
+                </span>
+                <span style={{ fontSize: 12, color: 'var(--texto-suave)' }}>
+                  {r.evento?.evento ?? 'Sem evento'}{r.data ? `, ${dataExtenso(r.data)}` : ''}
+                </span>
+              </Link>
+              <strong className="titulo numero" style={{ fontSize: 16 }}>{euros(r.valor)}</strong>
+            </div>
+          ))
         )}
       </div>
 
