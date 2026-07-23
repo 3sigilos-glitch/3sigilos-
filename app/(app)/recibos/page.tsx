@@ -41,20 +41,30 @@ export default async function PaginaRecibos({
         {porEmitir.length === 0 ? (
           <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Tudo em dia, sem recibos por emitir neste ano.</p>
         ) : (
-          porEmitir.map((r) => (
-            <div key={r.id} className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-              <Link href={`/recibos/${r.id}/editar`} style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1 }}>
-                <strong style={{ fontSize: 15 }}>{r.membro?.nome ?? 'Sem membro'}</strong>
-                <span style={{ fontSize: 12, color: 'var(--texto-suave)' }}>
-                  {r.evento?.evento ?? 'Sem evento'}{r.data ? `, ${dataExtenso(r.data)}` : ''}
-                </span>
-              </Link>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-                <strong className="titulo numero" style={{ fontSize: 16 }}>{euros(r.valor)}</strong>
-                <BotaoPassado id={r.id} passado={r.passado} />
+          porEmitir.map((r) => {
+            // Lembrete automatico de um concerto realizado: sem membro e sem valor.
+            const ehLembrete = !r.membro_id && Number(r.valor ?? 0) === 0;
+            return (
+              <div key={r.id} className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, borderColor: ehLembrete ? 'var(--linha-quente)' : undefined }}>
+                <Link href={`/recibos/${r.id}/editar`} style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1, minWidth: 0 }}>
+                  <strong style={{ fontSize: 15 }}>{ehLembrete ? (r.evento?.evento ?? 'Concerto') : (r.membro?.nome ?? 'Sem membro')}</strong>
+                  <span style={{ fontSize: 12, color: 'var(--texto-suave)' }}>
+                    {ehLembrete
+                      ? `Recibos por combinar${r.data ? `, ${dataExtenso(r.data)}` : ''}`
+                      : `${r.evento?.evento ?? 'Sem evento'}${r.data ? `, ${dataExtenso(r.data)}` : ''}`}
+                  </span>
+                </Link>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                  {ehLembrete ? (
+                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--acento-forte)', background: 'var(--acento-suave)', border: '1px solid var(--acento)', borderRadius: 999, padding: '2px 8px' }}>Lembrete</span>
+                  ) : (
+                    <strong className="titulo numero" style={{ fontSize: 16 }}>{euros(r.valor)}</strong>
+                  )}
+                  <BotaoPassado id={r.id} passado={r.passado} />
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
