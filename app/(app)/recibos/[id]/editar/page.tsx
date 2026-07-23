@@ -13,10 +13,18 @@ export default async function PaginaEditarRecibo({ params }: { params: Promise<{
   const guardar = atualizarRecibo.bind(null, id);
   const apagar = apagarRecibo.bind(null, id);
 
+  // Lembrete de um concerto realizado, ainda por passar: sem musico e sem valor.
+  const ehLembrete = !recibo.membro_id && Number(recibo.valor ?? 0) === 0 && !recibo.passado;
+
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <Link href="/recibos" style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Voltar</Link>
-      <h1 style={{ fontSize: 30 }}>Editar recibo</h1>
+      <h1 style={{ fontSize: 30 }}>{ehLembrete ? 'Passar recibo' : 'Editar recibo'}</h1>
+      {ehLembrete && (
+        <p style={{ color: 'var(--texto-suave)', fontSize: 14, lineHeight: 1.6, marginTop: -8 }}>
+          Indica quem passou o recibo, o valor e a data, e marca <strong style={{ color: 'var(--texto)' }}>Recibo ja passado</strong>.
+        </p>
+      )}
       <FormularioRecibo acao={guardar} recibo={recibo} eventos={opcoes.eventos} membros={opcoes.membros} />
       {sessao.ehAdmin && (
         <BotaoApagar acao={apagar} confirmacao="Apagar este recibo?" etiqueta="Apagar recibo" />
