@@ -61,6 +61,28 @@ function lerFormulario(formData: FormData) {
   return registo;
 }
 
+type Cliente = Awaited<ReturnType<typeof criarClienteServidor>>;
+
+// Ao passar um evento a "realizado", deixa um lembrete de recibos por emitir:
+// um unico recibo ligado ao evento, sem membro e sem valor (a banda decide
+// entre si quem passa o que). So cria se ainda nao houver nenhum recibo para
+// este evento, para nao duplicar. Silencioso: nunca trava o guardar do evento.
+async function garantirLembreteRecibo(supabase: Cliente, eventoId: string, dataEvento: string | null) {
+  try {
+    const { data: existentes } = await supabase.from('recibos').select('id').eq('evento_id', eventoId).limit(1);
+    if (existentes && existentes.length > 0) return;
+    await supabase.from('recibos').insert({
+      evento_id: eventoId,
+      membro_id: null,
+      valor: 0,
+      data: dataEvento ? dataEvento.slice(0, 10) : null,
+      passado: false,
+    });
+  } catch {
+    // Sem barulho: o lembrete nao e critico para guardar o evento.
+  }
+}
+
 export async function criarEvento(formData: FormData) {
   const supabase = await criarClienteServidor();
   const registo = lerFormulario(formData);
@@ -68,6 +90,11 @@ export async function criarEvento(formData: FormData) {
   const { data, error } = await supabase.from('eventos').insert(registo).select('id').single();
   if (error) {
     throw new Error(`Nao foi possivel criar o evento: ${error.message}`);
+  }
+
+  if (registo.estado === 'realizado') {
+    await garantirLembreteRecibo(supabase, data.id, registo.data);
+    revalidatePath('/recibos');
   }
 
   revalidatePath('/eventos');
@@ -81,6 +108,11 @@ export async function atualizarEvento(id: string, formData: FormData) {
   const { error } = await supabase.from('eventos').update(registo).eq('id', id);
   if (error) {
     throw new Error(`Nao foi possivel guardar as alteracoes: ${error.message}`);
+  }
+
+  if (registo.estado === 'realizado') {
+    await garantirLembreteRecibo(supabase, id, registo.data);
+    revalidatePath('/recibos');
   }
 
   revalidatePath('/eventos');
