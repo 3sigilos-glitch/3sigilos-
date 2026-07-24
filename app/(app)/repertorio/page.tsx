@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import FiltrosRepertorio from '@/components/repertorio/FiltrosRepertorio';
+import Dica from '@/components/Dica';
 import { listarRepertorio } from '@/lib/consultas';
 
 export default async function PaginaRepertorio({
@@ -21,6 +22,12 @@ export default async function PaginaRepertorio({
           <Link href="/repertorio/novo" className="botao" style={{ width: 'auto' }}>Nova</Link>
         </div>
       </div>
+
+      <Dica id="repertorio">
+        Cada musica pode ter varias versoes de cifra (por exemplo <strong>BAIXO</strong>, <strong>TECLAS</strong>,
+        <strong> VOZ</strong>). Abre uma musica e toca em <strong>Ver esta</strong> para escolheres a que queres ver.
+        Define o teu instrumento em <strong>As minhas cifras</strong> (icone no topo) para vir logo a tua.
+      </Dica>
 
       <Suspense>
         <FiltrosRepertorio />

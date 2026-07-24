@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Dica from '@/components/Dica';
 import { listarSetlists } from '@/lib/consultas';
 
 export default async function PaginaSetlists() {
@@ -10,6 +11,12 @@ export default async function PaginaSetlists() {
         <h1 style={{ fontSize: 30 }}>Setlists</h1>
         <Link href="/setlists/nova" className="botao" style={{ width: 'auto' }}>Nova</Link>
       </div>
+
+      <Dica id="setlists">
+        Cria a setlist e arrasta as musicas para as ordenares. No concerto, abre o <strong>Modo palco</strong>: texto
+        grande, dois dedos para dar zoom, e podes mudar o tom na hora. Podes ligar uma setlist a um evento na ficha
+        do evento.
+      </Dica>
 
       {setlists.length === 0 ? (
         <div className="cartao" style={{ textAlign: 'center', color: 'var(--texto-suave)' }}>

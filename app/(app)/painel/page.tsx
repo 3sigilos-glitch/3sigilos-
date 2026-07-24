@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import CartaoEvento from '@/components/eventos/CartaoEvento';
+import Dica from '@/components/Dica';
 import { carregarPainel } from '@/lib/consultas';
 import { obterSessao } from '@/lib/sessao';
 import { euros, mesAno, dataExtenso, hora, textoDias } from '@/lib/formatar';
@@ -24,6 +25,11 @@ export default async function PaginaPainel() {
         </p>
         <h1 className="t-titulo" style={{ fontSize: 34, marginTop: 4 }}>Painel</h1>
       </div>
+
+      <Dica id="painel">
+        Este e o ponto de partida: proximo concerto, agenda, propostas e contas num relance. Navega pela barra de
+        baixo (Painel, Agenda, Setlists, Recibos). Cada cartao abre com um toque.
+      </Dica>
 
       {/* Proximo concerto em destaque */}
       {proximo && (
