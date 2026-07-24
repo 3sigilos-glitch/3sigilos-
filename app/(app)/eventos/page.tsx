@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import FiltrosEventos from '@/components/eventos/FiltrosEventos';
 import CartaoEvento from '@/components/eventos/CartaoEvento';
+import Dica from '@/components/Dica';
 import { listarEventos } from '@/lib/consultas';
 import { mesAno } from '@/lib/formatar';
 import type { Evento } from '@/lib/tipos';
@@ -34,6 +35,12 @@ export default async function PaginaEventos({
           Novo
         </Link>
       </div>
+
+      <Dica id="eventos">
+        Toca em <strong>Novo</strong> para marcar um evento. Vai mudando o estado: <strong>orcamentado</strong> quando
+        envias a proposta, <strong>confirmado</strong> quando fecha a data, e <strong>realizado</strong> depois do
+        concerto (fica logo um lembrete de recibo). Se marcares dois eventos no mesmo dia, a app avisa.
+      </Dica>
 
       <Suspense>
         <FiltrosEventos />

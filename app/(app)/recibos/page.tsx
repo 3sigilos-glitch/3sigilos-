@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import BotaoPassado from '@/components/recibos/BotaoPassado';
+import Dica from '@/components/Dica';
 import { listarRecibos, resumirPorMembro } from '@/lib/consultas';
 import { euros, dataExtenso } from '@/lib/formatar';
 
@@ -22,6 +23,12 @@ export default async function PaginaRecibos({
         <h1 style={{ fontSize: 30 }}>Recibos</h1>
         <Link href="/recibos/novo" className="botao" style={{ width: 'auto' }}>Novo</Link>
       </div>
+
+      <Dica id="recibos">
+        Quando um concerto passa a <strong>realizado</strong>, aparece aqui um lembrete em <strong>Em falta</strong>.
+        Quem for passar o recibo toca em <strong>Passar</strong>, escolhe o seu nome, o valor e a data, e marca como
+        passado. O recibo salta para <strong>Passados</strong>, com o nome de quem o passou.
+      </Dica>
 
       {/* Navegacao de ano */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -55,14 +62,16 @@ export default async function PaginaRecibos({
                       : `${r.evento?.evento ?? 'Sem evento'}${r.data ? `, ${dataExtenso(r.data)}` : ''}`}
                   </span>
                 </Link>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-                  {ehLembrete ? (
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--acento-forte)', background: 'var(--acento-suave)', border: '1px solid var(--acento)', borderRadius: 999, padding: '2px 8px' }}>Lembrete</span>
-                  ) : (
+                {ehLembrete ? (
+                  // Lembrete: leva ao ecra de passar (escolher quem, valor e data),
+                  // em vez do visto rapido, que marcaria sem preencher nada.
+                  <Link href={`/recibos/${r.id}/editar`} className="botao" style={{ width: 'auto', minHeight: 40, fontSize: 13, whiteSpace: 'nowrap', flexShrink: 0 }}>Passar</Link>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
                     <strong className="titulo numero" style={{ fontSize: 16 }}>{euros(r.valor)}</strong>
-                  )}
-                  <BotaoPassado id={r.id} passado={r.passado} />
-                </div>
+                    <BotaoPassado id={r.id} passado={r.passado} />
+                  </div>
+                )}
               </div>
             );
           })
