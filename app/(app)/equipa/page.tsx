@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Avatar from '@/components/Avatar';
+import EstadoVazio from '@/components/EstadoVazio';
 import { listarEquipa } from '@/lib/consultas';
 import { obterSessao } from '@/lib/sessao';
 import type { Equipa } from '@/lib/tipos';
@@ -17,9 +18,12 @@ export default async function PaginaEquipa() {
       </div>
 
       {equipa.length === 0 && (
-        <div className="cartao" style={{ textAlign: 'center', color: 'var(--texto-suave)' }}>
-          <p>Sem elementos. {sessao.ehAdmin ? 'Toca em Novo para adicionar.' : 'O admin ainda nao adicionou ninguem.'}</p>
-        </div>
+        <EstadoVazio
+          titulo="Sem elementos"
+          texto="A equipa junta os musicos e os dois tecnicos de som. Serve para atribuir quem tratou de cada evento e quem passou recibo."
+          accaoHref={sessao.ehAdmin ? '/equipa/novo' : undefined}
+          accaoEtiqueta={sessao.ehAdmin ? 'Adicionar elemento' : undefined}
+        />
       )}
 
       {membros.length > 0 && <Grupo titulo="Banda" elementos={membros} podeEditar={sessao.ehAdmin} />}

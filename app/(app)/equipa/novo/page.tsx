@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 import { redirect } from 'next/navigation';
 import FormularioMembro from '@/components/equipa/FormularioMembro';
 import { obterSessao } from '@/lib/sessao';
@@ -11,7 +11,7 @@ export default async function PaginaNovoMembro() {
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <Link href="/equipa" style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Voltar</Link>
+      <BotaoVoltar href="/equipa" />
       <h1 style={{ fontSize: 30 }}>Novo elemento</h1>
       <FormularioMembro acao={criarMembro} />
     </section>

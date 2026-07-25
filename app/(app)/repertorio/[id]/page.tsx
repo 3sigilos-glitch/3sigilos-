@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 import { notFound } from 'next/navigation';
 import CifraFormatada from '@/components/cifras/CifraFormatada';
 import {
@@ -30,7 +31,7 @@ export default async function PaginaMusica({ params }: { params: Promise<{ id: s
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href="/repertorio" style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Voltar</Link>
+        <BotaoVoltar href="/repertorio" />
         <Link href={`/repertorio/${id}/editar`} className="botao botao-secundario" style={{ width: 'auto' }}>Editar musica</Link>
       </div>
 

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 import { redirect } from 'next/navigation';
 import { obterDefinicoes, listarEscaloes } from '@/lib/consultas';
 import { obterSessao } from '@/lib/sessao';
@@ -14,6 +15,7 @@ export default async function PaginaDefinicoes() {
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <BotaoVoltar href="/painel" />
       <h1 style={{ fontSize: 30 }}>Definicoes</h1>
 
       {/* Parametros gerais e textos da proposta */}

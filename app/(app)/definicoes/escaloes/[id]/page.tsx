@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 import { notFound, redirect } from 'next/navigation';
 import FormularioEscalao from '@/components/definicoes/FormularioEscalao';
 import BotaoApagar from '@/components/BotaoApagar';
@@ -18,7 +18,7 @@ export default async function PaginaEditarEscalao({ params }: { params: Promise<
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <Link href="/definicoes" style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Voltar</Link>
+      <BotaoVoltar href="/definicoes" />
       <h1 style={{ fontSize: 30 }}>Editar escalao</h1>
       <FormularioEscalao acao={guardar} escalao={escalao} />
       <BotaoApagar acao={apagar} confirmacao={`Apagar o escalao "${escalao.nome}"?`} etiqueta="Apagar escalao" />

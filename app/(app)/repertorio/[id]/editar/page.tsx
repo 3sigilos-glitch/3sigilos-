@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 import { notFound } from 'next/navigation';
 import FormularioMusica from '@/components/repertorio/FormularioMusica';
 import BotaoApagar from '@/components/BotaoApagar';
@@ -15,7 +15,7 @@ export default async function PaginaEditarMusica({ params }: { params: Promise<{
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <Link href="/repertorio" style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Voltar</Link>
+      <BotaoVoltar href="/repertorio" />
       <h1 style={{ fontSize: 30 }}>Editar musica</h1>
       <FormularioMusica acao={guardar} musica={musica} />
       {sessao.ehAdmin && (

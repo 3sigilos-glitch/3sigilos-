@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 import FormularioPreferencias from '@/components/preferencias/FormularioPreferencias';
 import { obterPreferenciasCifra } from '@/lib/consultas';
 
@@ -11,11 +11,7 @@ export default async function PaginaPreferencias() {
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Link href="/setlists" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--texto-suave)', fontSize: 14 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M15 18l-6-6 6-6" /></svg>Voltar
-        </Link>
-      </div>
+      <BotaoVoltar href="/painel" />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <h1 style={{ fontSize: 28 }}>As minhas cifras</h1>

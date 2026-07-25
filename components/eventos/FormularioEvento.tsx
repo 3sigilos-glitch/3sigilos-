@@ -123,6 +123,10 @@ export default function FormularioEvento({ acao, evento, contactos, membros, tec
             <option key={esc.id} value={esc.id}>{esc.nome} ({euros(esc.valor_base)})</option>
           ))}
         </select>
+        <span style={{ fontSize: 12, color: 'var(--texto-fraco)', lineHeight: 1.5 }}>
+          O escalao e o teu preco-tipo (por exemplo Festa de vila ou Bar). Escolher um sugere logo o valor base, que
+          podes ajustar. Geres os escaloes em Definicoes.
+        </span>
       </Campo>
 
       <Campo etiqueta="Valor base (EUR)">

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 import CopiarBloco from '@/components/CopiarBloco';
 import BotaoBriefingEmail from '@/components/automacoes/BotaoBriefingEmail';
 import { carregarFollowUps, carregarLembretes, carregarBriefing } from '@/lib/automacoes';
@@ -14,6 +15,7 @@ export default async function PaginaAutomacoes() {
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
+      <BotaoVoltar href="/painel" />
       <h1 style={{ fontSize: 30 }}>Automacoes</h1>
 
       {/* Follow-up de propostas */}

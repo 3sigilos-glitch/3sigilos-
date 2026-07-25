@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 import { notFound } from 'next/navigation';
 import GestorMusicas from '@/components/setlists/GestorMusicas';
 import { obterSetlist, listarRepertorio, cifrasPorMusicas } from '@/lib/consultas';
@@ -18,7 +19,7 @@ export default async function PaginaSetlist({ params }: { params: Promise<{ id: 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href="/setlists" style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Voltar</Link>
+        <BotaoVoltar href="/setlists" />
         <div style={{ display: 'flex', gap: 8 }}>
           {setlist.itens.length > 0 && (
             <Link href={`/setlists/${id}/palco`} className="botao" style={{ width: 'auto' }}>Modo palco</Link>

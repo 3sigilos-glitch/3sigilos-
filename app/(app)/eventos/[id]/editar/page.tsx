@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 import { notFound } from 'next/navigation';
 import FormularioEvento from '@/components/eventos/FormularioEvento';
 import { carregarOpcoesEvento, obterEvento } from '@/lib/consultas';
@@ -15,7 +15,7 @@ export default async function PaginaEditarEvento({ params }: { params: Promise<{
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <Link href={`/eventos/${id}`} style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Voltar</Link>
+        <BotaoVoltar href={`/eventos/${id}`} />
       </div>
       <h1 style={{ fontSize: 30 }}>Editar evento</h1>
       <FormularioEvento acao={guardar} evento={evento} {...opcoes} />

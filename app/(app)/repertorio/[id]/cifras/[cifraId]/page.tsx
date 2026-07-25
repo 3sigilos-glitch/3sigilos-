@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 import { notFound } from 'next/navigation';
 import EditorCifra from '@/components/cifras/EditorCifra';
 import BotaoApagar from '@/components/BotaoApagar';
@@ -16,7 +16,7 @@ export default async function PaginaEditarCifra({ params }: { params: Promise<{ 
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <Link href={`/repertorio/${id}`} style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Voltar</Link>
+      <BotaoVoltar href={`/repertorio/${id}`} />
       <h1 style={{ fontSize: 26 }}>Editar cifra</h1>
       <span style={{ fontSize: 14, color: 'var(--texto-suave)', marginTop: -10 }}>{musica.musica}</span>
       <EditorCifra acao={guardar} cifra={cifra} />

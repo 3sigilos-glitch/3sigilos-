@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 import { notFound } from 'next/navigation';
 import EtiquetaEstado from '@/components/EtiquetaEstado';
 import BotaoApagar from '@/components/BotaoApagar';
@@ -20,7 +21,7 @@ export default async function PaginaFichaEvento({ params }: { params: Promise<{ 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href="/eventos" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--texto-suave)', fontSize: 14 }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M15 18l-6-6 6-6" /></svg>Voltar</Link>
+        <BotaoVoltar href="/eventos" />
         <div style={{ display: 'flex', gap: 8 }}>
           <Link href={`/eventos/${id}/proposta`} className="botao botao-secundario" style={{ width: 'auto' }}>Proposta</Link>
           <Link href={`/eventos/${id}/editar`} className="botao" style={{ width: 'auto' }}>Editar</Link>
