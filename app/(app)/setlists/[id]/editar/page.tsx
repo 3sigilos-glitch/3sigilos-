@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 import { notFound } from 'next/navigation';
 import FormularioSetlist from '@/components/setlists/FormularioSetlist';
 import BotaoApagar from '@/components/BotaoApagar';
@@ -15,7 +15,7 @@ export default async function PaginaEditarSetlist({ params }: { params: Promise<
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <Link href={`/setlists/${id}`} style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Voltar</Link>
+      <BotaoVoltar href={`/setlists/${id}`} />
       <h1 style={{ fontSize: 30 }}>Editar setlist</h1>
       <FormularioSetlist acao={guardar} setlist={setlist} />
       {sessao.ehAdmin && (

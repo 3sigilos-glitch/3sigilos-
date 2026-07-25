@@ -86,7 +86,10 @@ export default async function PaginaPainel() {
 
       {/* Pipeline por estado */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <h2 className="rotulo-seccao">Pipeline</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <h2 className="rotulo-seccao">Pipeline</h2>
+          <span style={{ fontSize: 12, color: 'var(--texto-fraco)' }}>Quantos eventos em cada fase, do orcamento ao concerto. Toca para filtrar a agenda.</span>
+        </div>
         {totalPipeline > 0 && (
           <div className="barra-pipeline">
             {estados.map((estado) => {

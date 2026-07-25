@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 import { notFound } from 'next/navigation';
 import EtiquetaEstado from '@/components/EtiquetaEstado';
 import BotaoApagar from '@/components/BotaoApagar';
@@ -17,7 +18,7 @@ export default async function PaginaFichaContacto({ params }: { params: Promise<
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href="/contactos" style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Voltar</Link>
+        <BotaoVoltar href="/contactos" />
         <Link href={`/contactos/${id}/editar`} className="botao" style={{ width: 'auto' }}>Editar</Link>
       </div>
 

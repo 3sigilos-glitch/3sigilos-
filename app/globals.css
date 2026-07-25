@@ -13,8 +13,8 @@
 
   /* Texto */
   --texto: #f2f0ea;          /* branco sujo (off-white) */
-  --texto-suave: #a8a6a0;    /* secundario */
-  --texto-fraco: #6b6963;    /* legendas e pistas */
+  --texto-suave: #b3b1aa;    /* secundario */
+  --texto-fraco: #8a887f;    /* legendas e pistas (contraste melhorado) */
 
   /* Acento de palco (laranja) */
   --acento: #f5811e;
