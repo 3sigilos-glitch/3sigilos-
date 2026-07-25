@@ -31,6 +31,19 @@ export default async function PaginaPainel() {
         baixo (Painel, Agenda, Setlists, Recibos). Cada cartao abre com um toque.
       </Dica>
 
+      {/* Primeiros passos: so aparece enquanto a app estiver vazia (sem eventos). */}
+      {totalPipeline === 0 && (
+        <div className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 14, background: 'linear-gradient(135deg, var(--superficie-quente), var(--superficie) 70%)', borderColor: 'var(--linha-quente)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span className="rotulo-seccao">Primeiros passos</span>
+            <span style={{ fontSize: 13, color: 'var(--texto-suave)', lineHeight: 1.5 }}>Poe a app a andar em tres passos. Podes fazer por qualquer ordem.</span>
+          </div>
+          <PassoInicial numero={1} href="/eventos/novo" titulo="Marcar o primeiro evento" texto="Data, local, contratante e valor." />
+          <PassoInicial numero={2} href="/equipa" titulo="Adicionar a equipa" texto="Os musicos e os tecnicos de som." />
+          <PassoInicial numero={3} href="/repertorio" titulo="Meter o repertorio" texto="As musicas e as cifras para o palco." />
+        </div>
+      )}
+
       {/* Proximo concerto em destaque */}
       {proximo && (
         <Link href={`/eventos/${proximo.id}`} className="cartao-heroi">
@@ -111,9 +124,10 @@ export default async function PaginaPainel() {
         </div>
       )}
 
-      {!proximo && (
-        <div className="cartao" style={{ color: 'var(--texto-suave)', textAlign: 'center' }}>
-          <p>Nada agendado para os proximos dias.</p>
+      {!proximo && totalPipeline > 0 && (
+        <div className="cartao" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, textAlign: 'center' }}>
+          <p style={{ color: 'var(--texto-suave)' }}>Nada agendado para os proximos dias.</p>
+          <Link href="/eventos/novo" className="botao" style={{ width: 'auto' }}>Marcar evento</Link>
         </div>
       )}
 
@@ -135,6 +149,37 @@ export default async function PaginaPainel() {
         </p>
       )}
     </section>
+  );
+}
+
+function PassoInicial({ numero, href, titulo, texto }: { numero: number; href: string; titulo: string; texto: string }) {
+  return (
+    <Link href={href} style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--texto)' }}>
+      <span
+        aria-hidden
+        style={{
+          flexShrink: 0,
+          width: 30,
+          height: 30,
+          borderRadius: 999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--acento-suave)',
+          border: '1px solid var(--acento)',
+          color: 'var(--acento-forte)',
+          fontWeight: 700,
+          fontSize: 14,
+        }}
+      >
+        {numero}
+      </span>
+      <span style={{ display: 'flex', flexDirection: 'column', gap: 1, flex: 1, minWidth: 0 }}>
+        <strong style={{ fontSize: 15 }}>{titulo}</strong>
+        <span style={{ fontSize: 12, color: 'var(--texto-suave)' }}>{texto}</span>
+      </span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--texto-fraco)" strokeWidth="1.8"><path d="M9 18l6-6-6-6" /></svg>
+    </Link>
   );
 }
 

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import FiltrosEventos from '@/components/eventos/FiltrosEventos';
 import CartaoEvento from '@/components/eventos/CartaoEvento';
 import Dica from '@/components/Dica';
+import EstadoVazio from '@/components/EstadoVazio';
 import { listarEventos } from '@/lib/consultas';
 import { mesAno } from '@/lib/formatar';
 import type { Evento } from '@/lib/tipos';
@@ -47,9 +48,12 @@ export default async function PaginaEventos({
       </Suspense>
 
       {eventos.length === 0 ? (
-        <div className="cartao" style={{ textAlign: 'center', color: 'var(--texto-suave)' }}>
-          <p style={{ lineHeight: 1.6 }}>Sem eventos para mostrar. Toca em <strong style={{ color: 'var(--texto)' }}>Novo</strong> para criar o primeiro.</p>
-        </div>
+        <EstadoVazio
+          titulo="Sem eventos"
+          texto="A agenda guarda concertos e propostas: data, local, contratante, valor e avisos de conflito de datas."
+          accaoHref="/eventos/novo"
+          accaoEtiqueta="Marcar evento"
+        />
       ) : (
         grupos.map(([mes, lista]) => (
           <div key={mes} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

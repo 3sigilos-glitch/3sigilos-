@@ -2,19 +2,16 @@ import Cabecalho from '@/components/Cabecalho';
 import NavInferior from '@/components/NavInferior';
 import BotaoCriar from '@/components/BotaoCriar';
 import Toaster from '@/components/Toaster';
-import { criarClienteServidor } from '@/lib/supabase/server';
+import { obterSessao } from '@/lib/sessao';
 
 // Esqueleto da zona autenticada: cabecalho fixo no topo,
 // conteudo no meio e navegacao inferior pensada para o polegar.
 export default async function LayoutApp({ children }: { children: React.ReactNode }) {
-  const supabase = await criarClienteServidor();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const sessao = await obterSessao();
 
   return (
     <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
-      <Cabecalho email={user?.email} />
+      <Cabecalho email={sessao.email ?? undefined} ehAdmin={sessao.ehAdmin} />
       <main
         style={{
           flex: 1,

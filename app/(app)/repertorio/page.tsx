@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import FiltrosRepertorio from '@/components/repertorio/FiltrosRepertorio';
 import Dica from '@/components/Dica';
+import EstadoVazio from '@/components/EstadoVazio';
 import { listarRepertorio } from '@/lib/consultas';
 
 export default async function PaginaRepertorio({
@@ -36,9 +37,12 @@ export default async function PaginaRepertorio({
       <p style={{ fontSize: 13, color: 'var(--texto-fraco)' }}>{musicas.length} musicas, {ativas} ativas</p>
 
       {musicas.length === 0 ? (
-        <div className="cartao" style={{ textAlign: 'center', color: 'var(--texto-suave)' }}>
-          <p>Sem musicas para mostrar.</p>
-        </div>
+        <EstadoVazio
+          titulo="Sem musicas"
+          texto="O repertorio guarda as musicas e as cifras. Cada musica pode ter varias versoes (BAIXO, TECLAS, VOZ) para o modo palco."
+          accaoHref="/repertorio/novo"
+          accaoEtiqueta="Nova musica"
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {musicas.map((m) => (
