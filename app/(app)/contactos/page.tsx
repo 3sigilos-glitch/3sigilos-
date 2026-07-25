@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import EstadoVazio from '@/components/EstadoVazio';
 import { listarContactos } from '@/lib/consultas';
 import { TIPO_CONTACTO, type Contacto, type TipoContacto } from '@/lib/tipos';
 
@@ -25,9 +26,12 @@ export default async function PaginaContactos() {
       </div>
 
       {contactos.length === 0 ? (
-        <div className="cartao" style={{ textAlign: 'center', color: 'var(--texto-suave)' }}>
-          <p style={{ lineHeight: 1.6 }}>Sem contactos. Toca em <strong style={{ color: 'var(--texto)' }}>Novo</strong> para adicionar.</p>
-        </div>
+        <EstadoVazio
+          titulo="Sem contactos"
+          texto="Guarda aqui quem contrata a banda (camaras, juntas, associacoes, motards) com o historico de cada um."
+          accaoHref="/contactos/novo"
+          accaoEtiqueta="Novo contacto"
+        />
       ) : (
         grupos.map(([tipo, lista]) => (
           <div key={tipo} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

@@ -2,10 +2,15 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import CifraFormatada from '@/components/cifras/CifraFormatada';
 import { tomTransposto } from '@/lib/acordes';
+import { TAGS_CIFRA } from '@/lib/tipos';
 import { guardarPreferenciasRapido } from '@/app/(app)/preferencias/acoes';
+
+// Instrumentos sugeridos para a escolha rapida no palco (sem a versao GERAL).
+const INSTRUMENTOS = TAGS_CIFRA.filter((t) => t !== 'GERAL');
 
 export interface MusicaPalco {
   titulo: string;
@@ -51,11 +56,52 @@ export default function ModoPalco({
   const [esconderAcordes, setEsconderAcordes] = useState(preferencias?.esconderAcordes ?? false);
   const [soTonica, setSoTonica] = useState(preferencias?.soTonica ?? false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   // Guarda o tamanho atual para o gesto de pinca o poder ler sem se re-subscrever.
   const tamanhoRef = useRef(tamanho);
   tamanhoRef.current = tamanho;
-  // A etiqueta do instrumento nao se muda aqui, mas viaja nas gravacoes rapidas.
-  const tag = preferencias?.tag ?? null;
+  // Instrumento do membro: pode ser escolhido aqui na primeira vez.
+  const [tag, setTag] = useState<string | null>(preferencias?.tag ?? null);
+  const [mostrarInstrumento, setMostrarInstrumento] = useState(false);
+  const [mostrarGestos, setMostrarGestos] = useState(false);
+
+  // Primeira vez: propoe escolher o instrumento (se ainda nao tiver) e mostra a
+  // dica dos gestos. Cada uma so aparece uma vez (guardado no dispositivo).
+  useEffect(() => {
+    try {
+      if (!tag && localStorage.getItem('nasa-palco-instrumento') !== 'adiado') setMostrarInstrumento(true);
+      if (localStorage.getItem('nasa-palco-gestos') !== 'visto') setMostrarGestos(true);
+    } catch {
+      // Sem armazenamento: mostra na mesma, sem memoria.
+    }
+  }, [tag]);
+
+  // Escolher o instrumento aqui: guarda e recarrega para abrir logo a versao
+  // certa de cada musica.
+  async function escolherInstrumento(valor: string) {
+    setTag(valor);
+    setMostrarInstrumento(false);
+    try {
+      await guardarPreferenciasRapido({ tag: valor, esconderAcordes, soTonica, tamanho });
+      router.refresh();
+    } catch {
+      // Segue sem recarregar; a proxima abertura ja vem certa.
+    }
+  }
+
+  function adiarInstrumento() {
+    setMostrarInstrumento(false);
+    try {
+      localStorage.setItem('nasa-palco-instrumento', 'adiado');
+    } catch {}
+  }
+
+  function fecharGestos() {
+    setMostrarGestos(false);
+    try {
+      localStorage.setItem('nasa-palco-gestos', 'visto');
+    } catch {}
+  }
 
   const musica = musicas[indice];
 
@@ -172,6 +218,40 @@ export default function ModoPalco({
           <span className="carimbo carimbo--caixa" style={{ flexShrink: 0 }}>Tom {tomAtual}</span>
         )}
       </div>
+
+      {/* Primeira vez: escolher o instrumento para ver a versao certa. */}
+      {mostrarInstrumento && (
+        <div style={{ margin: '4px 12px 0', padding: 12, borderRadius: 'var(--raio-pequeno)', background: 'var(--acento-suave)', border: '1px solid var(--acento)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <span style={{ fontSize: 14, color: 'var(--texto)' }}>Que instrumento tocas? Abre logo a tua versao da cifra.</span>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {INSTRUMENTOS.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => escolherInstrumento(t)}
+                style={{ minHeight: 36, padding: '6px 14px', borderRadius: 999, fontSize: 13, fontWeight: 600, background: 'var(--superficie-2)', border: '1px solid var(--linha)', color: 'var(--texto)' }}
+              >
+                {t}
+              </button>
+            ))}
+            <button type="button" onClick={adiarInstrumento} style={{ minHeight: 36, padding: '6px 14px', borderRadius: 999, fontSize: 13, background: 'transparent', border: 'none', color: 'var(--texto-suave)' }}>
+              Depois
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Primeira vez: dica dos gestos. */}
+      {mostrarGestos && !mostrarInstrumento && (
+        <div style={{ margin: '4px 12px 0', padding: '10px 12px', borderRadius: 'var(--raio-pequeno)', background: 'var(--superficie-2)', border: '1px solid var(--linha)', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ flex: 1, fontSize: 12, color: 'var(--texto-suave)', lineHeight: 1.5 }}>
+            Junta dois dedos para aumentar o texto. <strong style={{ color: 'var(--texto)' }}>-1/+1</strong> muda o tom, <strong style={{ color: 'var(--texto)' }}>A-/A+</strong> o tamanho.
+          </span>
+          <button type="button" onClick={fecharGestos} aria-label="Percebi" style={{ flexShrink: 0, background: 'transparent', border: 'none', color: 'var(--texto-fraco)', padding: 2 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+      )}
 
       {/* Cifra, area grande e com scroll suave */}
       <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 16px 16px', scrollBehavior: 'smooth', touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' as any }}>

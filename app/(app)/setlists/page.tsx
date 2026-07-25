@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Dica from '@/components/Dica';
+import EstadoVazio from '@/components/EstadoVazio';
 import { listarSetlists } from '@/lib/consultas';
 
 export default async function PaginaSetlists() {
@@ -19,9 +20,12 @@ export default async function PaginaSetlists() {
       </Dica>
 
       {setlists.length === 0 ? (
-        <div className="cartao" style={{ textAlign: 'center', color: 'var(--texto-suave)' }}>
-          <p style={{ lineHeight: 1.6 }}>Sem setlists. Toca em <strong style={{ color: 'var(--texto)' }}>Nova</strong> para criar a primeira.</p>
-        </div>
+        <EstadoVazio
+          titulo="Sem setlists"
+          texto="Uma setlist e o alinhamento de musicas de um concerto. Cria uma, ordena as musicas, e abre o modo palco para tocar."
+          accaoHref="/setlists/nova"
+          accaoEtiqueta="Nova setlist"
+        />
       ) : (
         <div className="lista-escalonada" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--e2)' }}>
         {setlists.map((s) => (
