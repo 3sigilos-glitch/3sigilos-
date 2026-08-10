@@ -6,6 +6,7 @@ import { obterSessao } from '@/lib/sessao';
 import { euros } from '@/lib/formatar';
 import { guardarDefinicoes } from './acoes';
 import CopiaSeguranca from '@/components/definicoes/CopiaSeguranca';
+import ImportarConcertos from '@/components/definicoes/ImportarConcertos';
 
 export default async function PaginaDefinicoes() {
   const sessao = await obterSessao();
@@ -77,6 +78,14 @@ export default async function PaginaDefinicoes() {
             </Link>
           ))
         )}
+      </div>
+
+      {/* Importar da folha do Drive */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <h2 className="rotulo-seccao">Importar concertos e recibos</h2>
+        <div className="cartao">
+          <ImportarConcertos />
+        </div>
       </div>
 
       {/* Copias de seguranca */}
