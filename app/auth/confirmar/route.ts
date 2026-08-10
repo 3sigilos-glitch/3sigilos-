@@ -45,6 +45,16 @@ export async function GET(request: NextRequest) {
     if (code) {
       const { error } = await supabase.auth.exchangeCodeForSession(code);
       if (!error) return irPara();
+      // Falha tipica: o link foi aberto noutro browser ou noutra aplicacao (por
+      // exemplo, o browser interno do email), onde falta a chave de conferencia
+      // que ficou no browser em que se pediu o link. Explica-se em vez de
+      // mostrar o erro tecnico.
+      if (/verifier|storage/i.test(error.message)) {
+        return paraLogin(
+          'abre o link no mesmo browser onde o pediste. Pede um link novo aqui e, ' +
+            'no email, mantem premido o link e escolhe abrir no browser.'
+        );
+      }
       return paraLogin(error.message);
     }
 
