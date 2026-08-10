@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Avatar from '@/components/Avatar';
 import EstadoVazio from '@/components/EstadoVazio';
-import { AvisoAdmin } from '@/components/SoAdmin';
 import { listarEquipa } from '@/lib/consultas';
 import { obterSessao } from '@/lib/sessao';
 import type { Equipa } from '@/lib/tipos';
@@ -15,23 +14,8 @@ export default async function PaginaEquipa() {
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={{ fontSize: 30 }}>Equipa</h1>
-        {sessao.ehAdmin && (
-          <Link
-            href="/equipa/novo"
-            className="botao"
-            style={{ width: 'auto', background: 'var(--admin)', boxShadow: 'none' }}
-          >
-            Novo
-          </Link>
-        )}
+        {sessao.ehAdmin && <Link href="/equipa/novo" className="botao" style={{ width: 'auto' }}>Novo</Link>}
       </div>
-
-      {sessao.ehAdmin && (
-        <AvisoAdmin>
-          <strong style={{ color: 'var(--admin-forte)' }}>So admin.</strong> Criar, editar e apagar elementos da equipa
-          e reservado a ti. Os outros elementos veem esta lista, mas nao a conseguem alterar.
-        </AvisoAdmin>
-      )}
 
       {equipa.length === 0 && (
         <EstadoVazio

@@ -123,30 +123,6 @@ Como o login e por link magico, basta o email estar registado para a pessoa cons
    o link magico de login deixa de funcionar.
 4. Faz deploy. O Vercel constroi e publica automaticamente a cada push.
 
-### Como se poe uma alteracao no ar (testar antes de publicar)
-
-A regra e simples: **nada vai para a app da banda sem ser visto primeiro**. A `main` e o que os
-elementos usam todos os dias, por isso as alteracoes nunca vao diretas para la.
-
-1. O trabalho e feito num ramo proprio (por exemplo `claude/...`), nunca na `main`.
-2. Ao enviar esse ramo para o GitHub, o Vercel publica sozinho uma **pre-visualizacao**: uma copia
-   completa da app, com o seu proprio endereco, que nao mexe na app de producao.
-3. Onde encontrar esse endereco: no [vercel.com](https://vercel.com), no projeto, separador
-   **Deployments**, escolhe o deployment do ramo e carrega em **Visit**. O endereco estavel do ramo
-   tem a forma `https://nasarockpt-git-<nome-do-ramo>-<conta>.vercel.app`.
-4. Testa nesse endereco. So depois de estar bom e que o ramo e juntado a `main`, e ai sim a app de
-   producao e atualizada.
-
-Dois avisos importantes sobre as pre-visualizacoes:
-
-- **A base de dados e a mesma.** A pre-visualizacao usa as mesmas variaveis de ambiente, logo o
-  mesmo Supabase. Ver ecras e navegar e inofensivo, mas criar, apagar ou importar ali mexe nos
-  dados a serio.
-- **O login precisa de autorizacao.** Como o endereco e diferente, o link magico so funciona se o
-  Supabase o aceitar. Em **Authentication, URL Configuration, Redirect URLs**, acrescenta uma
-  entrada com caracter universal: `https://nasarockpt-git-*.vercel.app/**`. Sem isto, o login na
-  pre-visualizacao falha (a app de producao nao e afetada).
-
 ### Lista rapida de verificacao do deploy
 
 - [ ] Variaveis NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY e NEXT_PUBLIC_SITE_URL

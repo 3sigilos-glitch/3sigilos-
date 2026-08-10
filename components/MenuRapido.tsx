@@ -23,9 +23,7 @@ export default function MenuRapido({ email, ehAdmin }: { email?: string; ehAdmin
   const [aberto, setAberto] = useState(false);
   const caminho = usePathname();
 
-  const items: { href: string; etiqueta: string; admin?: boolean }[] = ehAdmin
-    ? [...LINKS, { href: '/definicoes', etiqueta: 'Definicoes', admin: true }]
-    : LINKS;
+  const items = ehAdmin ? [...LINKS, { href: '/definicoes', etiqueta: 'Definicoes' }] : LINKS;
 
   // Fecha com Escape.
   useEffect(() => {
@@ -90,23 +88,15 @@ export default function MenuRapido({ email, ehAdmin }: { email?: string; ehAdmin
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 8,
                     minHeight: 46,
                     padding: '0 14px',
                     fontSize: 15,
-                    color: l.admin ? 'var(--admin-forte)' : ativo ? 'var(--acento)' : 'var(--texto)',
+                    color: ativo ? 'var(--acento)' : 'var(--texto)',
                     fontWeight: ativo ? 700 : 400,
                     borderBottom: '1px solid var(--linha)',
-                    background: l.admin ? 'var(--admin-suave)' : undefined,
                   }}
                 >
                   {l.etiqueta}
-                  {l.admin && (
-                    <span style={{ fontSize: 9, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--admin-forte)' }}>
-                      So admin
-                    </span>
-                  )}
                 </Link>
               );
             })}

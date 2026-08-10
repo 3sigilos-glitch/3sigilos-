@@ -1,34 +1,8 @@
 'use client';
 
-import { Suspense, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 import Brasao from '@/components/Brasao';
 import { criarClienteBrowser } from '@/lib/supabase/client';
-
-// Motivo trazido pela rota de confirmacao quando o link magico falha, para se
-// perceber o que se passou em vez de voltar ao login sem explicacao nenhuma.
-function AvisoDoLink() {
-  const motivo = useSearchParams().get('erro');
-  if (!motivo) return null;
-  return (
-    <p
-      style={{
-        maxWidth: 360,
-        width: '100%',
-        fontSize: 13,
-        lineHeight: 1.5,
-        color: 'var(--acento-forte)',
-        background: 'var(--acento-suave)',
-        border: '1px solid var(--acento)',
-        borderRadius: 'var(--raio-pequeno)',
-        padding: '10px 12px',
-        textAlign: 'center',
-      }}
-    >
-      Nao foi possivel entrar com esse link: {motivo}
-    </p>
-  );
-}
 
 // Ecra de entrada: logotipo branco sobre fundo escuro e login rapido
 // por link magico (sem palavra-passe para memorizar).
@@ -47,22 +21,11 @@ export default function PaginaLogin() {
       email: email.trim(),
       options: {
         emailRedirectTo: `${window.location.origin}/auth/confirmar`,
-        // A app e so para os elementos convidados: nao cria contas novas a quem
-        // simplesmente descubra o endereco. Quem nao estiver registado no
-        // Supabase nao recebe link nenhum.
-        shouldCreateUser: false,
       },
     });
 
     if (error) {
-      const m = error.message ?? '';
-      if (/signups? not allowed|not allowed for otp|user not found/i.test(m)) {
-        setMensagemErro('Esse email nao esta registado. A app e so para os elementos da banda, pede ao admin para te acrescentar.');
-      } else if (/rate limit|too many/i.test(m)) {
-        setMensagemErro('Ja foram pedidos links a mais nos ultimos minutos. Espera um pouco e tenta de novo.');
-      } else {
-        setMensagemErro('Nao foi possivel enviar o link. Confirma o email e tenta de novo.');
-      }
+      setMensagemErro('Nao foi possivel enviar o link. Confirma o email e tenta de novo.');
       setEstado('erro');
     } else {
       setEstado('enviado');
@@ -89,10 +52,6 @@ export default function PaginaLogin() {
           Gestao da banda
         </p>
       </div>
-
-      <Suspense fallback={null}>
-        <AvisoDoLink />
-      </Suspense>
 
       {estado === 'enviado' ? (
         <div className="cartao" style={{ maxWidth: 360, width: '100%', textAlign: 'center' }}>
