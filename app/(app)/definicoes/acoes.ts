@@ -108,18 +108,85 @@ export async function apagarEscalao(id: string) {
 
 // --- Importador da folha do Drive (concertos e recibos passados) ---
 
-// Le uma data em varios formatos comuns e devolve YYYY-MM-DD (ou null).
+// Meses por extenso e abreviados, em portugues e ingles (a folha pode ter as
+// datas escritas, conforme o formato).
+const MESES: Record<string, number> = {
+  jan: 1, janeiro: 1, january: 1,
+  fev: 2, fevereiro: 2, feb: 2, february: 2,
+  mar: 3, marco: 3, 'março': 3, march: 3,
+  abr: 4, abril: 4, apr: 4, april: 4,
+  mai: 5, maio: 5, may: 5,
+  jun: 6, junho: 6, june: 6,
+  jul: 7, julho: 7, july: 7,
+  ago: 8, agosto: 8, aug: 8, august: 8,
+  set: 9, setembro: 9, sep: 9, sept: 9, september: 9,
+  out: 10, outubro: 10, oct: 10, october: 10,
+  nov: 11, novembro: 11, november: 11,
+  dez: 12, dezembro: 12, dec: 12, december: 12,
+};
+
+const doisDigitos = (n: number | string) => String(n).padStart(2, '0');
+
+// Le uma data da folha e devolve YYYY-MM-DD (com hora, se existir), ou null.
+// Aceita: 10/05/2026, 10-05-2026, 10.05.2026, 2026-05-10, 10/05/26,
+// "sab, 10/05/2026", "10 de maio de 2026", "10 mai 2026", "maio 10, 2026", a
+// hora (22:00 ou 22h30) e o numero de serie das folhas de calculo. So o ano
+// fica sem data (nao inventa um dia 1 de Janeiro errado).
 function parseDataFolha(bruto: string): string | null {
-  const s = (bruto ?? '').trim();
+  let s = (bruto ?? '').trim();
   if (!s) return null;
-  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
-  m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
-  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
-  m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2})$/);
-  if (m) return `20${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
-  m = s.match(/^(\d{4})$/); // so o ano
-  if (m) return `${m[1]}-01-01`;
+
+  // Hora, se existir. Nunca se inventa uma hora.
+  let hora = '';
+  const mh = s.match(/\b(\d{1,2})[:h](\d{2})\b|\b(\d{1,2})h\b/);
+  if (mh) {
+    const hh = doisDigitos(mh[1] ?? mh[3] ?? '0');
+    const mm = doisDigitos(mh[2] ?? '00');
+    if (Number(hh) < 24 && Number(mm) < 60) hora = `T${hh}:${mm}:00`;
+    s = s.replace(mh[0], ' ').trim();
+  }
+  const comHora = (ymd: string) => `${ymd}${hora}`;
+
+  // Tira um dia da semana no inicio, se existir (lista explicita para nao comer
+  // o nome de um mes).
+  s = s
+    .replace(
+      /^(seg|ter|qua|qui|sex|sab|sáb|dom|segunda|terca|terça|quarta|quinta|sexta|sabado|sábado|domingo|mon|tue|wed|thu|fri|sat|sun)(-feira)?\.?,?\s+/i,
+      ''
+    )
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!s) return null;
+
+  const noAno = (a: string) => (a.length === 2 ? `20${a}` : a);
+
+  let m = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/);
+  if (m) return comHora(`${m[1]}-${doisDigitos(m[2])}-${doisDigitos(m[3])}`);
+
+  m = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2}|\d{4})$/);
+  if (m) return comHora(`${noAno(m[3])}-${doisDigitos(m[2])}-${doisDigitos(m[1])}`);
+
+  m = s.match(/^(\d{1,2})\s*(?:de\s+)?[-\s]?([a-zA-Zçãáéíóúâêô]{3,9})\.?\s*(?:de\s+)?[-\s]?(\d{2}|\d{4})$/i);
+  if (m) {
+    const mes = MESES[m[2].toLowerCase()];
+    if (mes) return comHora(`${noAno(m[3])}-${doisDigitos(mes)}-${doisDigitos(m[1])}`);
+  }
+
+  m = s.match(/^([a-zA-Zçãáéíóúâêô]{3,9})\.?\s+(\d{1,2}),?\s+(\d{2}|\d{4})$/i);
+  if (m) {
+    const mes = MESES[m[1].toLowerCase()];
+    if (mes) return comHora(`${noAno(m[3])}-${doisDigitos(mes)}-${doisDigitos(m[2])}`);
+  }
+
+  m = s.match(/^(\d{5})$/);
+  if (m) {
+    const serie = Number(m[1]);
+    if (serie > 20000 && serie < 80000) {
+      const d = new Date(Date.UTC(1899, 11, 30) + serie * 86400000);
+      return comHora(d.toISOString().slice(0, 10));
+    }
+  }
+
   return null;
 }
 
@@ -153,17 +220,31 @@ export async function importarConcertos(texto: string): Promise<string> {
     );
   };
 
-  // Eventos existentes, para nao duplicar (nome + data).
+  // Eventos existentes, para nao duplicar.
   const { data: evsData } = await supabase.from('eventos').select('id, evento, data');
   const existentes = (evsData ?? []) as { id: string; evento: string; data: string | null }[];
-  const chave = (nome: string, data: string | null) => `${nome.trim().toLowerCase()}|${data ? data.slice(0, 10) : ''}`;
+  const normalizar = (nome: string) => nome.trim().toLowerCase().replace(/\s+/g, ' ');
+  const chave = (nome: string, data: string | null) => `${normalizar(nome)}|${data ? data.slice(0, 10) : ''}`;
   const mapaEventos = new Map<string, string>(existentes.map((e) => [chave(e.evento, e.data), e.id]));
+
+  // Eventos com o mesmo nome mas ainda SEM data. Se a folha trouxer a data,
+  // preenche-se a do evento que ja existe em vez de criar um duplicado. E o que
+  // corrige de uma vez uma importacao anterior feita sem datas.
+  const semData = new Map<string, string[]>();
+  for (const e of existentes) {
+    if (!e.data) {
+      const n = normalizar(e.evento);
+      semData.set(n, [...(semData.get(n) ?? []), e.id]);
+    }
+  }
 
   const hoje = new Date().toISOString().slice(0, 10);
   let criados = 0;
   let jaExistiam = 0;
+  let datasPreenchidas = 0;
   let recibosCriados = 0;
   let ignoradas = 0;
+  let semDataReconhecida = 0;
   const naoEncontrados = new Set<string>();
 
   for (const linha of (texto ?? '').split('\n')) {
@@ -195,9 +276,26 @@ export async function importarConcertos(texto: string): Promise<string> {
       continue;
     }
     const data = parseDataFolha(dataBruta);
+    if (dataBruta.trim() && !data) semDataReconhecida++;
 
-    // Concerto: reutiliza se ja existir, senao cria.
+    // Concerto: 1) mesmo nome e data ja existe, nao mexe; 2) existe com o mesmo
+    // nome mas sem data, preenche-lhe a data; 3) senao, cria.
     let eventoId = mapaEventos.get(chave(local, data));
+    if (eventoId) jaExistiam++;
+
+    if (!eventoId && data) {
+      const candidatos = semData.get(normalizar(local)) ?? [];
+      const porCorrigir = candidatos.shift();
+      if (porCorrigir) {
+        const { error } = await supabase.from('eventos').update({ data }).eq('id', porCorrigir);
+        if (!error) {
+          eventoId = porCorrigir;
+          mapaEventos.set(chave(local, data), eventoId);
+          datasPreenchidas++;
+        }
+      }
+    }
+
     if (!eventoId) {
       const passou = !!(reciboNome ?? '').trim();
       const jaPassado = data ? data < hoje : false;
@@ -214,8 +312,6 @@ export async function importarConcertos(texto: string): Promise<string> {
       eventoId = novo.id as string;
       mapaEventos.set(chave(local, data), eventoId);
       criados++;
-    } else {
-      jaExistiam++;
     }
 
     // Recibo passado, se houver nome de quem passou.
@@ -248,13 +344,14 @@ export async function importarConcertos(texto: string): Promise<string> {
   revalidatePath('/recibos');
   revalidatePath('/painel');
 
-  const partes = [
-    `${criados} concertos criados`,
-    `${jaExistiam} ja existiam`,
-    `${recibosCriados} recibos passados criados`,
-  ];
+  const partes = [`${criados} concertos criados`, `${jaExistiam} ja existiam`];
+  if (datasPreenchidas > 0) partes.push(`${datasPreenchidas} datas preenchidas em concertos que estavam sem data`);
+  partes.push(`${recibosCriados} recibos passados criados`);
   if (naoEncontrados.size > 0) {
     partes.push(`sem correspondencia na equipa: ${[...naoEncontrados].join(', ')} (adiciona-os em Equipa e volta a importar)`);
+  }
+  if (semDataReconhecida > 0) {
+    partes.push(`${semDataReconhecida} linhas tinham data que nao consegui ler (ficam sem data; confirma o formato da coluna)`);
   }
   if (ignoradas > 0) partes.push(`${ignoradas} linhas ignoradas`);
   return partes.join('. ') + '.';
