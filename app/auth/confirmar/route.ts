@@ -9,7 +9,14 @@ export async function GET(request: NextRequest) {
   const tokenHash = searchParams.get('token_hash');
   const tipo = searchParams.get('type') as EmailOtpType | null;
   const code = searchParams.get('code');
-  const destino = searchParams.get('next') ?? '/painel';
+
+  // O destino vem do endereco e nunca deve poder levar para fora da app.
+  // So aceita um caminho interno simples (comeca por "/" e nao por "//" nem
+  // "/\"), senao volta ao painel. Evita que um link forjado use o nosso dominio
+  // para atirar alguem para um site falso depois de entrar.
+  const destinoBruto = searchParams.get('next');
+  const destino =
+    destinoBruto && /^\/(?![/\\])/.test(destinoBruto) ? destinoBruto : '/painel';
 
   const supabase = await criarClienteServidor();
 
