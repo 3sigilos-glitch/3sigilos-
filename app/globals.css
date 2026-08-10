@@ -31,6 +31,7 @@
   --estado-confirmado: #43b56a;    /* verde */
   --estado-realizado: #8a8f98;     /* cinza neutro */
   --estado-recusado: #d8514a;      /* vermelho apagado */
+  --estado-cancelado: #6b6963;     /* cinza escuro (cancelado, raro) */
 
   /* Camada de superficie elevada (menus, folhas, cartao-heroi) */
   --superficie-elevada: #232327;

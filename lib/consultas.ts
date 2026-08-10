@@ -175,8 +175,26 @@ export interface FiltrosEventos {
   mes?: string; // formato AAAA-MM
 }
 
+// Passa a "realizado" os concertos confirmados cuja data ja passou (o dia do
+// evento terminou). Automatico: e chamado ao carregar a agenda e o painel, para
+// nao ser preciso mudar o estado a mao depois de cada concerto.
+export async function promoverConcertosRealizados(): Promise<void> {
+  try {
+    const supabase = await criarClienteServidor();
+    const hoje = new Date().toISOString().slice(0, 10); // meia-noite de hoje (UTC)
+    await supabase
+      .from('eventos')
+      .update({ estado: 'realizado' })
+      .eq('estado', 'confirmado')
+      .lt('data', hoje);
+  } catch {
+    // Silencioso: se falhar, o estado fica como esta ate a proxima vez.
+  }
+}
+
 export async function listarEventos(filtros: FiltrosEventos = {}): Promise<Evento[]> {
   const supabase = await criarClienteServidor();
+  await promoverConcertosRealizados();
   let consulta = supabase.from('eventos').select('*').order('data', { ascending: true, nullsFirst: false });
 
   if (filtros.estado && filtros.estado !== 'todos') {
@@ -428,6 +446,41 @@ export async function listarRecibos(ano: number): Promise<ReciboDetalhado[]> {
   return (data as unknown as ReciboDetalhado[]) ?? [];
 }
 
+// Concertos por passar recibo: eventos realizados de um ano que ainda nao tem
+// nenhum recibo marcado como passado. Assim os concertos anteriores (mesmo os
+// importados) aparecem sempre como pendentes ate alguem passar o recibo.
+export interface ConcertoPorPassar {
+  id: string;
+  evento: string;
+  data: string | null;
+  valor_total: number;
+}
+
+export async function listarConcertosPorPassar(ano: number): Promise<ConcertoPorPassar[]> {
+  const supabase = await criarClienteServidor();
+  const inicio = `${ano}-01-01`;
+  const fim = `${ano + 1}-01-01`;
+
+  const { data: evs } = await supabase
+    .from('eventos')
+    .select('id, evento, data, valor_total')
+    .eq('estado', 'realizado')
+    .gte('data', inicio)
+    .lt('data', fim)
+    .order('data', { ascending: false });
+  const eventos = (evs as ConcertoPorPassar[]) ?? [];
+  if (eventos.length === 0) return [];
+
+  const { data: passados } = await supabase
+    .from('recibos')
+    .select('evento_id')
+    .eq('passado', true)
+    .in('evento_id', eventos.map((e) => e.id));
+  const comRecibo = new Set((passados ?? []).map((r: any) => r.evento_id));
+
+  return eventos.filter((e) => !comRecibo.has(e.id));
+}
+
 export interface ResumoMembro {
   membroId: string | null;
   nome: string;
@@ -499,11 +552,12 @@ export interface DadosPainel {
 
 export async function carregarPainel(): Promise<DadosPainel> {
   const supabase = await criarClienteServidor();
+  await promoverConcertosRealizados();
   const agora = new Date();
   const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString();
   const inicioMesSeguinte = new Date(agora.getFullYear(), agora.getMonth() + 1, 1).toISOString();
 
-  const [todos, proximos, recibos, doMes] = await Promise.all([
+  const [todos, proximos, realizados, passados, doMes] = await Promise.all([
     // Todos os eventos, so o estado, para contar o pipeline.
     supabase.from('eventos').select('estado'),
     // Proximos concertos a partir de hoje (exclui recusados), os mais proximos primeiro.
@@ -514,8 +568,10 @@ export async function carregarPainel(): Promise<DadosPainel> {
       .neq('estado', 'recusado')
       .order('data', { ascending: true })
       .limit(6),
-    // Recibos ainda por passar.
-    supabase.from('recibos').select('id', { count: 'exact', head: true }).eq('passado', false),
+    // Concertos realizados (para cruzar com os recibos passados).
+    supabase.from('eventos').select('id').eq('estado', 'realizado'),
+    // Recibos ja passados (so o evento).
+    supabase.from('recibos').select('evento_id').eq('passado', true),
     // Eventos confirmados ou realizados no mes corrente, para indicadores.
     supabase
       .from('eventos')
@@ -535,10 +591,14 @@ export async function carregarPainel(): Promise<DadosPainel> {
   const eventosMes = doMes.data ?? [];
   const faturacaoPrevista = eventosMes.reduce((soma: number, e: any) => soma + Number(e.valor_total ?? 0), 0);
 
+  // Por passar: concertos realizados sem nenhum recibo passado.
+  const comRecibo = new Set((passados.data ?? []).map((r: any) => r.evento_id));
+  const recibosPorPassar = (realizados.data ?? []).filter((e: any) => !comRecibo.has(e.id)).length;
+
   return {
     proximos: (proximos.data as Evento[]) ?? [],
     pipeline,
-    recibosPorPassar: recibos.count ?? 0,
+    recibosPorPassar,
     indicadores: {
       concertosDoMes: eventosMes.length,
       faturacaoPrevista,

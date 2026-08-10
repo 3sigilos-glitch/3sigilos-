@@ -1,7 +1,6 @@
 import Link from 'next/link';
-import BotaoPassado from '@/components/recibos/BotaoPassado';
 import Dica from '@/components/Dica';
-import { listarRecibos, resumirPorMembro } from '@/lib/consultas';
+import { listarRecibos, resumirPorMembro, listarConcertosPorPassar } from '@/lib/consultas';
 import { euros, dataExtenso } from '@/lib/formatar';
 
 export default async function PaginaRecibos({
@@ -11,11 +10,10 @@ export default async function PaginaRecibos({
 }) {
   const { ano: anoParam } = await searchParams;
   const ano = Number(anoParam) || new Date().getFullYear();
-  const recibos = await listarRecibos(ano);
-  const resumo = resumirPorMembro(recibos);
-  const porEmitir = recibos.filter((r) => !r.passado);
+  const [recibos, porPassar] = await Promise.all([listarRecibos(ano), listarConcertosPorPassar(ano)]);
   const passados = recibos.filter((r) => r.passado);
-  const totalAno = recibos.reduce((s, r) => s + Number(r.valor ?? 0), 0);
+  const resumo = resumirPorMembro(passados);
+  const totalAno = passados.reduce((s, r) => s + Number(r.valor ?? 0), 0);
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -25,9 +23,9 @@ export default async function PaginaRecibos({
       </div>
 
       <Dica id="recibos">
-        Quando um concerto passa a <strong>realizado</strong>, aparece aqui um lembrete em <strong>Em falta</strong>.
-        Quem for passar o recibo toca em <strong>Passar</strong>, escolhe o seu nome, o valor e a data, e marca como
-        passado. O recibo salta para <strong>Passados</strong>, com o nome de quem o passou.
+        Cada concerto <strong>realizado</strong> sem recibo aparece em <strong>Por passar</strong>. Quem for passar o
+        recibo toca em <strong>Passar</strong>, escolhe o seu nome, o valor e a data. O concerto sai de Por passar e o
+        recibo aparece em <strong>Passados</strong>, com o nome de quem o passou.
       </Dica>
 
       {/* Navegacao de ano */}
@@ -43,38 +41,23 @@ export default async function PaginaRecibos({
         <strong className="titulo numero" style={{ fontSize: 28, color: 'var(--acento-forte)' }}>{euros(totalAno)}</strong>
       </div>
 
-      {/* Recibos em falta */}
+      {/* Recibos por passar: concertos realizados sem recibo passado */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <h2 className="rotulo-seccao">Em falta ({porEmitir.length})</h2>
-        {porEmitir.length === 0 ? (
-          <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Tudo em dia, sem recibos em falta neste ano.</p>
+        <h2 className="rotulo-seccao">Por passar ({porPassar.length})</h2>
+        {porPassar.length === 0 ? (
+          <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Tudo em dia, sem recibos por passar neste ano.</p>
         ) : (
-          porEmitir.map((r) => {
-            // Lembrete automatico de um concerto realizado: sem membro e sem valor.
-            const ehLembrete = !r.membro_id && Number(r.valor ?? 0) === 0;
-            return (
-              <div key={r.id} className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, borderColor: ehLembrete ? 'var(--linha-quente)' : undefined }}>
-                <Link href={`/recibos/${r.id}/editar`} style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1, minWidth: 0 }}>
-                  <strong style={{ fontSize: 15 }}>{ehLembrete ? (r.evento?.evento ?? 'Concerto') : (r.membro?.nome ?? 'Sem membro')}</strong>
-                  <span style={{ fontSize: 12, color: 'var(--texto-suave)' }}>
-                    {ehLembrete
-                      ? `Recibos por combinar${r.data ? `, ${dataExtenso(r.data)}` : ''}`
-                      : `${r.evento?.evento ?? 'Sem evento'}${r.data ? `, ${dataExtenso(r.data)}` : ''}`}
-                  </span>
-                </Link>
-                {ehLembrete ? (
-                  // Lembrete: leva ao ecra de passar (escolher quem, valor e data),
-                  // em vez do visto rapido, que marcaria sem preencher nada.
-                  <Link href={`/recibos/${r.id}/editar`} className="botao" style={{ width: 'auto', minHeight: 40, fontSize: 13, whiteSpace: 'nowrap', flexShrink: 0 }}>Passar</Link>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-                    <strong className="titulo numero" style={{ fontSize: 16 }}>{euros(r.valor)}</strong>
-                    <BotaoPassado id={r.id} passado={r.passado} />
-                  </div>
-                )}
-              </div>
-            );
-          })
+          porPassar.map((c) => (
+            <div key={c.id} className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, borderColor: 'var(--linha-quente)' }}>
+              <Link href={`/eventos/${c.id}`} style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1, minWidth: 0 }}>
+                <strong style={{ fontSize: 15 }}>{c.evento}</strong>
+                <span style={{ fontSize: 12, color: 'var(--texto-suave)' }}>
+                  {c.data ? dataExtenso(c.data) : 'sem data'}{Number(c.valor_total ?? 0) > 0 ? `  |  ${euros(c.valor_total)}` : ''}
+                </span>
+              </Link>
+              <Link href={`/recibos/novo?evento=${c.id}`} className="botao" style={{ width: 'auto', minHeight: 40, fontSize: 13, whiteSpace: 'nowrap', flexShrink: 0 }}>Passar</Link>
+            </div>
+          ))
         )}
       </div>
 
@@ -101,22 +84,16 @@ export default async function PaginaRecibos({
         )}
       </div>
 
-      {/* Resumo por membro */}
+      {/* Resumo por membro (recibos passados) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <h2 className="rotulo-seccao">Resumo por membro</h2>
+        <h2 className="rotulo-seccao">Passados por membro</h2>
         {resumo.length === 0 ? (
-          <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Sem recibos registados em {ano}.</p>
+          <p style={{ color: 'var(--texto-suave)', fontSize: 14 }}>Sem recibos passados em {ano}.</p>
         ) : (
           resumo.map((m) => (
-            <div key={m.membroId ?? 'sem'} className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <strong style={{ fontSize: 16 }}>{m.nome}</strong>
-                <strong className="titulo numero" style={{ fontSize: 18 }}>{euros(m.total)}</strong>
-              </div>
-              <div style={{ display: 'flex', gap: 16, fontSize: 13, color: 'var(--texto-suave)' }}>
-                <span><span style={{ color: 'var(--estado-confirmado)' }}>Passados:</span> {euros(m.passado)}</span>
-                <span><span style={{ color: 'var(--estado-orcamentado)' }}>Por passar:</span> {euros(m.porPassar)} ({m.numeroPorPassar})</span>
-              </div>
+            <div key={m.membroId ?? 'sem'} className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
+              <strong style={{ fontSize: 16 }}>{m.nome}</strong>
+              <strong className="titulo numero" style={{ fontSize: 18 }}>{euros(m.passado)}</strong>
             </div>
           ))
         )}
