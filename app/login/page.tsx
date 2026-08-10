@@ -1,8 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Brasao from '@/components/Brasao';
 import { criarClienteBrowser } from '@/lib/supabase/client';
+
+// Motivo trazido pela rota de confirmacao quando o link magico falha, para se
+// perceber o que se passou em vez de voltar ao login sem explicacao nenhuma.
+function AvisoDoLink() {
+  const motivo = useSearchParams().get('erro');
+  if (!motivo) return null;
+  return (
+    <p
+      style={{
+        maxWidth: 360,
+        width: '100%',
+        fontSize: 13,
+        lineHeight: 1.5,
+        color: 'var(--acento-forte)',
+        background: 'var(--acento-suave)',
+        border: '1px solid var(--acento)',
+        borderRadius: 'var(--raio-pequeno)',
+        padding: '10px 12px',
+        textAlign: 'center',
+      }}
+    >
+      Nao foi possivel entrar com esse link: {motivo}
+    </p>
+  );
+}
 
 // Ecra de entrada: logotipo branco sobre fundo escuro e login rapido
 // por link magico (sem palavra-passe para memorizar).
@@ -52,6 +78,10 @@ export default function PaginaLogin() {
           Gestao da banda
         </p>
       </div>
+
+      <Suspense fallback={null}>
+        <AvisoDoLink />
+      </Suspense>
 
       {estado === 'enviado' ? (
         <div className="cartao" style={{ maxWidth: 360, width: '100%', textAlign: 'center' }}>
