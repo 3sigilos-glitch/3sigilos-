@@ -33,6 +33,13 @@
   --estado-recusado: #d8514a;      /* vermelho apagado */
   --estado-cancelado: #6b6963;     /* cinza escuro (cancelado, raro) */
 
+  /* Zona de administracao: violeta frio, distinto do laranja de palco.
+     Marca tudo o que so o admin ve ou pode mexer. */
+  --admin: #9a86e0;
+  --admin-forte: #b3a3ef;
+  --admin-suave: rgba(154, 134, 224, 0.12);
+  --admin-linha: rgba(154, 134, 224, 0.45);
+
   /* Camada de superficie elevada (menus, folhas, cartao-heroi) */
   --superficie-elevada: #232327;
 
