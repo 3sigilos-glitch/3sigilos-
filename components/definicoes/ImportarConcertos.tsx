@@ -31,6 +31,11 @@ export default function ImportarConcertos() {
         cabecalho) e cola aqui. A app cria os concertos em falta e, para as linhas com nome, marca o recibo como passado
         com esse musico. Nao duplica o que ja existe, e podes voltar a colar sem medo.
       </p>
+      <p style={{ fontSize: 12, color: 'var(--texto-fraco)', lineHeight: 1.6, background: 'var(--superficie-2)', border: '1px solid var(--linha)', borderRadius: 'var(--raio-pequeno)', padding: '10px 12px' }}>
+        <strong style={{ color: 'var(--texto)' }}>Comeca a copiar pela coluna da data.</strong> Se ja tiveres concertos
+        criados sem data, basta voltar a colar com a coluna da data incluida: a app preenche a data nesses concertos em
+        vez de criar repetidos. Le datas como 10/05/2026, 2026-05-10 ou 10 de maio de 2026, e a hora (22:00) se existir.
+      </p>
 
       <textarea
         className="campo"

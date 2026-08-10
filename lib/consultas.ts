@@ -1,4 +1,5 @@
 import { criarClienteServidor } from '@/lib/supabase/server';
+import { ESTADO_EVENTO } from '@/lib/tipos';
 import type {
   Evento, Contacto, Equipa, Escalao, Repertorio, Recibo, Definicoes,
   Cifra, Setlist, SetlistMusica,
@@ -582,11 +583,13 @@ export async function carregarPainel(): Promise<DadosPainel> {
       .in('estado', ['confirmado', 'realizado']),
   ]);
 
-  const pipeline: Record<string, number> = {
-    orcamentado: 0, pre_reserva: 0, confirmado: 0, realizado: 0, recusado: 0,
-  };
+  // Arranca com todos os estados conhecidos a zero (assim um estado novo, como
+  // "cancelado", entra no pipeline sem ser preciso mexer aqui outra vez).
+  const pipeline: Record<string, number> = {};
+  for (const chave of Object.keys(ESTADO_EVENTO)) pipeline[chave] = 0;
   for (const e of todos.data ?? []) {
-    if (e.estado in pipeline) pipeline[e.estado] += 1;
+    if (!e.estado) continue;
+    pipeline[e.estado] = (pipeline[e.estado] ?? 0) + 1;
   }
 
   const eventosMes = doMes.data ?? [];
