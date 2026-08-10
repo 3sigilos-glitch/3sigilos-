@@ -45,7 +45,11 @@ security definer
 set search_path = public
 as $$
 begin
-  if not public.e_admin() then
+  -- So protege quando ha um utilizador com sessao que NAO e admin (o caso de um
+  -- membro a tentar promover-se pela app). Sem sessao (SQL Editor, chave de
+  -- servico), auth.uid() e nulo e a alteracao e permitida, para que definir o
+  -- admin a mao no Supabase continue a funcionar.
+  if auth.uid() is not null and not public.e_admin() then
     new.papel := old.papel;
     new.equipa_id := old.equipa_id;
   end if;

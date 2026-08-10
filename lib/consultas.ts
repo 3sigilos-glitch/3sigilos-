@@ -146,6 +146,7 @@ export interface EventoDetalhado extends Evento {
 
 export async function obterEvento(id: string): Promise<EventoDetalhado | null> {
   const supabase = await criarClienteServidor();
+  await promoverConcertosRealizados();
 
   const base = `*,
        contratante:contactos!eventos_contratante_id_fkey (nome, telefone, email),
