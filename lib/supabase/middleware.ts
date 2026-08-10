@@ -15,9 +15,22 @@ const ROTAS_PUBLICAS = ['/login', '/auth', '/api', '/.well-known', '/assistente-
 export async function atualizarSessao(request: NextRequest) {
   let resposta = NextResponse.next({ request });
 
+  // Sem as chaves do Supabase, o cliente rebenta e todas as paginas davam um
+  // erro 500 mudo. Em vez disso, diz-se claramente o que falta configurar.
+  const endereco = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const chaveAnonima = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!endereco || !chaveAnonima) {
+    return new NextResponse(
+      'Configuracao em falta: NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY. ' +
+        'Define estas variaveis de ambiente no Vercel (Settings, Environment Variables, ' +
+        'ambiente Production) e faz novo deploy.',
+      { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }
+    );
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    endereco,
+    chaveAnonima,
     {
       cookies: {
         getAll() {
