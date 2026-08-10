@@ -2,6 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import Marca from '@/components/Marca';
 import MenuRapido from '@/components/MenuRapido';
 
@@ -42,7 +43,8 @@ export default function Cabecalho({ email, ehAdmin }: { email?: string; ehAdmin?
         transition: 'transform var(--dur) var(--curva)',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+      {/* O emblema e o nome levam ao painel (home). */}
+      <Link href="/painel" aria-label="Ir para o painel" style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
         <img
           src="/logo-emblema.jpg"
           alt=""
@@ -51,7 +53,7 @@ export default function Cabecalho({ email, ehAdmin }: { email?: string; ehAdmin?
           style={{ width: 30, height: 30, objectFit: 'cover', borderRadius: 8, mixBlendMode: 'screen' }}
         />
         <Marca tamanho="medio" />
-      </div>
+      </Link>
 
       <MenuRapido email={email} ehAdmin={ehAdmin} />
     </header>

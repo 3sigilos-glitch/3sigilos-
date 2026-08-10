@@ -10,15 +10,17 @@ interface Props {
   recibo?: Recibo;
   eventos: { id: string; evento: string; valor_total: number }[];
   membros: { id: string; nome: string }[];
+  eventoInicial?: string;
+  passadoInicial?: boolean;
 }
 
-export default function FormularioRecibo({ acao, recibo, eventos, membros }: Props) {
+export default function FormularioRecibo({ acao, recibo, eventos, membros, eventoInicial, passadoInicial }: Props) {
   const hoje = new Date().toISOString().slice(0, 10);
 
   return (
     <form action={acao} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <Campo etiqueta="Evento">
-        <select name="evento_id" className="campo" defaultValue={recibo?.evento_id ?? ''}>
+        <select name="evento_id" className="campo" defaultValue={recibo?.evento_id ?? eventoInicial ?? ''}>
           <option value="">Sem evento</option>
           {eventos.map((e) => (
             <option key={e.id} value={e.id}>{e.evento} ({euros(e.valor_total)})</option>
@@ -45,7 +47,7 @@ export default function FormularioRecibo({ acao, recibo, eventos, membros }: Pro
       </div>
 
       <label style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 'var(--toque)' }}>
-        <input type="checkbox" name="passado" defaultChecked={recibo?.passado ?? false} style={{ width: 20, height: 20, accentColor: 'var(--acento)' }} />
+        <input type="checkbox" name="passado" defaultChecked={recibo?.passado ?? passadoInicial ?? false} style={{ width: 20, height: 20, accentColor: 'var(--acento)' }} />
         <span style={{ fontSize: 15 }}>Recibo ja passado</span>
       </label>
 

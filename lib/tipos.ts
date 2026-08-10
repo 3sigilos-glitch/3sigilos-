@@ -4,7 +4,7 @@
 export type Papel = 'membro' | 'tecnico';
 export type PapelConta = 'admin' | 'membro';
 export type TipoContacto = 'camara' | 'junta' | 'associacao' | 'clube_motard' | 'empresa' | 'privado';
-export type EstadoEvento = 'orcamentado' | 'pre_reserva' | 'confirmado' | 'realizado' | 'recusado';
+export type EstadoEvento = 'orcamentado' | 'pre_reserva' | 'confirmado' | 'realizado' | 'recusado' | 'cancelado';
 export type DisponibilidadeTecnico = 'por_confirmar' | 'sim' | 'nao';
 export type EstadoPagamento = 'por_receber' | 'recebido';
 
@@ -169,6 +169,7 @@ export const ESTADO_EVENTO: Record<EstadoEvento, { rotulo: string; corVar: strin
   confirmado: { rotulo: 'Confirmado', corVar: 'var(--estado-confirmado)' },
   realizado: { rotulo: 'Realizado', corVar: 'var(--estado-realizado)' },
   recusado: { rotulo: 'Recusado', corVar: 'var(--estado-recusado)' },
+  cancelado: { rotulo: 'Cancelado', corVar: 'var(--estado-cancelado)' },
 };
 
 export const TIPO_CONTACTO: Record<TipoContacto, string> = {
