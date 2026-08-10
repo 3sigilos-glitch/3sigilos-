@@ -552,7 +552,25 @@ export interface DadosPainel {
   };
 }
 
+// Painel vazio, usado quando a leitura falha (a app abre na mesma, sem erro 500).
+const PAINEL_VAZIO: DadosPainel = {
+  proximos: [],
+  pipeline: {},
+  recibosPorPassar: 0,
+  indicadores: { concertosDoMes: 0, faturacaoPrevista: 0, propostasEmAberto: 0 },
+};
+
+// Nunca lanca: o painel e a pagina de entrada da app, e uma falha de leitura
+// deitava a app abaixo com um erro 500 em vez de mostrar o ecra.
 export async function carregarPainel(): Promise<DadosPainel> {
+  try {
+    return await carregarPainelInterno();
+  } catch {
+    return PAINEL_VAZIO;
+  }
+}
+
+async function carregarPainelInterno(): Promise<DadosPainel> {
   const supabase = await criarClienteServidor();
   await promoverConcertosRealizados();
   const agora = new Date();

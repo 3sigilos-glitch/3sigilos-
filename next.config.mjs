@@ -11,8 +11,16 @@ const nextConfig = {
   async headers() {
     // A app so fala com ela propria e com o Supabase (base de dados, sessao e
     // storage). Tudo o resto e bloqueado pelo browser.
+    //
+    // IMPORTANTE: aqui vai sempre o dominio generico do Supabase, alem do
+    // endereco do projeto. Se a variavel de ambiente nao estiver disponivel na
+    // altura da compilacao, o browser continua a deixar a app falar com o
+    // Supabase, em vez de bloquear tudo (login incluido).
     const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
     const supabaseWs = supabase.replace(/^https:/, 'wss:');
+    const ligacoes = ["'self'", 'https://*.supabase.co', 'wss://*.supabase.co', supabase, supabaseWs]
+      .filter(Boolean)
+      .join(' ');
 
     const csp = [
       "default-src 'self'",
@@ -21,7 +29,7 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      `connect-src 'self' ${supabase} ${supabaseWs}`.trim(),
+      `connect-src ${ligacoes}`,
       // Ninguem pode embeber esta app dentro de outro site (anti-clickjacking).
       "frame-ancestors 'none'",
       "base-uri 'self'",
