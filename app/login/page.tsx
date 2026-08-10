@@ -21,11 +21,22 @@ export default function PaginaLogin() {
       email: email.trim(),
       options: {
         emailRedirectTo: `${window.location.origin}/auth/confirmar`,
+        // A app e so para os elementos convidados: nao cria contas novas a quem
+        // simplesmente descubra o endereco. Quem nao estiver registado no
+        // Supabase nao recebe link nenhum.
+        shouldCreateUser: false,
       },
     });
 
     if (error) {
-      setMensagemErro('Nao foi possivel enviar o link. Confirma o email e tenta de novo.');
+      const m = error.message ?? '';
+      if (/signups? not allowed|not allowed for otp|user not found/i.test(m)) {
+        setMensagemErro('Esse email nao esta registado. A app e so para os elementos da banda; pede ao admin para te acrescentar.');
+      } else if (/rate limit|too many/i.test(m)) {
+        setMensagemErro('Ja foram pedidos links a mais nos ultimos minutos. Espera um pouco e tenta de novo.');
+      } else {
+        setMensagemErro('Nao foi possivel enviar o link. Confirma o email e tenta de novo.');
+      }
       setEstado('erro');
     } else {
       setEstado('enviado');
