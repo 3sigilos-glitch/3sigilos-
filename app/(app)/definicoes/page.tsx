@@ -7,7 +7,6 @@ import { euros } from '@/lib/formatar';
 import { guardarDefinicoes } from './acoes';
 import CopiaSeguranca from '@/components/definicoes/CopiaSeguranca';
 import ImportarConcertos from '@/components/definicoes/ImportarConcertos';
-import { AvisoAdmin, EtiquetaAdmin } from '@/components/SoAdmin';
 
 export default async function PaginaDefinicoes() {
   const sessao = await obterSessao();
@@ -18,14 +17,7 @@ export default async function PaginaDefinicoes() {
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <BotaoVoltar href="/painel" />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <h1 style={{ fontSize: 30 }}>Definicoes</h1>
-        <EtiquetaAdmin />
-      </div>
-      <AvisoAdmin>
-        <strong style={{ color: 'var(--admin-forte)' }}>Zona de administracao.</strong> Esta pagina so aparece a quem e
-        admin (tu e quem tiveres definido). Os outros elementos nao a veem nem conseguem alterar nada aqui.
-      </AvisoAdmin>
+      <h1 style={{ fontSize: 30 }}>Definicoes</h1>
 
       {/* Parametros gerais e textos da proposta */}
       <form action={guardarDefinicoes} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

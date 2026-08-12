@@ -142,7 +142,7 @@ export default async function PaginaPainel() {
           <Atalho href="/contactos" etiqueta="Contactos" icone={<IconePessoa />} />
           <Atalho href="/equipa" etiqueta="Equipa" icone={<IconePessoas />} />
           <Atalho href="/automacoes" etiqueta="Automacoes" icone={<IconeRaio />} />
-          {sessao.ehAdmin && <Atalho href="/definicoes" etiqueta="Definicoes" icone={<IconeRoda />} admin />}
+          {sessao.ehAdmin && <Atalho href="/definicoes" etiqueta="Definicoes" icone={<IconeRoda />} />}
         </div>
       </div>
 
@@ -186,23 +186,15 @@ function PassoInicial({ numero, href, titulo, texto }: { numero: number; href: s
   );
 }
 
-// Atalho da grelha "Mais". Com admin, fica a violeta para se perceber logo que
-// e uma zona reservada (so o admin ve este cartao).
-function Atalho({ href, etiqueta, icone, admin }: { href: string; etiqueta: string; icone: React.ReactNode; admin?: boolean }) {
+function Atalho({ href, etiqueta, icone }: { href: string; etiqueta: string; icone: React.ReactNode }) {
   return (
     <Link
       href={href}
-      title={admin ? 'So visivel para admins' : undefined}
       className="cartao"
-      style={{
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        gap: 8, minHeight: 84, color: 'var(--texto)', textAlign: 'center',
-        ...(admin ? { borderColor: 'var(--admin-linha)', background: 'var(--admin-suave)' } : {}),
-      }}
+      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 84, color: 'var(--texto)', textAlign: 'center' }}
     >
-      <span style={{ color: admin ? 'var(--admin-forte)' : 'var(--texto-suave)' }}>{icone}</span>
+      <span style={{ color: 'var(--texto-suave)' }}>{icone}</span>
       <span style={{ fontSize: 12, letterSpacing: '0.02em' }}>{etiqueta}</span>
-      {admin && <span style={{ fontSize: 9, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--admin-forte)' }}>So admin</span>}
     </Link>
   );
 }

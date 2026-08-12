@@ -1,15 +1,10 @@
 'use server';
 
 import { emailsDaBanda, carregarBriefing, type Periodo } from '@/lib/automacoes';
-import { obterSessao } from '@/lib/sessao';
 
 // Envia um briefing por email a toda a banda, via Resend.
 // Sem RESEND_API_KEY, lanca um aviso (a alternativa e copiar para o WhatsApp).
 export async function enviarBriefingEmail(periodo: Periodo) {
-  // Guarda explicita: so quem tem sessao pode disparar emails.
-  const sessao = await obterSessao();
-  if (!sessao.id) throw new Error('Precisas de ter sessao iniciada.');
-
   const chave = process.env.RESEND_API_KEY;
   if (!chave) {
     throw new Error('Envio automatico nao configurado. Define RESEND_API_KEY ou copia o texto para o grupo.');
