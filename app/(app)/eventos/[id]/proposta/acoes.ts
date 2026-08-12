@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { criarClienteServidor } from '@/lib/supabase/server';
 import { obterEvento, obterDefinicoes } from '@/lib/consultas';
+import { obterSessao } from '@/lib/sessao';
 import { gerarPdfProposta } from '@/lib/propostaPdf';
 
 // Gera e atribui a referencia (NASA-ano-numero) ao evento, se ainda nao tiver,
@@ -55,6 +56,10 @@ export async function arquivarProposta(eventoId: string) {
 // So funciona se RESEND_API_KEY estiver definido. Caso contrario, usa o rascunho
 // de email (mailto) disponivel na pagina.
 export async function enviarPropostaEmail(eventoId: string) {
+  // Guarda explicita: so quem tem sessao pode enviar propostas por email.
+  const sessao = await obterSessao();
+  if (!sessao.id) throw new Error('Precisas de ter sessao iniciada.');
+
   const chave = process.env.RESEND_API_KEY;
   if (!chave) {
     throw new Error('Envio automatico nao configurado. Define RESEND_API_KEY ou usa o rascunho de email.');

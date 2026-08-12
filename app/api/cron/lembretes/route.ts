@@ -12,12 +12,17 @@ export const runtime = 'nodejs';
 //  - SUPABASE_SERVICE_ROLE_KEY: para ler dados sem sessao de utilizador
 //  - RESEND_API_KEY e RESEND_FROM: para enviar os emails
 export async function GET(request: Request) {
+  // Barreira fechada por omissao: sem CRON_SECRET definido, ninguem entra.
+  // (Antes, sem segredo, a rota ficava aberta e qualquer pessoa na internet
+  // podia dispara-la e mandar emails para a banda a vontade.) O Vercel Cron
+  // envia este cabecalho automaticamente quando a variavel esta definida.
   const segredo = process.env.CRON_SECRET;
-  if (segredo) {
-    const auth = request.headers.get('authorization');
-    if (auth !== `Bearer ${segredo}`) {
-      return new Response('Nao autorizado', { status: 401 });
-    }
+  if (!segredo) {
+    return new Response('Rota desativada: falta definir CRON_SECRET.', { status: 503 });
+  }
+  const auth = request.headers.get('authorization');
+  if (auth !== `Bearer ${segredo}`) {
+    return new Response('Nao autorizado', { status: 401 });
   }
 
   const chaveEmail = process.env.RESEND_API_KEY;
