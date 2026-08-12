@@ -27,7 +27,10 @@ const nextConfig = {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
+      // As fotos dos elementos e dos contactos sao enderecos externos que cada
+      // um cola (por exemplo do Google). Por isso, permite imagens de qualquer
+      // origem segura (https), alem das locais e embutidas.
+      "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
       `connect-src ${ligacoes}`,
       "frame-ancestors 'none'", // ninguem embebe esta app dentro de outro site
