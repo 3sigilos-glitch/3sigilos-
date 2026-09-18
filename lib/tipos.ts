@@ -7,6 +7,9 @@ export type TipoContacto = 'camara' | 'junta' | 'associacao' | 'clube_motard' | 
 export type EstadoEvento = 'orcamentado' | 'pre_reserva' | 'confirmado' | 'realizado' | 'recusado' | 'cancelado';
 export type DisponibilidadeTecnico = 'por_confirmar' | 'sim' | 'nao';
 export type EstadoPagamento = 'por_receber' | 'recebido';
+export type EstadoPedido = 'pendente' | 'confirmado' | 'recusado';
+export type EstadoDisponibilidade = 'pendente' | 'disponivel' | 'indisponivel';
+export type CanalResposta = 'push' | 'telegram';
 
 export interface Equipa {
   id: string;
@@ -17,6 +20,9 @@ export interface Equipa {
   telefone: string | null;
   foto_url: string | null;
   ativo: boolean;
+  // Canais de aviso de disponibilidade (ver migracao 0009).
+  telegram_chat_id: string | null;
+  push_subscription: PushSubscriptionGuardada | null;
   criado_em: string;
   atualizado_em: string;
 }
@@ -130,6 +136,38 @@ export interface SetlistMusica {
   created_at: string;
 }
 
+// Objeto de subscricao Web Push tal como o browser o devolve.
+export interface PushSubscriptionGuardada {
+  endpoint: string;
+  expirationTime?: number | null;
+  keys: { p256dh: string; auth: string };
+}
+
+// Pedido de orcamento vindo do formulario publico (ver migracao 0009).
+export interface PedidoOrcamento {
+  id: string;
+  criado_em: string;
+  nome_contacto: string;
+  email_contacto: string;
+  telefone_contacto: string | null;
+  data_evento: string;
+  local: string;
+  tipo_evento: string | null;
+  escalao_preco: string | null;
+  estado: EstadoPedido;
+  evento_id: string | null; // o evento (proposta) criado a partir do pedido
+}
+
+// Resposta de disponibilidade de um elemento a um pedido.
+export interface DisponibilidadeResposta {
+  id: string;
+  pedido_id: string;
+  membro_id: string;
+  estado: EstadoDisponibilidade;
+  respondido_em: string | null;
+  canal: CanalResposta | null;
+}
+
 export interface Definicoes {
   id: number;
   nome_banda: string;
@@ -190,4 +228,21 @@ export const DISPONIBILIDADE_TECNICO: Record<DisponibilidadeTecnico, string> = {
 export const ESTADO_PAGAMENTO: Record<EstadoPagamento, string> = {
   por_receber: 'Por receber',
   recebido: 'Recebido',
+};
+
+export const ESTADO_PEDIDO: Record<EstadoPedido, string> = {
+  pendente: 'Pendente',
+  confirmado: 'Confirmado',
+  recusado: 'Recusado',
+};
+
+export const ESTADO_DISPONIBILIDADE: Record<EstadoDisponibilidade, string> = {
+  pendente: 'Sem resposta',
+  disponivel: 'Disponivel',
+  indisponivel: 'Indisponivel',
+};
+
+export const CANAL_RESPOSTA: Record<CanalResposta, string> = {
+  push: 'Notificacao',
+  telegram: 'Telegram',
 };

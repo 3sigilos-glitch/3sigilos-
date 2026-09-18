@@ -33,7 +33,25 @@ A app esta a ser construida por fases. Concluido ate agora:
 - **Fase 9**: definicoes de admin (parametros, textos da proposta e escaloes), afinacao visual e
   preparacao do deploy no Vercel.
 
-A aplicacao esta completa. As fases seguintes sao so afinacoes e o uso no dia a dia.
+- **Fase 10 (em curso)**: pedidos de orcamento pelo site e disponibilidade da banda.
+  Feito ate agora, so base de dados (migracao `0009_pedidos_orcamento.sql`):
+  - `pedidos_orcamento`: o que entra pelo formulario publico (contacto, data, local, tipo de
+    evento, escalao em texto livre, estado `pendente`/`confirmado`/`recusado` e ligacao opcional
+    ao evento que vier a nascer do pedido).
+  - `disponibilidade_respostas`: uma linha por pedido e por elemento, com estado
+    `pendente`/`disponivel`/`indisponivel`, a hora da resposta e o canal (`push` ou `telegram`).
+    Unica por par pedido/elemento e apagada em cascata com o pedido.
+  - `equipa`: ganha `telegram_chat_id` e `push_subscription` (objeto Web Push em jsonb).
+  - Gatilho `tg_abrir_disponibilidade`: ao entrar um pedido, abre logo uma linha de resposta
+    `pendente` por cada elemento com `papel = 'membro'` e `ativo = true`.
+  - RLS igual ao resto: leem, criam e editam todos os autenticados, so o admin apaga. Nao ha
+    insert publico para `anon`: o formulario vai escrever pela rota de API com a service key.
+
+  Por fazer nesta fase: o formulario publico, as rotas de API (entrada do pedido e resposta de
+  disponibilidade), as notificacoes push e o bot de Telegram. Os valores reais dos escaloes de
+  preco no formulario tambem ficam por decidir.
+
+As restantes fases estao completas. O que vier a seguir sao afinacoes e o uso no dia a dia.
 
 ## Configurar as variaveis de ambiente
 
@@ -90,7 +108,8 @@ arquivar os PDF, a `0004_storage.sql` (cria o balde de Storage "propostas" e as 
 Para as setlists e cifras, corre a `0005_setlists_cifras.sql`. Para as preferencias de cifra por
 membro (cada um escolhe como ve o palco), corre a `0006_preferencias_cifra.sql`. Para a escolha
 pessoal de versao por musica (cada um marca a versao que quer ver), corre a `0007_cifra_escolhida.sql`.
-Para o estado "cancelado" nos eventos, corre a `0008_estado_cancelado.sql`.
+Para o estado "cancelado" nos eventos, corre a `0008_estado_cancelado.sql`. Para os pedidos de
+orcamento do formulario publico e a disponibilidade da banda, corre a `0009_pedidos_orcamento.sql`.
 
 Em alternativa, com a [CLI do Supabase](https://supabase.com/docs/guides/cli): `supabase db push`.
 
