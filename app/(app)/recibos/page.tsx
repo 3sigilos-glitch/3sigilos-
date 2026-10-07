@@ -25,7 +25,8 @@ export default async function PaginaRecibos({
       <Dica id="recibos">
         Cada concerto <strong>realizado</strong> sem recibo aparece em <strong>Por passar</strong>. Quem for passar o
         recibo toca em <strong>Passar</strong>, escolhe o seu nome, o valor e a data. O concerto sai de Por passar e o
-        recibo aparece em <strong>Passados</strong>, com o nome de quem o passou.
+        recibo aparece em <strong>Passados</strong>, com o nome de quem o passou. Se um concerto nao leva recibo (favor,
+        troca, sem faturacao), escolhe o nome <strong>Sem papel</strong>: fica registado com valor 0 e sai de Por passar.
       </Dica>
 
       {/* Navegacao de ano */}
@@ -71,7 +72,7 @@ export default async function PaginaRecibos({
             <div key={r.id} className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
               <Link href={`/recibos/${r.id}/editar`} style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1, minWidth: 0 }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                  <strong style={{ fontSize: 15 }}>{r.membro?.nome ?? 'Sem musico'}</strong>
+                  <strong style={{ fontSize: 15 }}>{r.membro?.nome ?? 'Sem papel'}</strong>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--estado-confirmado)" strokeWidth="2.4"><path d="M20 6L9 17l-5-5" /></svg>
                 </span>
                 <span style={{ fontSize: 12, color: 'var(--texto-suave)' }}>

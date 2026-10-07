@@ -4,6 +4,10 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { criarClienteServidor } from '@/lib/supabase/server';
 
+// Valor especial do menu de nomes (ver FormularioRecibo): concerto que nao leva
+// recibo. Fica registado com valor 0, sem musico e ja como passado.
+const SEM_PAPEL = '__sem_papel__';
+
 function lerFormulario(formData: FormData) {
   const texto = (chave: string) => {
     const v = formData.get(chave);
@@ -15,6 +19,18 @@ function lerFormulario(formData: FormData) {
     typeof valorBruto === 'string' && valorBruto.trim() !== ''
       ? Number(valorBruto.replace(',', '.'))
       : 0;
+
+  // "Sem papel": concerto sem recibo. Forca valor 0, sem musico e passado.
+  if (texto('membro_id') === SEM_PAPEL) {
+    return {
+      evento_id: texto('evento_id'),
+      membro_id: null,
+      valor: 0,
+      data: texto('data'),
+      passado: true,
+    };
+  }
+
   return {
     evento_id: texto('evento_id'),
     membro_id: texto('membro_id'),

@@ -499,7 +499,7 @@ export function resumirPorMembro(recibos: ReciboDetalhado[]): ResumoMembro[] {
     if (!mapa.has(chave)) {
       mapa.set(chave, {
         membroId: r.membro_id,
-        nome: r.membro?.nome ?? 'Sem membro',
+        nome: r.membro?.nome ?? 'Sem papel',
         total: 0,
         passado: 0,
         porPassar: 0,
