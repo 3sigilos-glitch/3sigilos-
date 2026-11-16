@@ -2,7 +2,7 @@ import Link from 'next/link';
 import BotaoImportarCalendario from '@/components/eventos/BotaoImportarCalendario';
 import { importarDoCalendario } from '@/app/(app)/eventos/acoes';
 import { obterResumoCalendario, indisponiveisEm } from '@/lib/calendarioDados';
-import { intervaloCurto, type ConcertoCalendario, type Indisponibilidade } from '@/lib/calendario';
+import { intervaloCurto, nomesIndisponiveis, type ConcertoCalendario, type Indisponibilidade } from '@/lib/calendario';
 import { euros } from '@/lib/formatar';
 
 // Quantos concertos por importar ficam a vista antes do "ver mais".
@@ -55,7 +55,7 @@ export default async function SeccaoCalendario() {
 
           {/* Os mais proximos a vista; o resto recolhido, para nao empurrar a agenda. */}
           {provaveis.slice(0, VISIVEIS).map((c) => (
-            <CartaoConcerto key={c.uid} concerto={c} hoje={hoje} />
+            <CartaoConcerto key={c.uid} concerto={c} hoje={hoje} indisponiveis={nomesIndisponiveis(proximas, c.dia)} />
           ))}
           {provaveis.length > VISIVEIS && (
             <details>
@@ -64,7 +64,7 @@ export default async function SeccaoCalendario() {
               </summary>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
                 {provaveis.slice(VISIVEIS).map((c) => (
-                  <CartaoConcerto key={c.uid} concerto={c} hoje={hoje} />
+                  <CartaoConcerto key={c.uid} concerto={c} hoje={hoje} indisponiveis={nomesIndisponiveis(proximas, c.dia)} />
                 ))}
               </div>
             </details>
@@ -72,7 +72,7 @@ export default async function SeccaoCalendario() {
 
           {cruzamento.mesmoDia.map(({ concerto, existente }) => (
             <div key={concerto.uid} className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 8, borderColor: 'var(--estado-orcamentado)' }}>
-              <Detalhes concerto={concerto} hoje={hoje} />
+              <Detalhes concerto={concerto} hoje={hoje} indisponiveis={nomesIndisponiveis(proximas, concerto.dia)} />
               <span style={{ fontSize: 13, color: 'var(--estado-orcamentado)', lineHeight: 1.5 }}>
                 Nesse dia ja tens na agenda: <Link href={`/eventos/${existente.id}`} style={{ fontWeight: 700, textDecoration: 'underline' }}>{existente.evento}</Link>.
                 Se for o mesmo concerto, nao importes.
@@ -93,7 +93,7 @@ export default async function SeccaoCalendario() {
               </summary>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
                 {outras.map((c) => (
-                  <CartaoConcerto key={c.uid} concerto={c} hoje={hoje} />
+                  <CartaoConcerto key={c.uid} concerto={c} hoje={hoje} indisponiveis={nomesIndisponiveis(proximas, c.dia)} />
                 ))}
               </div>
             </details>
@@ -120,7 +120,7 @@ export default async function SeccaoCalendario() {
   );
 }
 
-function Detalhes({ concerto, hoje }: { concerto: ConcertoCalendario; hoje: string }) {
+function Detalhes({ concerto, hoje, indisponiveis = [] }: { concerto: ConcertoCalendario; hoje: string; indisponiveis?: string[] }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1, minWidth: 0 }}>
       <strong style={{ fontSize: 15 }}>{concerto.nome}</strong>
@@ -134,14 +134,20 @@ function Detalhes({ concerto, hoje }: { concerto: ConcertoCalendario; hoje: stri
           No calendario: {concerto.titulo}
         </span>
       )}
+      {/* So um aviso: nao impede a importacao (quem marcou pode ja ter aceitado o concerto). */}
+      {indisponiveis.length > 0 && (
+        <span style={{ fontSize: 12, color: 'var(--estado-recusado)' }}>
+          Indisponivel nesse dia: {indisponiveis.join(', ')}
+        </span>
+      )}
     </div>
   );
 }
 
-function CartaoConcerto({ concerto, hoje }: { concerto: ConcertoCalendario; hoje: string }) {
+function CartaoConcerto({ concerto, hoje, indisponiveis }: { concerto: ConcertoCalendario; hoje: string; indisponiveis?: string[] }) {
   return (
     <div className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, borderColor: 'var(--linha-quente)' }}>
-      <Detalhes concerto={concerto} hoje={hoje} />
+      <Detalhes concerto={concerto} hoje={hoje} indisponiveis={indisponiveis} />
       <BotaoImportarCalendario acao={importarDoCalendario.bind(null, concerto.uid, false)} />
     </div>
   );
