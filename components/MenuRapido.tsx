@@ -10,6 +10,7 @@ import { usePathname } from 'next/navigation';
 const LINKS = [
   { href: '/painel', etiqueta: 'Painel' },
   { href: '/eventos', etiqueta: 'Agenda' },
+  { href: '/disponibilidade', etiqueta: 'Disponibilidade' },
   { href: '/setlists', etiqueta: 'Setlists' },
   { href: '/recibos', etiqueta: 'Recibos' },
   { href: '/repertorio', etiqueta: 'Repertorio' },

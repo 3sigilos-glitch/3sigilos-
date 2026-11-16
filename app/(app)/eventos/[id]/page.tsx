@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import BotaoVoltar from '@/components/BotaoVoltar';
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import EtiquetaEstado from '@/components/EtiquetaEstado';
 import BotaoApagar from '@/components/BotaoApagar';
@@ -8,6 +9,8 @@ import { obterSessao } from '@/lib/sessao';
 import { apagarEvento } from '../acoes';
 import { dataExtenso, hora, textoDias, euros } from '@/lib/formatar';
 import { DISPONIBILIDADE_TECNICO, ESTADO_PAGAMENTO } from '@/lib/tipos';
+import { AvisoIndisponiveis } from '@/components/eventos/SeccaoCalendario';
+import { diaDoEvento } from '@/lib/calendario';
 
 export default async function PaginaFichaEvento({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -51,6 +54,13 @@ export default async function PaginaFichaEvento({ params }: { params: Promise<{ 
         </div>
         <strong className="titulo numero" style={{ fontSize: 34, color: 'var(--acento-forte)' }}>{euros(evento.valor_total)}</strong>
       </div>
+
+      {/* Quem escreveu no calendario Google que esta indisponivel neste dia. */}
+      {!['realizado', 'recusado', 'cancelado'].includes(evento.estado) && (
+        <Suspense fallback={null}>
+          <AvisoIndisponiveis dia={diaDoEvento(evento.data)} />
+        </Suspense>
+      )}
 
       <Bloco titulo="Quando e onde">
         <Linha rotulo="Data" valor={`${dataExtenso(evento.data)}${h ? `, ${h}` : ''}${dias ? `  (${dias})` : ''}`} />

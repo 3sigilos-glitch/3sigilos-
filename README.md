@@ -194,6 +194,27 @@ Para envio automatico agendado (sem ser a mao), o ficheiro `vercel.json` ja agen
 para chamar `/api/cron/lembretes` todos os dias as 9h. Para funcionar, define no Vercel as variaveis
 `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY` e, por seguranca, `CRON_SECRET`.
 
+## Calendario Google (indisponibilidades e concertos)
+
+A app le o calendario Google dos N'ASA (so leitura, nunca escreve la nada):
+
+- **Indisponibilidades**: eventos com o nome de quem e e a palavra `indisponivel`
+  no titulo (tambem aceita `indisp`, `ind.` e `off`, por exemplo "Kev indisp",
+  "Marco off."). Aparecem em Agenda e em Disponibilidade, e a app avisa ao
+  marcar ou abrir um concerto num dia em que alguem esta indisponivel. Se o
+  evento for apagado ou alterado no calendario, deixa de aparecer na app.
+- **Concertos**: o que estiver escrito no calendario e ainda nao existir na
+  agenda aparece em "No calendario, por importar", com um botao Importar. Antes
+  de sugerir e antes de gravar, compara com a agenda: se ja houver um evento no
+  mesmo dia (ou no dia ao lado) com nome ou local parecido, nao sugere nem cria.
+  Ensaios, aniversarios, jantares e entradas anuladas sao ignorados.
+
+Para ligar: no Google Calendar, Definicoes do calendario dos N'ASA, copiar o
+"Endereco secreto no formato iCal" e guarda-lo no Vercel na variavel
+`CALENDARIO_ICAL_URL` (Production e Preview), depois fazer Redeploy. Sem a
+variavel (ou se o calendario falhar) a app funciona exatamente como antes. As
+alteracoes no calendario chegam a app em cerca de 5 minutos.
+
 ## Propostas
 
 Na ficha de cada evento, em **Proposta**, geras a proposta: e atribuida uma referencia unica no
