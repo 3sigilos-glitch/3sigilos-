@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import FiltrosEventos from '@/components/eventos/FiltrosEventos';
 import CartaoEvento from '@/components/eventos/CartaoEvento';
+import SeccaoCalendario from '@/components/eventos/SeccaoCalendario';
 import Dica from '@/components/Dica';
 import EstadoVazio from '@/components/EstadoVazio';
 import { listarEventos } from '@/lib/consultas';
@@ -40,8 +41,16 @@ export default async function PaginaEventos({
       <Dica id="eventos">
         Toca em <strong>Novo</strong> para marcar um evento. Vai mudando o estado: <strong>orcamentado</strong> quando
         envias a proposta, <strong>confirmado</strong> quando fecha a data, e <strong>realizado</strong> depois do
-        concerto (fica logo um lembrete de recibo). Se marcares dois eventos no mesmo dia, a app avisa.
+        concerto (fica logo um lembrete de recibo). Se marcares dois eventos no mesmo dia, a app avisa. O que
+        escreverem no <strong>calendario Google</strong> aparece aqui: concertos novos para importar com um toque e as
+        indisponibilidades de cada um (escrevam o nome e <strong>indisponivel</strong> no titulo).
       </Dica>
+
+      {/* Calendario Google: carrega a parte, sem atrasar a agenda. Se nao estiver
+          ligado ou falhar, nao aparece nada. */}
+      <Suspense fallback={null}>
+        <SeccaoCalendario />
+      </Suspense>
 
       <Suspense>
         <FiltrosEventos />

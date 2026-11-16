@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation';
 import { criarClienteServidor } from '@/lib/supabase/server';
 import { deLocalParaIso } from '@/lib/formatar';
 import type { EstadoEvento } from '@/lib/tipos';
+import { diaEmPortugal, procurarNaAgenda, somarDias, tecnicoNoTitulo, type EventoApp } from '@/lib/calendario';
+import { indisponiveisEm, obterConcertoDoCalendario, obterTecnicos } from '@/lib/calendarioDados';
 
 // Le os campos do formulario e monta o registo do evento.
 function lerFormulario(formData: FormData) {
@@ -105,7 +107,17 @@ export async function apagarEvento(id: string) {
 // Verifica se ja existe outro evento na mesma data (ignora o proprio).
 // Distingue confirmados de pendentes, para o aviso ser claro.
 export async function verificarConflitoData(dataIso: string, idAtual?: string) {
-  if (!dataIso) return { confirmados: [], pendentes: [] };
+  if (!dataIso) return { confirmados: [], pendentes: [], indisponiveis: [] as string[] };
+
+  // Quem escreveu no calendario Google que esta indisponivel nesse dia.
+  // (Lista vazia se o calendario nao estiver ligado ou falhar.)
+  let indisponiveis: string[] = [];
+  try {
+    const instante = new Date(dataIso);
+    if (!Number.isNaN(instante.getTime())) indisponiveis = await indisponiveisEm(diaEmPortugal(instante));
+  } catch {
+    indisponiveis = [];
+  }
 
   const supabase = await criarClienteServidor();
   const dia = new Date(dataIso);
@@ -125,10 +137,72 @@ export async function verificarConflitoData(dataIso: string, idAtual?: string) {
   }
 
   const { data, error } = await consulta;
-  if (error || !data) return { confirmados: [], pendentes: [] };
+  if (error || !data) return { confirmados: [], pendentes: [], indisponiveis };
 
   return {
     confirmados: data.filter((e) => e.estado === 'confirmado' || e.estado === 'realizado'),
     pendentes: data.filter((e) => e.estado === 'orcamentado' || e.estado === 'pre_reserva'),
+    indisponiveis,
   };
+}
+
+// Importa para a agenda um concerto escrito no calendario Google.
+//
+// Antes de gravar volta SEMPRE a comparar com a agenda (alguem pode ter criado
+// o evento a mao entretanto): se ja houver um evento ligado a esta entrada, ou
+// um evento no mesmo dia (ou no dia ao lado) com nome ou local parecido, nao
+// cria nada e abre o que ja existe. Se houver outro evento no mesmo dia com
+// nome diferente, so cria com confirmacao explicita (outroConcerto = true).
+export async function importarDoCalendario(uid: string, outroConcerto = false): Promise<{ erro: string } | void> {
+  let destino: string;
+  try {
+    const concerto = await obterConcertoDoCalendario(uid);
+    if (!concerto) return { erro: 'Esta entrada ja nao esta no calendario. Atualiza a pagina.' };
+
+    const supabase = await criarClienteServidor();
+    const colunas = 'id, evento, local, concelho, data, estado, calendar_event_id';
+    const [ligados, perto] = await Promise.all([
+      supabase.from('eventos').select(colunas).eq('calendar_event_id', uid),
+      supabase
+        .from('eventos')
+        .select(colunas)
+        .gte('data', somarDias(concerto.dia, -2))
+        .lt('data', somarDias(concerto.dia, 3)),
+    ]);
+    if (ligados.error || perto.error) return { erro: 'Nao foi possivel confirmar a agenda. Tenta outra vez.' };
+
+    const existentes = [...((ligados.data as EventoApp[]) ?? []), ...((perto.data as EventoApp[]) ?? [])];
+    const { igual, mesmoDia } = procurarNaAgenda(concerto, existentes);
+
+    if (igual) {
+      destino = `/eventos/${igual.id}`;
+    } else if (mesmoDia && !outroConcerto) {
+      destino = `/eventos/${mesmoDia.id}`;
+    } else {
+      const tecnico = tecnicoNoTitulo(concerto.titulo, await obterTecnicos());
+      const notas = [`Importado do calendario: "${concerto.titulo}"`, concerto.descricao].filter(Boolean).join('\n');
+      const { data: novo, error } = await supabase
+        .from('eventos')
+        .insert({
+          evento: concerto.nome,
+          estado: concerto.estado,
+          // A app guarda a hora tal como se le no relogio (sem fuso).
+          data: `${concerto.dia}T${concerto.hora ?? '00:00'}:00Z`,
+          local: concerto.local || null,
+          valor_base: concerto.valor,
+          tecnico_id: tecnico?.id ?? null,
+          notas,
+          calendar_event_id: uid,
+        })
+        .select('id')
+        .single();
+      if (error || !novo) return { erro: `Nao foi possivel importar: ${error?.message ?? 'erro desconhecido'}` };
+      destino = `/eventos/${novo.id}`;
+    }
+  } catch {
+    return { erro: 'Nao foi possivel importar agora. Tenta outra vez.' };
+  }
+
+  revalidatePath('/eventos');
+  redirect(destino);
 }

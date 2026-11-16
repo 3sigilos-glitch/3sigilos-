@@ -33,7 +33,7 @@ export default function FormularioEvento({ acao, evento, contactos, membros, tec
   // Estado controlado apenas para o que precisa de reagir ao vivo.
   const [valorBase, setValorBase] = useState<string>(String(evento?.valor_base ?? ''));
   const [deslocacao, setDeslocacao] = useState<string>(String(evento?.deslocacao_valor ?? ''));
-  const [conflito, setConflito] = useState<{ confirmados: any[]; pendentes: any[] } | null>(null);
+  const [conflito, setConflito] = useState<{ confirmados: any[]; pendentes: any[]; indisponiveis?: string[] } | null>(null);
   const [aGuardar, iniciarTransicao] = useTransition();
 
   const total = (Number(valorBase || 0) + Number(deslocacao || 0)) || 0;
@@ -53,7 +53,10 @@ export default function FormularioEvento({ acao, evento, contactos, membros, tec
     const iso = new Date(valor).toISOString();
     iniciarTransicao(async () => {
       const resultado = await verificarConflitoData(iso, evento?.id);
-      const ha = resultado.confirmados.length > 0 || resultado.pendentes.length > 0;
+      const ha =
+        resultado.confirmados.length > 0 ||
+        resultado.pendentes.length > 0 ||
+        (resultado.indisponiveis ?? []).length > 0;
       setConflito(ha ? resultado : null);
     });
   }
@@ -250,8 +253,10 @@ function PistaSubtil({ children }: { children: React.ReactNode }) {
   return <span style={{ fontSize: 12, color: 'var(--texto-fraco)' }}>{children}</span>;
 }
 
-function AvisoConflito({ conflito }: { conflito: { confirmados: any[]; pendentes: any[] } }) {
+function AvisoConflito({ conflito }: { conflito: { confirmados: any[]; pendentes: any[]; indisponiveis?: string[] } }) {
   const { confirmados, pendentes } = conflito;
+  const indisponiveis = conflito.indisponiveis ?? [];
+  const haEventos = confirmados.length > 0 || pendentes.length > 0;
   return (
     <div
       style={{
@@ -265,7 +270,15 @@ function AvisoConflito({ conflito }: { conflito: { confirmados: any[]; pendentes
         marginTop: 4,
       }}
     >
-      <strong style={{ color: 'var(--estado-orcamentado)', fontSize: 13 }}>Atencao: ja ha algo neste dia</strong>
+      {indisponiveis.length > 0 && (
+        <span style={{ fontSize: 13 }}>
+          <strong style={{ color: 'var(--estado-recusado)' }}>Indisponivel neste dia (calendario):</strong>{' '}
+          {indisponiveis.join(', ')}
+        </span>
+      )}
+      {haEventos && (
+        <strong style={{ color: 'var(--estado-orcamentado)', fontSize: 13 }}>Atencao: ja ha algo neste dia</strong>
+      )}
       {confirmados.map((e) => (
         <span key={e.id} style={{ fontSize: 13 }}>
           <span style={{ color: 'var(--estado-confirmado)', fontWeight: 700 }}>Confirmado:</span> {e.evento}
