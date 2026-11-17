@@ -429,10 +429,11 @@ function palavrasFortes(s: string): string[] {
 // Dois nomes parecem o mesmo concerto? Basta partilharem uma palavra forte (por
 // exemplo o local: "Barreira", "Cortes"). Se algum nao tiver palavras fortes,
 // nao ha como distinguir e assume-se que sim (prefere-se nunca duplicar).
-export function nomesParecidos(a: string, b: string): boolean {
+export function nomesParecidos(a: string, b: string, estrito = false): boolean {
   const pa = palavrasFortes(a);
   const pb = palavrasFortes(b);
-  if (pa.length === 0 || pb.length === 0) return true;
+  // Estrito (para ligar automaticamente): sem palavras fortes nao se liga nada.
+  if (pa.length === 0 || pb.length === 0) return !estrito;
   for (const x of pa) {
     for (const y of pb) {
       if (x === y) return true;
@@ -518,4 +519,115 @@ export function tecnicoNoTitulo(titulo: string, tecnicos: MembroRef[]): MembroRe
     return !!primeiro && primeiro.length >= 3 && lista.includes(primeiro);
   });
   return achados.length === 1 ? achados[0] : null;
+}
+
+// ---------------------------------------------------------------------------
+// Sincronizacao automatica com o calendario.
+//
+// O que a app faz sozinha, de cada vez que rele o calendario:
+//   - liga cada evento da agenda a sua entrada no calendario (o importado ja
+//     vem ligado; um criado a mao liga-se se houver UMA entrada no mesmo dia
+//     com nome ou local claramente igual);
+//   - muda o estado quando o titulo o diz com todas as letras: "Anulei" ou
+//     "sem efeito" cancela; "fechado" ou "confirmado" confirma; "reserva" passa
+//     a pre-reserva. So sobe (nunca desce) e so em eventos futuros e ativos.
+// O que so assinala, sem mexer: mudou de dia no calendario, ou a entrada
+// desapareceu do calendario.
+// ---------------------------------------------------------------------------
+
+const ATIVOS = ['orcamentado', 'pre_reserva', 'confirmado'];
+const ORDEM_ESTADO: Record<string, number> = { orcamentado: 0, pre_reserva: 1, confirmado: 2 };
+
+export type EstadoDeclarado = 'cancelado' | 'confirmado' | 'pre_reserva';
+
+// O estado que o titulo afirma claramente, ou null se nao afirma nada.
+export function estadoDeclarado(titulo: string): EstadoDeclarado | null {
+  const c = classificar(titulo);
+  if (c.tipo === 'anulado') return 'cancelado';
+  if (c.tipo !== 'concerto') return null;
+  const t = normalizar(titulo);
+  // Duvidas ou negacoes: nao se mexe.
+  if (/\?|\bpor confirmar\b|\btalvez\b|\bpossivel|\bnao (esta |foi )?(confirmad|fechad)/.test(t)) return null;
+  if (/\bfechad[oa]s?\b|\bconfirmad[oa]s?\b/.test(t)) return 'confirmado';
+  if (/\breserva\b/.test(t)) return 'pre_reserva';
+  return null;
+}
+
+export interface MudancaEstado {
+  eventoId: string;
+  evento: string;
+  de: string;
+  para: EstadoDeclarado;
+  titulo: string;
+}
+
+export interface PlanoSincronizacao {
+  ligar: { eventoId: string; uid: string }[];
+  estados: MudancaEstado[];
+  mudouDia: { eventoId: string; evento: string; diaApp: string; diaCalendario: string; titulo: string }[];
+  desapareceu: { eventoId: string; evento: string; dia: string }[];
+}
+
+export function planearSincronizacao(
+  entradas: EntradaCalendario[],
+  eventos: EventoApp[],
+  hoje: string
+): PlanoSincronizacao {
+  const plano: PlanoSincronizacao = { ligar: [], estados: [], mudouDia: [], desapareceu: [] };
+
+  const porUid = new Map<string, EntradaCalendario>();
+  for (const e of entradas) if (!porUid.has(e.uid)) porUid.set(e.uid, e);
+
+  const ativosFuturos = eventos.filter((e) => {
+    const dia = diaDoEvento(e.data);
+    return ATIVOS.includes(e.estado) && !!dia && dia >= hoje;
+  });
+
+  // 1. Ligar os eventos criados a mao. So quando a correspondencia e unica
+  // nos dois sentidos (uma entrada para um evento), no mesmo dia e com uma
+  // palavra forte em comum.
+  const uidsLigados = new Set(eventos.map((e) => e.calendar_event_id).filter(Boolean) as string[]);
+  const soltos = ativosFuturos.filter((e) => !e.calendar_event_id);
+  const pares: { eventoId: string; uid: string }[] = [];
+  for (const entrada of entradas) {
+    if (uidsLigados.has(entrada.uid) || entrada.de < hoje) continue;
+    if (classificar(entrada.titulo).tipo !== 'concerto') continue;
+    const texto = `${entrada.titulo} ${entrada.local}`;
+    const candidatos = soltos.filter(
+      (e) => diaDoEvento(e.data) === entrada.de && nomesParecidos(texto, textoDoEvento(e), true)
+    );
+    if (candidatos.length === 1) pares.push({ eventoId: candidatos[0].id, uid: entrada.uid });
+  }
+  const vezesPorEvento = new Map<string, number>();
+  for (const p of pares) vezesPorEvento.set(p.eventoId, (vezesPorEvento.get(p.eventoId) ?? 0) + 1);
+  plano.ligar = pares.filter((p) => vezesPorEvento.get(p.eventoId) === 1);
+
+  // 2. Estados e avisos, para os eventos ligados (os que ja estavam e os novos).
+  const ligacao = new Map<string, string>();
+  for (const e of ativosFuturos) if (e.calendar_event_id) ligacao.set(e.id, e.calendar_event_id);
+  for (const p of plano.ligar) ligacao.set(p.eventoId, p.uid);
+
+  for (const e of ativosFuturos) {
+    const uid = ligacao.get(e.id);
+    if (!uid) continue;
+    const diaApp = diaDoEvento(e.data)!;
+    const entrada = porUid.get(uid);
+    if (!entrada) {
+      plano.desapareceu.push({ eventoId: e.id, evento: e.evento, dia: diaApp });
+      continue;
+    }
+    const declarado = estadoDeclarado(entrada.titulo);
+    const titulo = entrada.titulo.replace(/\s+/g, ' ').trim();
+    if (declarado === 'cancelado') {
+      plano.estados.push({ eventoId: e.id, evento: e.evento, de: e.estado, para: 'cancelado', titulo });
+      continue;
+    }
+    if (declarado && (ORDEM_ESTADO[declarado] ?? 0) > (ORDEM_ESTADO[e.estado] ?? 0)) {
+      plano.estados.push({ eventoId: e.id, evento: e.evento, de: e.estado, para: declarado, titulo });
+    }
+    if (entrada.de !== diaApp) {
+      plano.mudouDia.push({ eventoId: e.id, evento: e.evento, diaApp, diaCalendario: entrada.de, titulo });
+    }
+  }
+  return plano;
 }

@@ -1,4 +1,6 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
+import AvisoCalendarioPainel from '@/components/eventos/AvisoCalendarioPainel';
 import CartaoEvento from '@/components/eventos/CartaoEvento';
 import Dica from '@/components/Dica';
 import { carregarPainel } from '@/lib/consultas';
@@ -76,6 +78,11 @@ export default async function PaginaPainel() {
         </Link>
       )}
 
+      {/* Calendario Google: carrega a parte e nunca atrasa nem deita o painel abaixo. */}
+      <Suspense fallback={null}>
+        <AvisoCalendarioPainel />
+      </Suspense>
+
       {/* Indicadores */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
         <Indicador rotulo="Concertos do mes" valor={String(dados.indicadores.concertosDoMes)} href="/eventos" />
@@ -103,7 +110,7 @@ export default async function PaginaPainel() {
           {estados.map((estado) => (
             <Link
               key={estado}
-              href={`/eventos?estado=${estado}`}
+              href={estado === 'realizado' ? '/eventos?estado=realizado&vista=arquivo' : `/eventos?estado=${estado}`}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 16px', borderBottom: '1px solid var(--linha)' }}
             >
               <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
