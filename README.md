@@ -203,6 +203,11 @@ A app le o calendario Google dos N'ASA (so leitura, nunca escreve la nada):
   "Marco off."). Aparecem em Agenda e em Disponibilidade, e a app avisa ao
   marcar ou abrir um concerto num dia em que alguem esta indisponivel. Se o
   evento for apagado ou alterado no calendario, deixa de aparecer na app.
+- **Marcar indisponibilidades na app**: em Disponibilidade, "Marcar
+  indisponibilidade" abre o Google Calendar ja preenchido ("Kevin indisponivel -
+  motivo", dia inteiro); quem marca so confirma o calendario dos N'ASA e grava.
+  Cada indisponibilidade da lista abre o respetivo evento no Google Calendar
+  para alterar ou apagar. A app nunca escreve no calendario.
 - **Concertos**: o que estiver escrito no calendario e ainda nao existir na
   agenda aparece em "No calendario, por importar", com um botao Importar. Antes
   de sugerir e antes de gravar, compara com a agenda: se ja houver um evento no

@@ -631,3 +631,63 @@ export function planearSincronizacao(
   }
   return plano;
 }
+
+// ---------------------------------------------------------------------------
+// Links para o Google Calendar (marcar, ver, alterar e apagar la).
+// A app nunca escreve no calendario: abre-o ja preenchido, e e a pessoa que
+// grava. Assim o calendario continua a ser a unica fonte da verdade.
+// ---------------------------------------------------------------------------
+
+// Identificador do calendario a partir do endereco iCal, sem a parte secreta.
+// Ex.: .../calendar/ical/banda%40gmail.com/private-abc/basic.ics -> banda@gmail.com
+export function idDoCalendarioIcal(enderecoIcal: string | null | undefined): string | null {
+  const m = (enderecoIcal ?? '').match(/\/calendar\/ical\/([^/?#]+)\//);
+  if (!m) return null;
+  try {
+    const id = decodeURIComponent(m[1]).trim();
+    return /^[^\s@]+@[^\s@]+$/.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
+
+// Endereco que abre um evento no Google Calendar (para o ver, alterar ou
+// apagar). O Google identifica-o por "<evento> <calendario>" em base64, com o
+// calendario abreviado ("@gmail.com" passa a "@m").
+export function linkEventoGoogle(uid: string, calendarioId: string | null): string | null {
+  if (!calendarioId || !uid.endsWith('@google.com')) return null;
+  const evento = uid.slice(0, -'@google.com'.length);
+  if (!/^[A-Za-z0-9_]+$/.test(evento)) return null;
+  const calendario = calendarioId
+    .replace(/@gmail\.com$/i, '@m')
+    .replace(/@group\.calendar\.google\.com$/i, '@g');
+  const eid = btoa(`${evento} ${calendario}`).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+  return `https://www.google.com/calendar/event?eid=${eid}`;
+}
+
+// Titulo de uma indisponibilidade, no formato que a app ja sabe ler.
+export function tituloIndisponibilidade(nome: string, motivo?: string): string {
+  const primeiro = (nome ?? '').trim().split(/\s+/)[0] || 'Alguem';
+  const extra = (motivo ?? '').replace(/\s+/g, ' ').trim();
+  return extra ? `${primeiro} indisponivel - ${extra}` : `${primeiro} indisponivel`;
+}
+
+// Endereco que abre o Google Calendar com uma indisponibilidade de dia inteiro
+// ja preenchida (de "de" a "ate", inclusive).
+export function linkNovaIndisponibilidade(o: {
+  titulo: string;
+  de: string; // AAAA-MM-DD
+  ate: string; // AAAA-MM-DD
+  calendarioId?: string | null;
+}): string {
+  const fim = somarDias(o.ate < o.de ? o.de : o.ate, 1); // no Google, o fim e o dia seguinte
+  const p = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: o.titulo,
+    dates: `${o.de.replace(/-/g, '')}/${fim.replace(/-/g, '')}`,
+    details: "Marcado a partir da app dos N'ASA.",
+    ctz: FUSO,
+  });
+  if (o.calendarioId) p.set('src', o.calendarioId);
+  return `https://calendar.google.com/calendar/render?${p.toString()}`;
+}

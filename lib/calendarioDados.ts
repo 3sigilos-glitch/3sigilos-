@@ -20,6 +20,8 @@ import {
   nomesIndisponiveis,
   planearSincronizacao,
   intervaloCurto,
+  idDoCalendarioIcal,
+  linkEventoGoogle,
   type PlanoSincronizacao,
   type MudancaEstado,
   type EntradaCalendario,
@@ -42,6 +44,18 @@ function enderecoIcal(): string | null {
 
 export function calendarioConfigurado(): boolean {
   return enderecoIcal() !== null;
+}
+
+// Identificador do calendario (o email do calendario), para os links do Google
+// Calendar. Nunca devolve a parte secreta do endereco iCal.
+export function idDoCalendario(): string | null {
+  return idDoCalendarioIcal(enderecoIcal());
+}
+
+// Link para abrir uma entrada do calendario no Google Calendar (ver, alterar,
+// apagar). null se nao for possivel montar.
+export function linkNoCalendario(uid: string): string | null {
+  return linkEventoGoogle(uid, idDoCalendario());
 }
 
 // Le o calendario. Guardado em cache 5 minutos, para a app nao ir ao Google a
@@ -75,6 +89,26 @@ async function listarEquipaAtiva(): Promise<{ todos: MembroRef[]; tecnicos: Memb
     };
   } catch {
     return { todos: [], tecnicos: [] };
+  }
+}
+
+// Equipa ativa (musicos e tecnicos), para escolher de quem e a indisponibilidade.
+export async function obterEquipaAtiva(): Promise<MembroRef[]> {
+  return (await listarEquipaAtiva()).todos.sort((a, b) => a.nome.localeCompare(b.nome, 'pt'));
+}
+
+// O elemento da equipa ligado ao login atual (para vir ja escolhido), ou null.
+export async function obterMeuMembroId(): Promise<string | null> {
+  try {
+    const supabase = await criarClienteServidor();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+    const { data } = await supabase.from('perfis').select('equipa_id').eq('id', user.id).maybeSingle();
+    return (data as { equipa_id: string | null } | null)?.equipa_id ?? null;
+  } catch {
+    return null;
   }
 }
 
