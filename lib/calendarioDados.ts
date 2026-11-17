@@ -18,12 +18,17 @@ import {
   somarDias,
   diaDoEvento,
   nomesIndisponiveis,
+  planearSincronizacao,
+  intervaloCurto,
+  type PlanoSincronizacao,
+  type MudancaEstado,
   type EntradaCalendario,
   type Indisponibilidade,
   type Cruzamento,
   type EventoApp,
   type MembroRef,
 } from '@/lib/calendario';
+import { ESTADO_EVENTO, type EstadoEvento } from '@/lib/tipos';
 
 export type EstadoCalendario = 'desligado' | 'ligado' | 'erro';
 
@@ -182,4 +187,80 @@ export async function obterConcertoDoCalendario(uid: string) {
 
 export async function obterTecnicos(): Promise<MembroRef[]> {
   return (await listarEquipaAtiva()).tecnicos;
+}
+
+// ---------------------------------------------------------------------------
+// Sincronizacao automatica (ver planearSincronizacao em lib/calendario).
+// Corre sempre que alguem abre a Agenda ou o Painel, e uma vez por dia pela
+// rotina automatica. Pode correr varias vezes sem mal: cada alteracao so e
+// gravada se o evento ainda estiver como estava quando se decidiu mudar.
+// ---------------------------------------------------------------------------
+
+// Basta um cliente do Supabase com "from" (o da sessao ou o de servico).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ClienteBd = { from: (tabela: string) => any };
+
+export interface ResultadoSincronizacao {
+  estado: EstadoCalendario;
+  ligados: number;
+  alterados: MudancaEstado[]; // estados efetivamente mudados nesta passagem
+  mudouDia: PlanoSincronizacao['mudouDia'];
+  desapareceu: PlanoSincronizacao['desapareceu'];
+}
+
+const SEM_SINCRONIZACAO: ResultadoSincronizacao = { estado: 'desligado', ligados: 0, alterados: [], mudouDia: [], desapareceu: [] };
+
+const rotulo = (estado: string) => ESTADO_EVENTO[estado as EstadoEvento]?.rotulo ?? estado;
+
+export async function sincronizarComCalendario(cliente?: ClienteBd): Promise<ResultadoSincronizacao> {
+  try {
+    const { estado, entradas } = await carregarEntradas();
+    if (estado !== 'ligado') return { ...SEM_SINCRONIZACAO, estado };
+
+    const bd: ClienteBd = cliente ?? (await criarClienteServidor());
+    const hoje = hojeEmPortugal();
+    const { data, error } = await bd
+      .from('eventos')
+      .select('id, evento, local, concelho, data, estado, calendar_event_id, notas')
+      .in('estado', ['orcamentado', 'pre_reserva', 'confirmado'])
+      .gte('data', `${hoje}T00:00:00.000Z`);
+    if (error || !data) return { ...SEM_SINCRONIZACAO, estado: 'erro' };
+
+    const eventos = data as (EventoApp & { notas: string | null })[];
+    const plano = planearSincronizacao(entradas, eventos, hoje);
+
+    let ligados = 0;
+    for (const l of plano.ligar) {
+      const { data: feito } = await bd
+        .from('eventos')
+        .update({ calendar_event_id: l.uid })
+        .eq('id', l.eventoId)
+        .is('calendar_event_id', null)
+        .select('id');
+      if (feito && feito.length > 0) ligados++;
+    }
+
+    const alterados: MudancaEstado[] = [];
+    const quando = intervaloCurto(hoje, hoje, hoje);
+    for (const m of plano.estados) {
+      const atual = eventos.find((e) => e.id === m.eventoId);
+      // Cada mudanca automatica so acontece uma vez. Se ja foi feita (esta nas
+      // notas) e alguem a desfez a mao, a app respeita a pessoa e nao insiste.
+      const marca = `-> ${rotulo(m.para)}, pelo calendario: "${m.titulo}"`;
+      if (atual?.notas?.includes(marca)) continue;
+      const linha = `[${quando}] ${rotulo(m.de)} ${marca}`;
+      const notas = [atual?.notas?.trim(), linha].filter(Boolean).join('\n');
+      const { data: feito } = await bd
+        .from('eventos')
+        .update({ estado: m.para, notas })
+        .eq('id', m.eventoId)
+        .eq('estado', m.de) // so se ninguem o mudou entretanto
+        .select('id');
+      if (feito && feito.length > 0) alterados.push(m);
+    }
+
+    return { estado, ligados, alterados, mudouDia: plano.mudouDia, desapareceu: plano.desapareceu };
+  } catch {
+    return { ...SEM_SINCRONIZACAO, estado: 'erro' };
+  }
 }

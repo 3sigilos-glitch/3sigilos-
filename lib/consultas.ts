@@ -3,6 +3,7 @@ import type {
   Evento, Contacto, Equipa, Escalao, Repertorio, Recibo, Definicoes,
   Cifra, Setlist, SetlistMusica,
 } from '@/lib/tipos';
+import { hojeEmPortugal } from '@/lib/calendario';
 
 // Preferencias de cifra do login atual (privadas). Resiliente: se a migracao
 // 0006 ainda nao tiver corrido, devolve os valores por defeito sem rebentar.
@@ -174,6 +175,13 @@ export async function obterEvento(id: string): Promise<EventoDetalhado | null> {
 export interface FiltrosEventos {
   estado?: string;
   mes?: string; // formato AAAA-MM
+  vista?: string; // 'arquivo' para os eventos ja passados; senao, os proximos
+}
+
+// Inicio do dia de hoje, no formato em que a app guarda as datas (a hora do
+// relogio, sem fuso). O que comeca antes disto ja passou e vai para o arquivo.
+function inicioDeHoje(): string {
+  return `${hojeEmPortugal()}T00:00:00.000Z`;
 }
 
 // Passa a "realizado" os concertos confirmados cuja data ja passou (o dia do
@@ -193,10 +201,18 @@ export async function promoverConcertosRealizados(): Promise<void> {
   }
 }
 
+// Lista da agenda. Por defeito so os proximos (de hoje em diante, mais os que
+// ainda nao tem data, para alguem os completar), do mais proximo ao mais longe.
+// Na vista "arquivo", os que ja passaram, do mais recente para tras. Com um mes
+// escolhido mostra esse mes inteiro, seja passado ou futuro.
 export async function listarEventos(filtros: FiltrosEventos = {}): Promise<Evento[]> {
   const supabase = await criarClienteServidor();
   await promoverConcertosRealizados();
-  let consulta = supabase.from('eventos').select('*').order('data', { ascending: true, nullsFirst: false });
+  const arquivo = filtros.vista === 'arquivo' && !filtros.mes;
+  let consulta = supabase
+    .from('eventos')
+    .select('*')
+    .order('data', { ascending: !arquivo, nullsFirst: false });
 
   if (filtros.estado && filtros.estado !== 'todos') {
     consulta = consulta.eq('estado', filtros.estado);
@@ -208,10 +224,30 @@ export async function listarEventos(filtros: FiltrosEventos = {}): Promise<Event
       const fim = new Date(ano, mes, 1).toISOString();
       consulta = consulta.gte('data', inicio).lt('data', fim);
     }
+  } else if (arquivo) {
+    consulta = consulta.lt('data', inicioDeHoje());
+  } else {
+    consulta = consulta.or(`data.gte.${inicioDeHoje()},data.is.null`);
   }
 
   const { data } = await consulta;
   return (data as Evento[]) ?? [];
+}
+
+// Quantos eventos estao no arquivo (para o separador). 0 se falhar.
+export async function contarArquivo(estado?: string): Promise<number> {
+  try {
+    const supabase = await criarClienteServidor();
+    let consulta = supabase
+      .from('eventos')
+      .select('id', { count: 'exact', head: true })
+      .lt('data', inicioDeHoje());
+    if (estado && estado !== 'todos') consulta = consulta.eq('estado', estado);
+    const { count } = await consulta;
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
 }
 
 // -----------------------------------------------------------------------------

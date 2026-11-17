@@ -9,5 +9,11 @@ export function criarClienteServico() {
   if (!url || !chave) {
     throw new Error('Faltam NEXT_PUBLIC_SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY.');
   }
-  return createClient(url, chave, { auth: { persistSession: false } });
+  return createClient(url, chave, {
+    auth: { persistSession: false },
+    // Nunca guardar em cache pedidos a base de dados. Numa rota sem sessao, o
+    // Next.js pode reaproveitar respostas antigas (ate de gravacoes) se outro
+    // pedido no mesmo processamento tiver pedido cache (o do calendario pede).
+    global: { fetch: (entrada, opcoes) => fetch(entrada, { ...opcoes, cache: 'no-store' }) },
+  });
 }

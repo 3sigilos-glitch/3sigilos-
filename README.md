@@ -209,6 +209,18 @@ A app le o calendario Google dos N'ASA (so leitura, nunca escreve la nada):
   mesmo dia (ou no dia ao lado) com nome ou local parecido, nao sugere nem cria.
   Ensaios, aniversarios, jantares e entradas anuladas sao ignorados.
 
+- **Sincronizacao automatica**: sempre que alguem abre a Agenda ou o Painel (e
+  uma vez por dia, as ~7h40 UTC, antes dos lembretes), a app rele o calendario
+  e: liga cada evento a sua entrada no calendario; passa a **confirmado** quando
+  o titulo diz "fechado" ou "confirmado", a **pre-reserva** quando diz
+  "reserva", e a **cancelado** quando diz "Anulei" ou "sem efeito". So sobe de
+  estado (nunca desce), so em eventos futuros e ativos, e cada mudanca fica nas
+  notas do evento e so acontece uma vez (se alguem a desfizer a mao, a app nao
+  insiste). Se a data mudar no calendario ou a entrada for apagada, a app so
+  avisa. Concertos novos nunca sao importados sozinhos: ficam a espera de um
+  toque. A rotina diaria (`/api/cron/calendario`) precisa de `CRON_SECRET` e
+  `SUPABASE_SERVICE_ROLE_KEY`; sem elas nao faz nada e o resto funciona igual.
+
 Para ligar: no Google Calendar, Definicoes do calendario dos N'ASA, copiar o
 "Endereco secreto no formato iCal" e guarda-lo no Vercel na variavel
 `CALENDARIO_ICAL_URL` (Production e Preview), depois fazer Redeploy. Sem a

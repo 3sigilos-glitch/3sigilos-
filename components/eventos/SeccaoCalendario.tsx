@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import BotaoImportarCalendario from '@/components/eventos/BotaoImportarCalendario';
 import { importarDoCalendario } from '@/app/(app)/eventos/acoes';
-import { obterResumoCalendario, indisponiveisEm } from '@/lib/calendarioDados';
+import { obterResumoCalendario, indisponiveisEm, sincronizarComCalendario, type ResultadoSincronizacao } from '@/lib/calendarioDados';
+import { ESTADO_EVENTO, type EstadoEvento } from '@/lib/tipos';
 import { intervaloCurto, nomesIndisponiveis, type ConcertoCalendario, type Indisponibilidade } from '@/lib/calendario';
 import { euros } from '@/lib/formatar';
 
@@ -15,7 +16,10 @@ const VISIVEIS = 3;
 // Se o calendario nao estiver ligado (ou falhar), nao mostra nada.
 export default async function SeccaoCalendario() {
   let resumo;
+  let sinc: ResultadoSincronizacao;
   try {
+    // Primeiro aplica o que o calendario diz (estados), depois faz o resumo.
+    sinc = await sincronizarComCalendario();
     resumo = await obterResumoCalendario();
   } catch {
     return null;
@@ -26,11 +30,44 @@ export default async function SeccaoCalendario() {
   const provaveis = cruzamento.novos.filter((c) => c.provavel);
   const outras = cruzamento.novos.filter((c) => !c.provavel);
   const porImportar = provaveis.length + cruzamento.mesmoDia.length;
-  const nada = conflitos.length === 0 && porImportar === 0 && outras.length === 0 && proximas.length === 0;
+  const avisos = sinc.mudouDia.length + sinc.desapareceu.length;
+  const nada =
+    conflitos.length === 0 && porImportar === 0 && outras.length === 0 && proximas.length === 0 &&
+    sinc.alterados.length === 0 && avisos === 0;
   if (nada) return null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {sinc.alterados.length > 0 && (
+        <div className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 8, borderColor: 'var(--estado-pre-reserva)', background: 'rgba(74, 155, 216, 0.08)' }}>
+          <strong style={{ fontSize: 13, color: 'var(--estado-pre-reserva)' }}>Atualizado agora pelo calendario</strong>
+          {sinc.alterados.map((m) => (
+            <Link key={m.eventoId} href={`/eventos/${m.eventoId}`} style={{ fontSize: 13, lineHeight: 1.5 }}>
+              <strong>{m.evento}</strong>: {rotuloEstado(m.de)} {'->'} <strong style={{ color: ESTADO_EVENTO[m.para].corVar }}>{rotuloEstado(m.para)}</strong>
+            </Link>
+          ))}
+          <span style={{ fontSize: 12, color: 'var(--texto-fraco)' }}>Fica registado nas notas de cada evento.</span>
+        </div>
+      )}
+
+      {avisos > 0 && (
+        <div className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 8, borderColor: 'var(--estado-orcamentado)', background: 'rgba(216, 155, 44, 0.08)' }}>
+          <strong style={{ fontSize: 13, color: 'var(--estado-orcamentado)' }}>Verificar: o calendario nao bate certo</strong>
+          {sinc.mudouDia.map((m) => (
+            <Link key={m.eventoId} href={`/eventos/${m.eventoId}`} style={{ fontSize: 13, lineHeight: 1.5 }}>
+              <strong>{m.evento}</strong>: na app a {intervaloCurto(m.diaApp, m.diaApp, hoje)}, no calendario a{' '}
+              {intervaloCurto(m.diaCalendario, m.diaCalendario, hoje)}
+            </Link>
+          ))}
+          {sinc.desapareceu.map((m) => (
+            <Link key={m.eventoId} href={`/eventos/${m.eventoId}`} style={{ fontSize: 13, lineHeight: 1.5 }}>
+              <strong>{m.evento}</strong> ({intervaloCurto(m.dia, m.dia, hoje)}): ja nao esta no calendario
+            </Link>
+          ))}
+          <span style={{ fontSize: 12, color: 'var(--texto-fraco)' }}>A app nao muda datas nem cancela por isto. Abre o evento e corrige se for preciso.</span>
+        </div>
+      )}
+
       {conflitos.length > 0 && (
         <div
           className="cartao"
@@ -187,4 +224,8 @@ export async function AvisoIndisponiveis({ dia }: { dia: string | null }) {
       <span style={{ fontSize: 14 }}>{nomes.join(', ')}</span>
     </div>
   );
+}
+
+function rotuloEstado(estado: string): string {
+  return ESTADO_EVENTO[estado as EstadoEvento]?.rotulo ?? estado;
 }
