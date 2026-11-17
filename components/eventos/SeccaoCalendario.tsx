@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import BotaoImportarCalendario from '@/components/eventos/BotaoImportarCalendario';
 import { importarDoCalendario } from '@/app/(app)/eventos/acoes';
-import { obterResumoCalendario, indisponiveisEm, sincronizarComCalendario, type ResultadoSincronizacao } from '@/lib/calendarioDados';
+import { obterResumoCalendario, indisponiveisEm, sincronizarComCalendario, linkNoCalendario, type ResultadoSincronizacao } from '@/lib/calendarioDados';
 import { ESTADO_EVENTO, type EstadoEvento } from '@/lib/tipos';
 import { intervaloCurto, nomesIndisponiveis, type ConcertoCalendario, type Indisponibilidade } from '@/lib/calendario';
 import { euros } from '@/lib/formatar';
@@ -142,9 +142,14 @@ export default async function SeccaoCalendario() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
             <h2 className="rotulo-seccao">Indisponibilidades</h2>
-            <Link href="/disponibilidade" style={{ fontSize: 13, color: 'var(--acento-forte)' }}>
-              Ver todas ({proximas.length})
-            </Link>
+            <span style={{ display: 'flex', gap: 14 }}>
+              <Link href="/disponibilidade?marcar=1#marcar" style={{ fontSize: 13, color: 'var(--acento-forte)' }}>
+                + Marcar
+              </Link>
+              <Link href="/disponibilidade" style={{ fontSize: 13, color: 'var(--acento-forte)' }}>
+                Ver todas ({proximas.length})
+              </Link>
+            </span>
           </div>
           <div className="cartao" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {proximas.slice(0, 5).map((i) => (
@@ -190,19 +195,33 @@ function CartaoConcerto({ concerto, hoje, indisponiveis }: { concerto: ConcertoC
   );
 }
 
+// Uma indisponibilidade. Toca para a abrir no Google Calendar (alterar ou apagar).
 export function LinhaIndisponibilidade({ item, hoje }: { item: Indisponibilidade; hoje: string }) {
   const nomes = item.membros.map((m) => m.nome).join(' e ');
   const decorre = item.de <= hoje;
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, fontSize: 14 }}>
+  const href = linkNoCalendario(item.uid);
+  const conteudo = (
+    <>
       <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
         <strong>{nomes || 'Por identificar'}</strong>
         <span style={{ fontSize: 12, color: 'var(--texto-fraco)', overflowWrap: 'anywhere' }}>{item.titulo}</span>
       </span>
-      <span style={{ color: decorre ? 'var(--estado-recusado)' : 'var(--texto-suave)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+      <span style={{ color: decorre ? 'var(--estado-recusado)' : 'var(--texto-suave)', whiteSpace: 'nowrap', flexShrink: 0, display: 'flex', alignItems: 'baseline', gap: 6 }}>
         {decorre && item.de !== item.ate ? `ate ${intervaloCurto(item.ate, item.ate, hoje)}` : intervaloCurto(item.de, item.ate, hoje)}
+        {href && (
+          <svg aria-hidden width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ alignSelf: 'center', opacity: 0.7 }}>
+            <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+          </svg>
+        )}
       </span>
-    </div>
+    </>
+  );
+  const estilo = { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, fontSize: 14 } as const;
+  if (!href) return <div style={estilo}>{conteudo}</div>;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" title="Abrir no Google Calendar" style={{ ...estilo, color: 'inherit' }}>
+      {conteudo}
+    </a>
   );
 }
 
