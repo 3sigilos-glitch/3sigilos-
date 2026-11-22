@@ -22,6 +22,26 @@ import {
 // Mudar esta versao volta a mostrar o guia a todos (por exemplo, com novidades).
 export const VERSAO_GUIA = '2026-11';
 export const CHAVE_GUIA = 'nasa-guia-visto';
+export const EVENTO_GUIA_VISTO = 'nasa:guia-visto';
+
+// Ja viu esta versao do guia neste aparelho? (null se nao der para saber)
+export function guiaJaVisto(): boolean | null {
+  try {
+    return localStorage.getItem(CHAVE_GUIA) === VERSAO_GUIA;
+  } catch {
+    return null;
+  }
+}
+
+// Marca o guia como visto e avisa quem estiver a escutar (o botao do topo).
+export function marcarGuiaVisto() {
+  try {
+    localStorage.setItem(CHAVE_GUIA, VERSAO_GUIA);
+  } catch {
+    // Sem armazenamento: fica so por esta sessao.
+  }
+  window.dispatchEvent(new Event(EVENTO_GUIA_VISTO));
+}
 
 interface Passo {
   secao: string;

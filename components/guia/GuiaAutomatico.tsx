@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import Guia, { CHAVE_GUIA, VERSAO_GUIA } from './Guia';
+import Guia, { guiaJaVisto, marcarGuiaVisto } from './Guia';
 
 // Evento para abrir o guia a partir de qualquer sitio (por exemplo, do menu).
 export const EVENTO_ABRIR_GUIA = 'nasa:abrir-guia';
@@ -20,12 +20,9 @@ export default function GuiaAutomatico() {
   useEffect(() => {
     // Nao interrompe o modo palco nem a propria pagina do guia.
     if (caminho?.startsWith('/guia') || caminho?.includes('/palco')) return;
-    try {
-      if (localStorage.getItem(CHAVE_GUIA) !== VERSAO_GUIA) setAberto(true);
-    } catch {
-      // Sem armazenamento (navegacao privada): nao abre sozinho, para nao
-      // aparecer em todas as paginas. Continua disponivel no menu.
-    }
+    // Sem armazenamento (navegacao privada, null) nao abre sozinho, para nao
+    // aparecer em todas as paginas. Continua disponivel no topo e no menu.
+    if (guiaJaVisto() === false) setAberto(true);
     // So na primeira montagem: nao volta a abrir ao navegar.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -37,11 +34,7 @@ export default function GuiaAutomatico() {
   }, []);
 
   function fechar() {
-    try {
-      localStorage.setItem(CHAVE_GUIA, VERSAO_GUIA);
-    } catch {
-      // Sem armazenamento: so fecha.
-    }
+    marcarGuiaVisto();
     setAberto(false);
   }
 

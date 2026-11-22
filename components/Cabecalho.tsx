@@ -5,10 +5,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Marca from '@/components/Marca';
 import MenuRapido from '@/components/MenuRapido';
+import BotaoGuia from '@/components/guia/BotaoGuia';
 
 // Barra de topo com o emblema e o nome. Recua ao rolar para baixo, para dar o
-// ecra ao conteudo, e volta assim que se rola para cima. O menu a direita da
-// acesso a tudo a partir de qualquer sitio.
+// ecra ao conteudo, e volta assim que se rola para cima. A direita, o botao do
+// guia e o menu, que da acesso a tudo a partir de qualquer sitio.
 export default function Cabecalho({ email, ehAdmin }: { email?: string; ehAdmin?: boolean }) {
   const [escondido, setEscondido] = useState(false);
 
@@ -55,7 +56,11 @@ export default function Cabecalho({ email, ehAdmin }: { email?: string; ehAdmin?
         <Marca tamanho="medio" />
       </Link>
 
-      <MenuRapido email={email} ehAdmin={ehAdmin} />
+      {/* O guia fica sempre a vista no topo, ao lado do menu. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <BotaoGuia />
+        <MenuRapido email={email} ehAdmin={ehAdmin} />
+      </div>
     </header>
   );
 }
