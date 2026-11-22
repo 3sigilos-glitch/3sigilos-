@@ -654,3 +654,50 @@ textarea {
     50% { transform: translateY(3px); }
   }
 }
+
+/* Botao "Guia" no cabecalho: sempre a vista, com o acento de palco. */
+.botao-guia {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--acento-rgb), 0.55);
+  background: var(--acento-suave);
+  color: var(--acento-forte);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--dur) var(--curva), border-color var(--dur) var(--curva);
+}
+.botao-guia:hover {
+  background: rgba(var(--acento-rgb), 0.22);
+  border-color: var(--acento);
+}
+.botao-guia:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+/* Ponto de "ainda por ver". */
+.guia-ponto {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--acento);
+  border: 2px solid var(--fundo);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .guia-ponto::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid var(--acento);
+    animation: guia-pulso 1.6s var(--curva) infinite;
+  }
+}

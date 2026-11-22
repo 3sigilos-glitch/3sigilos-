@@ -79,6 +79,26 @@ export default function MenuRapido({ email, ehAdmin }: { email?: string; ehAdmin
               </span>
             )}
 
+            {/* O guia vem primeiro e em destaque, para ninguem o perder. */}
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setAberto(false);
+                abrirGuia();
+              }}
+              style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 10, minHeight: 52, padding: '0 14px', fontSize: 15, fontWeight: 700, background: 'var(--acento-suave)', border: 'none', borderBottom: '1px solid var(--linha-quente)', color: 'var(--acento-forte)' }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                <circle cx="12" cy="12" r="9" />
+                <path d="M10 8.5l5 3.5-5 3.5z" fill="currentColor" stroke="none" />
+              </svg>
+              <span style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                Guia da app
+                <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--texto-suave)' }}>Tudo explicado em 2 minutos</span>
+              </span>
+            </button>
+
             {items.map((l) => {
               const ativo = caminho === l.href || caminho.startsWith(`${l.href}/`);
               return (
@@ -102,22 +122,6 @@ export default function MenuRapido({ email, ehAdmin }: { email?: string; ehAdmin
                 </Link>
               );
             })}
-
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setAberto(false);
-                abrirGuia();
-              }}
-              style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 8, minHeight: 46, padding: '0 14px', fontSize: 15, background: 'transparent', border: 'none', borderBottom: '1px solid var(--linha)', color: 'var(--acento-forte)' }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
-                <circle cx="12" cy="12" r="9" />
-                <path d="M10 8.5l5 3.5-5 3.5z" />
-              </svg>
-              Guia da app
-            </button>
 
             <form action="/auth/sair" method="post">
               <button
