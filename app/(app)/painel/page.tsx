@@ -149,6 +149,7 @@ export default async function PaginaPainel() {
           <Atalho href="/contactos" etiqueta="Contactos" icone={<IconePessoa />} />
           <Atalho href="/equipa" etiqueta="Equipa" icone={<IconePessoas />} />
           <Atalho href="/automacoes" etiqueta="Automacoes" icone={<IconeRaio />} />
+          <Atalho href="/guia" etiqueta="Guia da app" icone={<IconeGuia />} />
           {sessao.ehAdmin && <Atalho href="/definicoes" etiqueta="Definicoes" icone={<IconeRoda />} />}
         </div>
       </div>
@@ -206,6 +207,9 @@ function Atalho({ href, etiqueta, icone }: { href: string; etiqueta: string; ico
   );
 }
 
+function IconeGuia() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="12" cy="12" r="9" /><path d="M10 8.5l5 3.5-5 3.5z" /></svg>;
+}
 function IconeNota() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M9 18V5l11-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="17" cy="16" r="3" /></svg>;
 }

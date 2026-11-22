@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { abrirGuia } from '@/components/guia/GuiaAutomatico';
 
 // Menu de acesso rapido no cabecalho: chega a qualquer seccao a partir de
 // qualquer sitio, mais As minhas cifras, a sessao e o terminar sessao. Fecha ao
@@ -101,6 +102,22 @@ export default function MenuRapido({ email, ehAdmin }: { email?: string; ehAdmin
                 </Link>
               );
             })}
+
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setAberto(false);
+                abrirGuia();
+              }}
+              style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 8, minHeight: 46, padding: '0 14px', fontSize: 15, background: 'transparent', border: 'none', borderBottom: '1px solid var(--linha)', color: 'var(--acento-forte)' }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+                <circle cx="12" cy="12" r="9" />
+                <path d="M10 8.5l5 3.5-5 3.5z" />
+              </svg>
+              Guia da app
+            </button>
 
             <form action="/auth/sair" method="post">
               <button

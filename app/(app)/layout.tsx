@@ -2,6 +2,7 @@ import Cabecalho from '@/components/Cabecalho';
 import NavInferior from '@/components/NavInferior';
 import BotaoCriar from '@/components/BotaoCriar';
 import Toaster from '@/components/Toaster';
+import GuiaAutomatico from '@/components/guia/GuiaAutomatico';
 import { obterSessao } from '@/lib/sessao';
 
 // Esqueleto da zona autenticada: cabecalho fixo no topo,
@@ -28,6 +29,8 @@ export default async function LayoutApp({ children }: { children: React.ReactNod
       <BotaoCriar />
       <NavInferior />
       <Toaster />
+      {/* Guia da app: abre sozinho na primeira entrada e quando pedido no menu. */}
+      <GuiaAutomatico />
     </div>
   );
 }
